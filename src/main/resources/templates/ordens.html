@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ordens de Serviço | Sputnik</title><link rel="icon" type="image/jpeg" href="/images/logo.jpg?v=3"><link rel="stylesheet" href="/app.css"></head>
+<body>
+<div th:replace="~{fragments :: skip-link}"></div><div th:replace="~{fragments :: sidebar}"></div>
+<main id="conteudo-principal" class="app"><header th:replace="~{fragments :: header('Ordens de Serviço','Acompanhe os serviços da oficina')}"></header>
+<section class="content">
+ <div th:replace="~{fragments :: flash}"></div>
+ <div class="page-actions"><div><h2>Atendimentos</h2><p>Abra a ordem usando os clientes e veículos já cadastrados.</p></div><div class="action-group"><a class="button outline" href="/clientes">Cadastros</a><a class="button" href="/ordens/nova">＋ Nova ordem</a></div></div>
+ <section th:if="${ordens.empty}" class="empty-panel"><span class="empty-panel-icon">▤</span><div><h2>Nenhuma ordem aberta ainda</h2><p>Consulte os cadastros existentes e selecione o cliente e veículo para abrir uma ordem.</p></div><a class="button" href="/ordens/nova">Abrir ordem</a></section>
+ <div class="card table-card"><table><thead><tr><th>Nº</th><th>Abertura</th><th>Pessoa</th><th>Carro</th><th>KM</th><th>Serviço</th><th>Status</th><th class="right">Ação</th></tr></thead><tbody><tr th:each="o:${ordens}"><td class="mono" th:text="${'#'+o.id}">#1</td><td th:text="${#temporals.format(o.abertura,'dd/MM/yyyy HH:mm')}">00/00</td><td th:text="${o.cliente.nome}">Pessoa</td><td th:text="${o.veiculo.marcaModelo+' · '+o.veiculo.placa}">Carro</td><td th:text="${o.quilometragemAbertura ?: '—'}">0</td><td th:text="${o.descricao}">Serviço</td><td><span class="badge" th:classappend="${o.status == 'CONCLUIDA'} ? ' good' : (${o.status == 'AGUARDANDO_PECA'} ? ' low' : ' status-progress')" th:text="${#strings.replace(o.status, '_', ' ')}">ABERTA</span></td><td class="right"><a class="button outline small-button" th:href="@{/ordens/{id}(id=${o.id})}">Ver OS</a></td></tr></tbody></table></div>
+</section></main>
+</body></html>

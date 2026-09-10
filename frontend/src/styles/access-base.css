@@ -1,0 +1,100 @@
+.login {
+  background: #f7f8fc;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+.login > section {
+  background:
+    radial-gradient(circle at 20% 12%, #293a74, transparent 42%), var(--navy);
+  color: #fff;
+  padding: 70px;
+}
+.login > section h1 {
+  font: 800 clamp(36px, 4vw, 54px)/1.08 Manrope;
+  margin: 80px 0 18px;
+}
+.login > section p {
+  color: #bdc8e1;
+  font-size: 16px;
+  max-width: 480px;
+}
+.login form {
+  align-self: center;
+  margin: auto;
+  max-width: 410px;
+  width: 100%;
+}
+.login form h2 {
+  font: 800 27px Manrope;
+  margin: 26px 0 3px;
+}
+.login form > p {
+  color: var(--muted);
+  margin: 0 0 26px;
+}
+.login label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 17px;
+}
+.login label input {
+  display: block;
+  margin-top: 6px;
+}
+.login .primary {
+  width: 100%;
+}
+@media (max-width: 950px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .shell aside {
+    position: static;
+  }
+  .shell nav {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .profile {
+    display: none;
+  }
+  .shell header {
+    padding: 18px;
+  }
+  .content {
+    padding: 22px;
+  }
+  .metrics,
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .login {
+    grid-template-columns: 1fr;
+  }
+  .login > section {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .metrics,
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  .shell nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .toolbar input {
+    max-width: none;
+  }
+  .content {
+    padding: 16px;
+  }
+  .shell header > span {
+    display: none;
+  }
+}

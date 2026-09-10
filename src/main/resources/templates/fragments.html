@@ -1,0 +1,25 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><body>
+<a th:fragment="skip-link" class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+<aside th:fragment="sidebar" class="sidebar" aria-label="Navegação principal">
+ <a class="brand" href="/"><img class="brand-logo" src="/images/logo.jpg?v=2" alt="Logo Sputnik"><span><b>SPUTNIK</b><small>Gestão de Estoque</small></span></a>
+ <nav aria-label="Módulos do sistema">
+  <a th:class="${pagina == 'inicio' ? 'active' : ''}" href="/">Início</a>
+  <a th:if="${podePecas}" th:class="${pagina == 'pecas' ? 'active' : ''}" href="/pecas">Peças</a>
+  <a th:if="${podePecas}" th:class="${pagina == 'nova' ? 'active' : ''}" href="/pecas/nova">Nova peça</a>
+  <details th:if="${podeOrdens}" class="nav-group" th:open="${pagina == 'clientes' or pagina == 'veiculos' or pagina == 'novo-cliente' or pagina == 'novo-veiculo'}">
+   <summary>Cadastros</summary>
+   <a th:class="${pagina == 'clientes' or pagina == 'novo-cliente' ? 'active' : ''}" href="/clientes">Clientes</a>
+   <a th:class="${pagina == 'veiculos' or pagina == 'novo-veiculo' ? 'active' : ''}" href="/veiculos">Veículos</a>
+  </details>
+  <a th:if="${podeOrdens}" th:class="${pagina == 'ordens' ? 'active' : ''}" href="/ordens/nova">Nova ordem de serviço</a>
+  <a th:if="${podeOrdens}" th:class="${pagina == 'ordens' ? 'active' : ''}" href="/ordens">Ordens de serviço</a>
+  <a th:if="${podeRelatorio}" th:class="${pagina == 'mensal' ? 'active' : ''}" href="/relatorio-mensal">Relatório mensal</a>
+  <a th:if="${podeReposicao}" th:class="${pagina == 'reposicao' ? 'active' : ''}" href="/reposicao">Reposição <em th:if="${!criticas.empty}" th:text="${criticas.size()}"></em></a>
+  <a th:if="${administrador}" th:class="${pagina == 'usuarios' ? 'active' : ''}" href="/admin/usuarios">Usuários</a>
+ </nav>
+ <div class="user"><span class="avatar" th:text="${#strings.substring(nome,0,1)}">O</span><span><b th:text="${nome}">Balconista</b><small th:text="${administrador ? 'Acesso administrativo' : 'Acesso operacional'}">Acesso operacional</small></span><form method="post" action="/logout"><button title="Sair" aria-label="Sair do sistema">↪</button></form></div>
+</aside>
+<header th:fragment="header(titulo,subtitulo)" class="header"><div><h1 th:text="${titulo}">Título</h1><p th:text="${subtitulo}">Subtítulo</p></div><span>Olá, <b th:text="${nome}">Usuário</b></span></header>
+<div th:fragment="flash"><div th:if="${param.sucesso}" class="alert alert-success" role="alert">Operação realizada com sucesso.</div><div th:if="${param.acessoNegado}" class="alert alert-warning" role="alert">Este recurso é exclusivo para administradores.</div></div>
+<div th:fragment="confirmation-modal"><dialog id="confirmation-modal" class="confirmation-modal" aria-labelledby="confirmation-title"><form method="dialog" class="confirmation-card"><span class="confirmation-icon">!</span><div><h2 id="confirmation-title">Confirmar alteração</h2><p id="confirmation-message">Deseja continuar?</p></div><div class="confirmation-actions"><button class="button outline" value="cancel">Cancelar</button><button id="confirmation-approve" class="primary" value="confirm">Confirmar</button></div></form></dialog><script>document.addEventListener('DOMContentLoaded',()=>{const modal=document.getElementById('confirmation-modal');if(!modal)return;let form;document.addEventListener('submit',event=>{const target=event.target;if(!(target instanceof HTMLFormElement)||!target.dataset.confirm||target.dataset.confirmed)return;event.preventDefault();form=target;document.getElementById('confirmation-title').textContent=target.dataset.confirmTitle||'Confirmar alteração';document.getElementById('confirmation-message').textContent=target.dataset.confirm;modal.showModal();});document.getElementById('confirmation-approve').addEventListener('click',()=>{if(!form)return;form.dataset.confirmed='true';form.requestSubmit();});});</script></div>
+</body></html>

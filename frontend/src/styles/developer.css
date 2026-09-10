@@ -1,0 +1,196 @@
+/* Console administrativo: inspirado em um painel técnico, sem romper a identidade do Sputnik. */
+.developer-console {
+  color: #dce5f5;
+}
+.developer-hero,
+.developer-health,
+.developer-metrics article {
+  border: 1px solid #263553;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #101a2c, #0b1220);
+  box-shadow: 0 12px 30px #0b12201c;
+}
+.developer-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 30px;
+}
+.developer-hero > div:first-child {
+  max-width: 640px;
+}
+.developer-hero small,
+.developer-metrics small,
+.developer-runtime small {
+  color: #8ea3c4;
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.developer-hero h2 {
+  color: #f8e7ae;
+  font: 800 30px Manrope;
+  margin: 8px 0;
+}
+.developer-hero p,
+.developer-health p,
+.developer-backups p {
+  color: #9aabc5;
+  margin: 0;
+}
+.developer-tags {
+  color: #e5c774;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 24px;
+}
+.developer-runtime {
+  align-content: start;
+  background: #0b1423;
+  border: 1px solid #263553;
+  border-radius: 13px;
+  display: grid;
+  gap: 5px;
+  min-width: 230px;
+  padding: 16px;
+}
+.developer-runtime small:not(:first-child) {
+  margin-top: 10px;
+}
+.developer-runtime b {
+  color: #fff;
+  font: 800 25px Manrope;
+}
+.developer-runtime strong {
+  color: #e3ebf7;
+  font-size: 13px;
+}
+.developer-metrics {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 18px 0;
+}
+.developer-metrics article {
+  min-height: 135px;
+  padding: 18px;
+}
+.developer-metrics b {
+  color: #fff;
+  display: block;
+  font: 800 28px Manrope;
+  margin-top: 18px;
+}
+.developer-metrics span {
+  color: #9aabc5;
+  display: block;
+  font-size: 12px;
+}
+.developer-metrics em {
+  color: #71d9a5;
+  display: block;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  margin-top: 5px;
+}
+.developer-health {
+  padding: 22px;
+}
+.developer-health h2,
+.developer-backups h2 {
+  color: #eaf1fb;
+  font: 800 18px Manrope;
+  margin: 0 0 16px;
+}
+.developer-health-title {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.developer-health-title h2 {
+  margin-bottom: 2px;
+}
+.developer-status {
+  background: #103425;
+  border: 1px solid #246443;
+  border-radius: 999px;
+  color: #70e1a5;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+.developer-summary {
+  border-top: 1px solid #263553;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 18px;
+  padding-top: 17px;
+}
+.developer-summary span {
+  border-right: 1px solid #263553;
+  color: #9aabc5;
+  font-size: 12px;
+  padding: 0 18px;
+}
+.developer-summary span:first-child {
+  padding-left: 0;
+}
+.developer-summary span:last-child {
+  border: 0;
+}
+.developer-summary b {
+  color: #f1f6fd;
+  display: block;
+  font: 700 14px Manrope;
+  margin-bottom: 3px;
+}
+.developer-backups {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 22px 0 12px;
+}
+.developer-backups h2 {
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+@media (max-width: 900px) {
+  .developer-hero {
+    display: grid;
+  }
+  .developer-metrics,
+  .developer-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .developer-summary span:nth-child(2) {
+    border-right: 0;
+  }
+  .developer-summary span:nth-child(n + 3) {
+    margin-top: 14px;
+    padding-left: 0;
+  }
+}
+@media (max-width: 620px) {
+  .developer-metrics,
+  .developer-summary {
+    grid-template-columns: 1fr;
+  }
+  .developer-summary span {
+    border: 0;
+    margin-top: 12px;
+    padding-left: 0;
+  }
+  .developer-summary span:first-child {
+    margin-top: 0;
+  }
+  .developer-backups {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+}

@@ -1,0 +1,61 @@
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.toast span {
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #18a561;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.toast p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.toast button {
+  margin-left: auto;
+  min-width: auto;
+  padding: 0.1rem 0.3rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 620px) {
+  .toast {
+    top: 1rem;
+    right: 1rem;
+  }
+}
+
+.toast {
+  background: #e8f8ef;
+  color: #05603a;
+}
+.alert.error {
+  background: #fff0f0;
+  color: #b42318;
+  margin: 0 0 15px;
+}

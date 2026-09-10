@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Novo usuário | Sputnik</title><link rel="icon" type="image/jpeg" href="/images/logo.jpg?v=3"><link rel="stylesheet" href="/app.css"></head>
+<body>
+<div th:replace="~{fragments :: sidebar}"></div>
+<main class="app"><header th:replace="~{fragments :: header('Novo usuário','Crie uma conta e configure os módulos permitidos')}"></header>
+    <section class="content narrow"><form class="card form" th:action="@{/admin/usuarios}" th:object="${form}" method="post">
+        <div class="form-heading"><h2>Novo Balconista</h2><p>Cadastre o nome completo, e-mail de acesso e as abas que essa pessoa poderá utilizar.</p></div>
+        <label>Nome completo<input th:field="*{nome}" required placeholder="Ex.: João da Silva" autocomplete="name"></label>
+        <label>E-mail de acesso<input th:field="*{email}" required type="email" placeholder="Ex.: joao@empresa.com.br" autocomplete="email"></label>
+        <label>Senha temporária<input th:field="*{senha}" required type="password" placeholder="Defina uma senha inicial" autocomplete="new-password"><span class="field-hint">No primeiro acesso, o Balconista será obrigado a criar uma senha pessoal e segura.</span></label>
+        <fieldset class="permission-group"><legend>Abas permitidas</legend><label th:each="p : ${permissoes}" class="permission-option"><input type="checkbox" th:field="*{permissoes}" th:value="${p}"><span th:text="${p.descricao}">Módulo</span></label></fieldset>
+        <p class="error" th:if="${#fields.hasAnyErrors()}" th:text="${#fields.errors('*')}"></p>
+        <div class="form-actions"><a class="button outline" href="/admin/usuarios">Cancelar</a><button class="primary" type="submit">Cadastrar Balconista</button></div>
+    </form></section>
+</main>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Usuários | Sputnik</title><link rel="icon" type="image/jpeg" href="/images/logo.jpg?v=3"><link rel="stylesheet" href="/app.css"></head>
+<body>
+<div th:replace="~{fragments :: sidebar}"></div>
+<main class="app">
+    <header th:replace="~{fragments :: header('Usuários','Gerencie acessos e módulos disponíveis')}"></header>
+    <section class="content">
+        <div th:replace="~{fragments :: flash}"></div>
+        <div class="page-actions"><div><h2>Acessos do sistema</h2><p>Revise os módulos liberados ou remova contas de Balconista quando necessário.</p></div><a class="button" href="/admin/usuarios/novo">＋ Novo usuário</a></div>
+        <div class="card table-card"><table><thead><tr><th>Nome</th><th>Login</th><th>Perfil</th><th>Módulos habilitados</th><th class="right">Ações</th></tr></thead><tbody>
+            <tr th:each="u : ${usuarios}">
+                <td th:text="${u.nome}">Nome</td>
+                <td class="login-value" th:text="${u.perfil.name() == 'ADMIN' ? u.usuario : u.email}">login</td>
+                <td><span class="badge good" th:text="${u.perfil}">PERFIL</span></td>
+                <td><span th:if="${u.perfil.name() == 'ADMIN'}">Acesso total</span><span th:unless="${u.perfil.name() == 'ADMIN'}" th:each="p, status : ${u.permissoes}" th:text="${p.descricao + (!status.last ? ', ' : '')}">Módulo</span></td>
+                <td class="right"><span th:if="${u.perfil.name() == 'ADMIN'}" class="muted-action">Protegido</span><div th:unless="${u.perfil.name() == 'ADMIN'}" class="row-actions"><a class="button outline small-button" th:href="@{/admin/usuarios/{id}/permissoes(id=${u.id})}">Permissões</a><form th:action="@{/admin/usuarios/{id}/resetar-senha(id=${u.id})}" method="post" data-confirm-title="Redefinir senha" data-confirm="A senha temporária será 12345678. O usuário deverá alterá-la no próximo login."><button class="reset-button" type="submit">Resetar senha</button></form><form th:action="@{/admin/usuarios/{id}/excluir(id=${u.id})}" method="post" data-confirm-title="Remover usuário" data-confirm="Esta conta será removida permanentemente e não poderá ser recuperada."><button class="danger-button" type="submit">Remover</button></form></div></td>
+            </tr>
+        </tbody></table></div>
+    </section>
+</main>
+<div th:replace="~{fragments :: confirmation-modal}"></div>
+</body>
+</html>

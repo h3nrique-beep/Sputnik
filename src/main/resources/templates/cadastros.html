@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clientes e veículos | Sputnik</title><link rel="icon" type="image/jpeg" href="/images/logo.jpg?v=3"><link rel="stylesheet" href="/app.css"></head>
+<body>
+<div th:replace="~{fragments :: skip-link}"></div><div th:replace="~{fragments :: sidebar}"></div>
+<main id="conteudo-principal" class="app"><header th:replace="~{fragments :: header('Clientes e veículos','Consulte cadastros e mantenha os vínculos atualizados')}"></header>
+<section class="content">
+ <div th:replace="~{fragments :: flash}"></div>
+ <div class="page-actions"><div><h2>Cadastros existentes</h2><p>Use os registros abaixo ao abrir uma ordem de serviço.</p></div><div class="action-group"><a class="button outline" href="/pessoas/nova">＋ Cliente</a><a class="button" href="/veiculos/novo">＋ Veículo</a></div></div>
+ <form class="filters filters-search" method="get" action="/cadastros"><input class="search-input" type="search" name="busca" th:value="${busca}" placeholder="Buscar por nome, telefone, CPF, placa ou chassi"><button type="submit">Buscar</button></form>
+ <section class="columns cadastro-columns">
+  <article class="card table-card"><div class="card-head"><div><h2>Clientes</h2><p th:text="${clientes.size()} + ' cadastro(s) encontrado(s)'">0 cadastro(s) encontrado(s)</p></div></div><table><thead><tr><th>Cliente</th><th>Telefone</th><th class="right">Veículo</th></tr></thead><tbody><tr th:each="cliente : ${clientes}"><td><b th:text="${cliente.nome}">Cliente</b><small th:text="${cliente.cpf ?: 'CPF não informado'}">CPF</small></td><td th:text="${cliente.telefone}">Telefone</td><td class="right"><a class="button outline small-button" th:href="@{/veiculos/novo(cliente=${cliente.id})}">Vincular veículo</a></td></tr><tr th:if="${clientes.empty}"><td colspan="3" class="empty-state">Nenhum cliente encontrado.</td></tr></tbody></table></article>
+  <article class="card table-card"><div class="card-head"><div><h2>Veículos</h2><p th:text="${veiculos.size()} + ' cadastro(s) encontrado(s)'">0 cadastro(s) encontrado(s)</p></div></div><table><thead><tr><th>Veículo</th><th>Chassi</th><th>Cliente vinculado</th><th>KM atual</th></tr></thead><tbody><tr th:each="veiculo : ${veiculos}"><td><b th:text="${veiculo.placa}">ABC1D23</b><small th:text="${veiculo.marcaModelo + (veiculo.ano != null ? ' · ' + veiculo.ano : '')}">Modelo</small></td><td th:text="${veiculo.chassi ?: 'Não informado'}">Chassi</td><td th:text="${veiculo.cliente.nome}">Cliente</td><td th:text="${veiculo.quilometragemAtual ?: '—'}">0</td></tr><tr th:if="${veiculos.empty}"><td colspan="4" class="empty-state">Nenhum veículo encontrado.</td></tr></tbody></table></article>
+ </section>
+</section></main>
+</body>
+</html>

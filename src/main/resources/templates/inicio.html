@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Início | Sputnik</title><link rel="icon" type="image/jpeg" href="/images/logo.jpg?v=3"><link rel="stylesheet" href="/app.css"></head>
+<body>
+<div th:replace="~{fragments :: skip-link}"></div>
+<div th:replace="~{fragments :: sidebar}"></div>
+<main id="conteudo-principal" class="app">
+    <header th:replace="~{fragments :: header('Visão geral', 'Acompanhe o estoque e os atendimentos da oficina')}"></header>
+    <section class="content dashboard">
+        <div th:if="${podeReposicao && !criticas.empty}" class="alert-banner">
+            <div class="alert-banner-copy"><span class="status-icon warning">!</span><span><strong th:text="${criticas.size()} + ' itens exigem reposição'">0 itens exigem reposição</strong><small>Estão abaixo do estoque mínimo configurado.</small></span></div>
+            <a href="/reposicao" class="button outline">Ver reposição</a>
+        </div>
+
+        <section class="mission-stats" th:classappend="${!administrador} ? ' three-stats' : ''">
+            <article th:if="${podePecas}" class="mission-card"><div class="metric-head"><span class="metric-icon blue">▣</span><small>Peças cadastradas</small></div><b th:text="${pecas.size()}">0</b><span>SKUs ativos no catálogo</span></article>
+            <article th:if="${administrador}" class="mission-card"><div class="metric-head"><span class="metric-icon purple">◫</span><small>Valor em estoque</small></div><b th:text="${#numbers.formatCurrency(valor)}">R$ 0,00</b><span>Preço de venda × saldo</span></article>
+            <article th:if="${podeOrdens}" class="mission-card"><div class="metric-head"><span class="metric-icon green">↗</span><small>Ordens abertas</small></div><b th:text="${ordensAbertas}">0</b><span>Serviços em andamento</span></article>
+            <article th:if="${podeOrdens}" class="mission-card"><div class="metric-head"><span class="metric-icon green">✓</span><small>OS concluídas</small></div><b th:text="${ordensConcluidasMes}">0</b><span>Concluídas neste mês</span></article>
+            <article th:if="${podeReposicao}" class="mission-card"><div class="metric-head"><span class="metric-icon amber">!</span><small>Estoque crítico</small></div><b th:text="${criticas.size()}">0</b><span>Itens abaixo do mínimo</span></article>
+        </section>
+
+        <div th:if="${podePecas || podeOrdens}">
+            <h2 class="section-title">Ações rápidas</h2>
+            <section class="quick-grid">
+                <a th:if="${podePecas}" href="/pecas/nova" class="quick-card"><span class="quick-icon">＋</span><b>Cadastrar peça</b><small>Incluir um novo item</small></a>
+                <a th:if="${podePecas}" href="/pecas" class="quick-card"><span class="quick-icon">⌕</span><b>Consultar peças</b><small>Contábil, disponível e locação</small></a>
+                <a th:if="${podeOrdens}" href="/clientes" class="quick-card"><span class="quick-icon">↕</span><b>Cadastros</b><small>Clientes e veículos</small></a>
+                <a th:if="${podeOrdens}" href="/ordens/nova" class="quick-card"><span class="quick-icon">▤</span><b>Nova ordem</b><small>Abrir um atendimento</small></a>
+            </section>
+        </div>
+
+        <section class="dashboard-columns">
+            <article th:if="${podePecas || podeRelatorio}" class="card dashboard-card"><div class="card-head"><div><h2>Últimas movimentações</h2><p>Atividades mais recentes no estoque</p></div><a th:if="${podeRelatorio}" href="/relatorio-mensal">Ver relatório</a></div><div class="activity-list"><div th:each="m : ${movimentos}" class="activity-item"><span class="activity-icon" th:classappend="${m.tipo.name() == 'ENTRADA'} ? ' entry' : ' exit'" th:text="${m.tipo.name() == 'ENTRADA'} ? '+' : '−'">+</span><div><b th:text="${m.peca.nome}">Peça</b><small th:text="${m.tipo + ' · ' + m.quantidade + ' unidade(s)'}">Entrada · 1 unidade</small></div></div><p th:if="${movimentos.empty}" class="empty-copy">Nenhuma movimentação registrada ainda.</p></div></article>
+            <article th:if="${podeReposicao}" class="card dashboard-card"><div class="card-head"><div><h2>Estoque crítico</h2><p>Itens que precisam de atenção</p></div><a href="/reposicao">Ver todos</a></div><div class="critical-list"><div th:each="p : ${criticas}" class="critical-item"><div><b th:text="${p.nome}">Peça</b><small th:text="${p.codigo}">COD</small></div><span th:text="${p.estoqueDisponivel + ' / mín. ' + p.estoqueMinimo}">0 / mín. 5</span></div><p th:if="${criticas.empty}" class="empty-copy">Nenhum item crítico. Tudo em dia.</p></div></article>
+        </section>
+        <section th:if="${podeOrdens}" class="dashboard-columns os-dashboard">
+            <article class="card dashboard-card"><div class="card-head"><div><h2>Ordens por status</h2><p>Visão rápida dos atendimentos</p></div><a href="/ordens">Gerenciar</a></div><div class="status-list"><div th:each="status : ${statusOrdens}" class="status-list-item"><span th:text="${status.descricao}">Status</span><b th:text="${ordensPorStatus.getOrDefault(status, 0)}">0</b></div></div></article>
+            <article class="card dashboard-card"><div class="card-head"><div><h2>Alertas de ordens</h2><p>Atendimentos que exigem acompanhamento</p></div><a href="/ordens">Ver ordens</a></div><div class="critical-list"><div th:each="ordem : ${aguardandoPeca}" class="critical-item"><div><b th:text="${'OS #' + ordem.id + ' · ' + ordem.cliente.nome}">OS</b><small th:text="${ordem.veiculo.placa + ' · aguardando peça'}">Veículo</small></div><span>Aguardando</span></div><div th:each="ordem : ${retornos}" class="critical-item"><div><b th:text="${'OS #' + ordem.id + ' · retorno do veículo'}">OS</b><small th:text="${ordem.veiculo.marcaModelo + ' · ' + ordem.veiculo.placa}">Veículo</small></div><span>Retorno</span></div><p th:if="${aguardandoPeca.empty and retornos.empty}" class="empty-copy">Nenhum alerta de ordem no momento.</p></div></article>
+            <article class="card dashboard-card"><div class="card-head"><div><h2>Peças mais utilizadas</h2><p>Itens lançados nas ordens de serviço</p></div><a href="/pecas">Ver peças</a></div><div class="critical-list"><div th:each="peca : ${pecasMaisUsadas}" class="critical-item"><div><b th:text="${peca.nome}">Peça</b><small th:text="${peca.codigo}">Código</small></div><span th:text="${peca.estoqueDisponivel + ' disponível'}">0 disponível</span></div><p th:if="${pecasMaisUsadas.empty}" class="empty-copy">Nenhuma peça foi usada em ordens ainda.</p></div></article>
+        </section>
+    </section>
+</main>
+</body>
+</html>

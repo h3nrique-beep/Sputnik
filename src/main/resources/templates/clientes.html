@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clientes | Sputnik</title><link rel="icon" type="image/jpeg" href="/images/logo.jpg?v=3"><link rel="stylesheet" href="/app.css"></head>
+<body>
+<div th:replace="~{fragments :: skip-link}"></div><div th:replace="~{fragments :: sidebar}"></div>
+<main id="conteudo-principal" class="app"><header th:replace="~{fragments :: header('Clientes','Cadastros usados para vincular veículos e abrir ordens de serviço')}"></header>
+<section class="content"><div th:replace="~{fragments :: flash}"></div>
+ <div class="page-actions"><div><h2>Clientes cadastrados</h2><p>Consulte por nome, telefone ou CPF.</p></div><a class="button" href="/clientes/novo">＋ Novo cliente</a></div>
+ <form class="filters filters-search" method="get" action="/clientes"><input class="search-input" type="search" name="busca" th:value="${busca}" placeholder="Buscar por nome, telefone ou CPF"><button type="submit">Buscar</button></form>
+ <article class="card table-card"><table><thead><tr><th>Cliente</th><th>CPF</th><th>Telefone</th><th class="right">Ação</th></tr></thead><tbody><tr th:each="cliente : ${clientes}"><td><b th:text="${cliente.nome}">Cliente</b></td><td th:text="${cliente.cpf ?: 'Não informado'}">CPF</td><td th:text="${cliente.telefone}">Telefone</td><td class="right"><a class="button outline small-button" th:href="@{/veiculos/novo(cliente=${cliente.id})}">Vincular veículo</a></td></tr><tr th:if="${clientes.empty}"><td colspan="4" class="empty-state">Nenhum cliente encontrado.</td></tr></tbody></table></article>
+</section></main>
+</body></html>

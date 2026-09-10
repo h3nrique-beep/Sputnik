@@ -1,0 +1,66 @@
+let csrfToken: string | undefined;
+
+async function obterTokenCsrf() {
+  if (csrfToken) return csrfToken;
+  const response = await fetch("/api/security/csrf", {
+    credentials: "include",
+  });
+  if (!response.ok)
+    throw new Error("Não foi possível preparar uma solicitação segura.");
+  const body = (await response.json()) as { token: string };
+  csrfToken = body.token;
+  return csrfToken;
+}
+
+/** Cliente HTTP único da interface React para a API de sessão do Spring. */
+export async function api<T>(url: string, options: RequestInit = {}) {
+  const metodo = (options.method || "GET").toUpperCase();
+  const requerToken = !["GET", "HEAD", "OPTIONS"].includes(metodo);
+  const enviar = async (token?: string) =>
+    fetch(`/api${url}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "X-CSRF-Token": token } : {}),
+        ...(options.headers || {}),
+      },
+      credentials: "include",
+      ...options,
+    });
+
+  let response = await enviar(requerToken ? await obterTokenCsrf() : undefined);
+  if (requerToken && response.status === 403) {
+    // Um token pode expirar junto com a sessão; ele é renovado uma vez antes de falhar.
+    csrfToken = undefined;
+    response = await enviar(await obterTokenCsrf());
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.mensagem || "Não foi possível concluir a operação.");
+  }
+
+  if ((url === "/auth/login" || url === "/auth/logout") && response.ok) {
+    csrfToken = undefined;
+  }
+
+  return response.status === 204
+    ? (undefined as T)
+    : (response.json() as Promise<T>);
+}
+
+/** Faz download de um arquivo protegido pela mesma sessão da aplicação. */
+export async function downloadApi(url: string, filename: string) {
+  const response = await fetch(`/api${url}`, { credentials: "include" });
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.mensagem || "Não foi possível baixar o arquivo.");
+  }
+  const arquivo = await response.blob();
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(arquivo);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(link.href);
+}

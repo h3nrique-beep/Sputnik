@@ -1,0 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* A ordem preserva a cascata visual existente. */
+@import "./base.css";
+@import "./developer.css";
+@import "./feedback.css";
+@import "./access-base.css";
+@import "./forms.css";
+@import "./theme.css";
+@import "./layout-print.css";
+@import "./order-document.css";

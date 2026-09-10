@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cadastrar veículo | Sputnik</title><link rel="icon" type="image/jpeg" href="/images/logo.jpg?v=3"><link rel="stylesheet" href="/app.css"></head>
+<body>
+<div th:replace="~{fragments :: sidebar}"></div>
+<main class="app"><header th:replace="~{fragments :: header('Cadastrar veículo','Registre os dados e vincule-o a um cliente já cadastrado, se necessário')}"></header>
+<section class="content narrow"><form class="card form" th:action="@{/veiculos}" th:object="${veiculo}" method="post">
+ <div class="form-heading"><h2>Dados do veículo</h2><p>O vínculo é opcional, mas só pode ser feito com um cliente previamente cadastrado.</p></div>
+ <label>Cliente vinculado <span class="optional">(opcional)</span><select name="clienteId"><option value="">Não vincular cliente agora</option><option th:each="p : ${pessoas}" th:value="${p.id}" th:selected="${p.id == clienteSelecionado}" th:text="${p.nome + ' · ' + p.telefone}"></option></select><span class="field-hint">Para abrir uma ordem de serviço, o veículo precisa estar vinculado ao cliente selecionado.</span></label>
+ <label>Placa<input th:field="*{placa}" placeholder="ABC1D23"></label>
+ <div class="grid"><label>Marca e modelo<input th:field="*{marcaModelo}" placeholder="Ex.: Volkswagen Gol"></label><label>Ano<input type="number" th:field="*{ano}" placeholder="2020"></label></div>
+ <label>Chassi<input th:field="*{chassi}" placeholder="Ex.: 9BWZZZ377VT004251"><span class="field-hint">Usado para localizar o veículo rapidamente.</span></label>
+ <label>Quilometragem atual<input type="number" min="0" th:field="*{quilometragemAtual}" placeholder="Ex.: 85420"></label>
+ <p class="error" th:if="${#fields.hasAnyErrors()}" th:text="${#fields.errors('*')}"></p>
+ <div class="form-actions"><a class="button outline" href="/veiculos">Cancelar</a><button class="primary" type="submit">Salvar veículo</button></div>
+</form></section></main>
+</body>
+</html>

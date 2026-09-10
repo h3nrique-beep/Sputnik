@@ -1,0 +1,77 @@
+/* Formulários operacionais do front React. */
+.grid-form {
+  display: grid;
+  gap: 0 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 820px;
+}
+.grid-form h2,
+.grid-form > p,
+.grid-form > .alert,
+.grid-form > button {
+  grid-column: 1/-1;
+}
+.compact-form {
+  display: block;
+}
+.compact-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+.compact-form label input,
+.compact-form label select,
+.compact-form label textarea {
+  display: block;
+  font-weight: 400;
+  margin-top: 6px;
+}
+.compact-form hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 18px 0;
+}
+.secondary {
+  background: #eef4ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 9px 12px;
+}
+@media (max-width: 600px) {
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+}
+.row-actions {
+  display: flex;
+  gap: 12px;
+}
+.danger {
+  color: #c53030;
+}
+.form-card fieldset {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 0 0 16px;
+  padding: 12px;
+}
+.form-card legend {
+  font-weight: 700;
+  padding: 0 4px;
+}
+.form-card label.check {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  font-weight: 500;
+  margin: 10px 0;
+}
+.form-card label.check input {
+  margin: 0;
+  padding: 0;
+  width: auto;
+}

@@ -1,0 +1,418 @@
+/* Camada visual alinhada ao padrão original do Sputnik. */
+:root {
+  --navy: #10182d;
+  --navy-soft: #25355f;
+  --blue: #2d62df;
+  --ink: #0d2245;
+  --muted: #62718e;
+  --bg: #f5f7fc;
+  --line: #e0e6f0;
+}
+.shell {
+  grid-template-columns: 252px 1fr;
+}
+.shell aside {
+  padding: 22px 12px 18px;
+}
+.brand {
+  padding: 0 8px 27px;
+}
+.brand img {
+  height: 40px;
+  width: 40px;
+}
+.brand b {
+  font-size: 13px;
+}
+.shell nav {
+  gap: 5px;
+}
+.shell nav button {
+  font-size: 14px;
+  padding: 11px 12px;
+}
+.shell nav button:hover,
+.shell nav .active {
+  background: var(--navy-soft);
+  box-shadow: none;
+}
+.nav-title {
+  margin-top: 18px;
+}
+.shell header {
+  min-height: 82px;
+  padding: 18px 34px;
+}
+.shell header h1 {
+  color: var(--ink);
+  font-size: 22px;
+}
+.content {
+  max-width: 1280px;
+  padding: 30px 34px;
+}
+.module-shell {
+  margin: 0 auto;
+  max-width: 1120px;
+  width: 100%;
+}
+.module-shell .toolbar {
+  margin-bottom: 20px;
+}
+.metric-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.restock-banner {
+  align-items: flex-start;
+  background: #fffaf0;
+  border: 1px solid #f8ca84;
+  border-radius: 12px;
+  display: flex;
+  gap: 13px;
+  margin-bottom: 24px;
+  padding: 16px;
+}
+.restock-banner > span {
+  align-items: center;
+  background: #fff0c8;
+  border-radius: 10px;
+  color: #e38200;
+  display: grid;
+  font-weight: 800;
+  height: 35px;
+  place-items: center;
+  width: 35px;
+}
+.restock-banner div {
+  flex: 1;
+}
+.restock-banner b,
+.restock-banner small {
+  display: block;
+}
+.restock-banner b {
+  color: #142342;
+  font-size: 14px;
+}
+.restock-banner small {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.restock-banner .secondary {
+  background: #fff;
+  border-color: #d6dde9;
+  color: #1b345b;
+  white-space: nowrap;
+}
+.metrics {
+  gap: 14px;
+  margin-bottom: 27px;
+}
+.metric {
+  align-items: flex-start;
+  display: flex;
+  gap: 11px;
+  min-height: 132px;
+  padding: 17px;
+}
+.metric > i,
+.quick-actions i {
+  align-items: center;
+  background: #edf2ff;
+  border-radius: 9px;
+  color: #2b63e6;
+  display: grid;
+  font-style: normal;
+  font-weight: 800;
+  height: 33px;
+  place-items: center;
+  width: 33px;
+}
+.metric:nth-child(2) > i {
+  background: #f2edff;
+  color: #7c51db;
+}
+.metric:nth-child(3) > i {
+  background: #eafaf1;
+  color: #15956a;
+}
+.metric:nth-child(4) > i {
+  background: #fff5df;
+  color: #e58c00;
+}
+.metric div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.metric small {
+  font-size: 12px;
+}
+.metric b {
+  color: var(--ink);
+  font-size: 25px;
+  margin-top: 8px;
+}
+.metric em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  margin-top: 3px;
+}
+.section-heading {
+  color: var(--ink);
+  font: 700 16px Manrope;
+  margin: 0 0 12px;
+}
+.quick-actions {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 27px;
+}
+.quick-actions button {
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  gap: 11px;
+  min-height: 114px;
+  padding: 17px;
+  text-align: left;
+}
+.quick-actions button:hover {
+  border-color: #aec5fb;
+  box-shadow: 0 10px 22px #1f3c7410;
+  transform: translateY(-1px);
+}
+.quick-actions span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.quick-actions b {
+  font-size: 13px;
+}
+.quick-actions small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.dashboard-cards {
+  grid-template-columns: repeat(3, 1fr);
+}
+.card {
+  border-radius: 12px;
+}
+.card h2 {
+  color: var(--ink);
+}
+.card p {
+  font-size: 13px;
+}
+.login {
+  background: #f7f8fc;
+  grid-template-columns: minmax(420px, 1fr) minmax(480px, 1fr);
+}
+.login-presentation {
+  background:
+    radial-gradient(circle at 16% 3%, #2d467f, transparent 38%), var(--navy);
+  display: flex;
+  flex-direction: column;
+  padding: 58px;
+  position: relative;
+}
+.login-presentation:after {
+  border: 1px solid #42547777;
+  border-radius: 50%;
+  content: "";
+  height: 430px;
+  position: absolute;
+  right: -170px;
+  top: -95px;
+  width: 430px;
+}
+.login-brand,
+.access-brand {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+.login-brand img,
+.access-brand img {
+  background: #fff;
+  border-radius: 11px;
+  height: 44px;
+  object-fit: cover;
+  width: 44px;
+}
+.login-brand b,
+.access-brand b {
+  display: block;
+  font: 700 17px Manrope;
+  letter-spacing: 0.08em;
+}
+.login-brand small {
+  color: #a9b9dd;
+  display: block;
+}
+.login-message {
+  margin: auto 0;
+  max-width: 540px;
+  position: relative;
+  z-index: 1;
+}
+.login-message h1 {
+  font: 800 clamp(40px, 4.3vw, 58px)/1.08 Manrope;
+  margin: 0 0 18px;
+}
+.login-message p {
+  color: #c5d2ef;
+  font-size: 16px;
+}
+.login-message ul {
+  display: grid;
+  gap: 13px;
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+}
+.login-message li {
+  align-items: center;
+  color: #d4dcf0;
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+}
+.login-message li:before {
+  align-items: center;
+  background: #273963;
+  border-radius: 7px;
+  color: #8caeff;
+  content: "✓";
+  display: grid;
+  font-weight: 800;
+  height: 27px;
+  place-items: center;
+  width: 27px;
+}
+.login-footer {
+  color: #8494b9;
+  position: relative;
+  z-index: 1;
+}
+.login-access {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  padding: 50px;
+}
+.login form {
+  margin: 0;
+  max-width: 410px;
+}
+.access-brand {
+  margin-bottom: 38px;
+}
+.access-brand b {
+  color: #102044;
+  font-size: 15px;
+}
+.access-brand small {
+  color: var(--muted);
+  display: block;
+  font-size: 11px;
+}
+.login form h2 {
+  color: var(--ink);
+  font-size: 28px;
+  margin: 0 0 5px;
+}
+.login form > p {
+  margin-bottom: 27px;
+}
+.login label {
+  color: #182744;
+}
+.password-field {
+  display: flex;
+  position: relative;
+}
+.password-field input {
+  padding-right: 76px;
+}
+.password-field button {
+  background: #fff;
+  border: 1px solid #9ca8b9;
+  border-radius: 6px;
+  color: #52617b;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 5px 8px;
+  position: absolute;
+  right: 5px;
+  top: 10px;
+}
+.login .primary {
+  border-radius: 8px;
+  margin-top: 2px;
+  padding: 12px;
+}
+.secondary {
+  border-radius: 8px;
+}
+.toast {
+  margin-left: 34px;
+  margin-right: 34px;
+}
+@media (max-width: 1020px) {
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .login {
+    grid-template-columns: 1fr;
+  }
+  .login-presentation {
+    display: none;
+  }
+  .login-access {
+    min-height: 100vh;
+  }
+}
+@media (max-width: 680px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .content {
+    padding: 20px 16px;
+  }
+  .shell header {
+    padding: 16px;
+  }
+  .metrics,
+  .dashboard-cards,
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  .metric-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .restock-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .restock-banner .secondary {
+    width: 100%;
+  }
+  .login-access {
+    padding: 28px;
+  }
+  .access-brand {
+    margin-bottom: 28px;
+  }
+}
