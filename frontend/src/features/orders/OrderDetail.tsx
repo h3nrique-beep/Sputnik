@@ -16,7 +16,15 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
       .catch((e) => setErro(e.message));
   };
   useEffect(reload, [id]);
-  if (!data) return <Loading />;
+  if (!data)
+    return erro ? (
+      <div className="space-y-4">
+        <div className="alert error">{erro}</div>
+        <Button variant="secondary" onClick={back}>Voltar para ordens</Button>
+      </div>
+    ) : (
+      <Loading />
+    );
   const o: Order = data.ordem;
   const eOrcamento = o.status === "ORCAMENTO";
   const documento = o.documento ?? {};
