@@ -3,6 +3,7 @@ package br.edu.fag.sputnik.domain;
 public enum PermissaoModulo {
     PECAS("Peças e movimentações"),
     ORDENS("Ordens de serviço"),
+    FINANCEIRO("Financeiro"),
     RELATORIO_MENSAL("Relatório mensal"),
     REPOSICAO("Reposição");
 

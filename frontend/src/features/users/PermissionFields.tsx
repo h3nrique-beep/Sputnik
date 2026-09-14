@@ -11,6 +11,7 @@ export function PermissionFields({
       {[
         ["PECAS", "Peças e movimentações"],
         ["ORDENS", "Ordens de serviço"],
+        ["FINANCEIRO", "Financeiro — receitas, despesas e baixas"],
         ["RELATORIO_MENSAL", "Relatório mensal"],
         ["REPOSICAO", "Reposição"],
       ].map(([key, label]) => (

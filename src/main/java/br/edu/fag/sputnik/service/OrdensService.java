@@ -17,6 +17,7 @@ import br.edu.fag.sputnik.repository.MovimentacaoRepository;
 import br.edu.fag.sputnik.repository.OrdemServicoRepository;
 import br.edu.fag.sputnik.repository.PecaRepository;
 import br.edu.fag.sputnik.repository.VeiculoRepository;
+import br.edu.fag.sputnik.web.OrdemServicoForm;
 import br.edu.fag.sputnik.web.OrdemServicoEdicaoForm;
 
 import jakarta.transaction.Transactional;
@@ -67,12 +68,8 @@ public class OrdensService {
 
     public long ordensAbertas() {
         return ordens().stream()
-                .filter(
-                        ordem ->
-                                !StatusOrdemServico.CONCLUIDA.name().equals(ordem.getStatus())
-                                        && !StatusOrdemServico.CANCELADA
-                                                .name()
-                                                .equals(ordem.getStatus()))
+                .map(this::statusDaOrdem)
+                .filter(status -> !status.encerraAtendimento() && !status.ehOrcamento())
                 .count();
     }
 
@@ -133,6 +130,17 @@ public class OrdensService {
             String descricao,
             Integer quilometragemAtual,
             String responsavel) {
+        return criarAtendimento(
+                clienteId, veiculoId, descricao, quilometragemAtual, responsavel, false);
+    }
+
+    private OrdemServico criarAtendimento(
+            Long clienteId,
+            Long veiculoId,
+            String descricao,
+            Integer quilometragemAtual,
+            String responsavel,
+            boolean orcamento) {
         Cliente cliente = buscarCliente(clienteId);
         Veiculo veiculo = buscarVeiculo(veiculoId);
 
@@ -147,26 +155,47 @@ public class OrdensService {
         ordem.setDescricao(descricao);
         ordem.setQuilometragemAbertura(quilometragemAtual);
         ordem.setAbertura(LocalDateTime.now());
-        ordem.setStatus(STATUS_ABERTA);
+        ordem.setStatus(orcamento ? StatusOrdemServico.ORCAMENTO.name() : STATUS_ABERTA);
         ordem.setUltimaAtualizacao(LocalDateTime.now());
         veiculo.setQuilometragemAtual(quilometragemAtual);
         OrdemServico salva = ordens.save(ordem);
-        registrarHistorico(salva, responsavel, "Ordem de serviço aberta.");
+        registrarHistorico(
+                salva,
+                responsavel,
+                orcamento
+                        ? "Orçamento criado. Aguardando aprovação do cliente."
+                        : "Ordem de serviço aberta.");
         return salva;
     }
 
     @Transactional
-    public OrdemServico abrirOrdem(
-            br.edu.fag.sputnik.web.OrdemServicoForm form, String responsavel) {
+    public OrdemServico abrirOrdem(OrdemServicoForm form, String responsavel) {
         OrdemServico ordem =
-                abrirOrdem(
+                criarAtendimento(
                         form.getClienteId(),
                         form.getVeiculoId(),
                         form.getDescricao(),
                         form.getQuilometragemAtual(),
-                        responsavel);
+                        responsavel,
+                        form.isOrcamento());
+        ordem.setAgendamento(form.getAgendamento());
+        ordem.setRetornoEm(form.getRetornoEm());
+        ordem.setGarantiaAte(form.getGarantiaAte());
         ordem.setDocumento(form.getDocumento());
-        return ordens.save(ordem);
+        OrdemServico salva = ordens.save(ordem);
+        if (form.getAgendamento() != null) {
+            registrarHistorico(
+                    salva,
+                    responsavel,
+                    "Atendimento agendado para " + form.getAgendamento().toString().replace('T', ' ') + ".");
+        }
+        if (form.getRetornoEm() != null) {
+            registrarHistorico(salva, responsavel, "Retorno preventivo programado para " + form.getRetornoEm() + ".");
+        }
+        if (form.getGarantiaAte() != null) {
+            registrarHistorico(salva, responsavel, "Garantia registrada até " + form.getGarantiaAte() + ".");
+        }
+        return salva;
     }
 
     public OrdemServico buscarOrdem(Long id) {
@@ -188,6 +217,10 @@ public class OrdensService {
             Long ordemId, OrdemServicoEdicaoForm formulario, String responsavel) {
         OrdemServico ordem = buscarOrdem(ordemId);
         StatusOrdemServico statusAnterior = statusDaOrdem(ordem);
+        if (statusAnterior.ehOrcamento()) {
+            throw new IllegalArgumentException(
+                    "Aprove o orçamento para convertê-lo em ordem de serviço antes de editar o status.");
+        }
         if (formulario.getDocumento() != null) ordem.setDocumento(formulario.getDocumento());
         ordem.setDescricao(formulario.getDescricao().trim());
         ordem.setQuilometragemAbertura(formulario.getQuilometragemAtual());
@@ -213,14 +246,13 @@ public class OrdensService {
         OrdemServico ordem = buscarOrdem(ordemId);
         validarOrdemEditavel(ordem);
         Peca peca = buscarPeca(pecaId);
-        if (quantidade > peca.getEstoqueDisponivel()) {
+        boolean orcamento = statusDaOrdem(ordem).ehOrcamento();
+        if (!orcamento && quantidade > peca.getEstoqueDisponivel()) {
             throw new IllegalArgumentException(
                     "Estoque insuficiente para adicionar esta peça à ordem.");
         }
 
-        peca.setSaldo(peca.getSaldo() - quantidade);
-        peca.setEstoqueDisponivel(peca.getEstoqueDisponivel() - quantidade);
-        registrarMovimentacaoDaOrdem(peca, quantidade, responsavel, ordem);
+        if (!orcamento) baixarEstoqueDaPeca(peca, quantidade, responsavel, ordem);
 
         ItemOrdemServico item = new ItemOrdemServico();
         item.setOrdemServico(ordem);
@@ -229,7 +261,7 @@ public class OrdensService {
         item.setDescricao(peca.getNome());
         item.setQuantidade(quantidade);
         item.setValorUnitario(peca.getPreco());
-        item.setEstoqueBaixado(true);
+        item.setEstoqueBaixado(!orcamento);
         itensOrdem.save(item);
         atualizarOrdemDepoisDeItem(
                 ordem, responsavel, "Peça adicionada: " + quantidade + "× " + peca.getNome() + ".");
@@ -252,6 +284,31 @@ public class OrdensService {
                 ordem, responsavel, "Serviço adicionado: " + descricao.trim() + ".");
     }
 
+    @Transactional
+    public void aprovarOrcamento(Long ordemId, String responsavel) {
+        OrdemServico ordem = buscarOrdem(ordemId);
+        if (!statusDaOrdem(ordem).ehOrcamento()) {
+            throw new IllegalArgumentException("Somente um orçamento pendente pode ser aprovado.");
+        }
+
+        for (ItemOrdemServico item : itensDaOrdem(ordemId)) {
+            if (item.getPeca() == null || item.isEstoqueBaixado()) continue;
+            Peca peca = buscarPeca(item.getPeca().getId());
+            if (item.getQuantidade() > peca.getEstoqueDisponivel()) {
+                throw new IllegalArgumentException(
+                        "Estoque insuficiente para aprovar o orçamento: " + peca.getNome() + ".");
+            }
+            baixarEstoqueDaPeca(peca, item.getQuantidade(), responsavel, ordem);
+            item.setEstoqueBaixado(true);
+            itensOrdem.save(item);
+        }
+
+        ordem.setStatus(STATUS_ABERTA);
+        ordem.setUltimaAtualizacao(LocalDateTime.now());
+        ordens.save(ordem);
+        registrarHistorico(ordem, responsavel, "Orçamento aprovado e convertido em ordem de serviço.");
+    }
+
     private StatusOrdemServico statusDaOrdem(OrdemServico ordem) {
         try {
             return StatusOrdemServico.valueOf(ordem.getStatus());
@@ -268,7 +325,8 @@ public class OrdensService {
     }
 
     private void atualizarOrdemDepoisDeItem(OrdemServico ordem, String responsavel, String evento) {
-        if (statusDaOrdem(ordem) == StatusOrdemServico.ABERTA)
+        StatusOrdemServico status = statusDaOrdem(ordem);
+        if (!status.ehOrcamento() && status == StatusOrdemServico.ABERTA)
             ordem.setStatus(StatusOrdemServico.EM_ANDAMENTO.name());
         ordem.setUltimaAtualizacao(LocalDateTime.now());
         ordens.save(ordem);
@@ -286,6 +344,13 @@ public class OrdensService {
         movimentacao.setOperador(responsavel);
         movimentacao.setObservacao("Baixa automática da OS #" + ordem.getId());
         movimentacoes.save(movimentacao);
+    }
+
+    private void baixarEstoqueDaPeca(
+            Peca peca, Integer quantidade, String responsavel, OrdemServico ordem) {
+        peca.setSaldo(peca.getSaldo() - quantidade);
+        peca.setEstoqueDisponivel(peca.getEstoqueDisponivel() - quantidade);
+        registrarMovimentacaoDaOrdem(peca, quantidade, responsavel, ordem);
     }
 
     private void registrarHistorico(OrdemServico ordem, String responsavel, String descricao) {

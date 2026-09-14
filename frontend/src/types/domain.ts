@@ -1,5 +1,7 @@
 export type User = {
   id: number;
+  empresaId?: number | null;
+  empresaNome?: string | null;
   nome: string;
   perfil: string;
   permissoes: string[];
@@ -40,6 +42,9 @@ export type Order = {
   id: number;
   status: string;
   abertura: string;
+  agendamento?: string | null;
+  retornoEm?: string | null;
+  garantiaAte?: string | null;
   quilometragem: number;
   descricao: string;
   cliente: Client;

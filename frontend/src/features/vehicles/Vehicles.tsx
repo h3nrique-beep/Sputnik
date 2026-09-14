@@ -1,27 +1,19 @@
-import { useEffect, useState } from "react";
 import { Button, Table } from "../../components/ui";
-import { api } from "../../lib/api";
+import { useSearchList } from "../../hooks/useSearchList";
 import { type Vehicle } from "../../types/domain";
 
 export function Vehicles({ go }: { go: (v: string) => void }) {
-  const [items, setItems] = useState<Vehicle[]>([]);
-  const [query, setQuery] = useState("");
-  useEffect(() => {
-    api<Vehicle[]>("/veiculos?busca=" + encodeURIComponent(query)).then(
-      setItems,
-    );
-  }, [query]);
+  const { items, query, setQuery } = useSearchList<Vehicle>("/veiculos");
   return (
     <div className="module-shell space-y-5">
       <div className="toolbar">
         <input
+          aria-label="Buscar veículos"
           placeholder="Buscar por placa ou chassi"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button onClick={() => go("vehicles-new")}>
-          ＋ Novo veículo
-        </Button>
+        <Button onClick={() => go("vehicles-new")}>＋ Novo veículo</Button>
       </div>
       <Table
         headers={["Veículo", "Placa", "Chassi", "KM", "Cliente"]}

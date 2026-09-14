@@ -15,20 +15,28 @@ export function Orders({ go }: { go: (v: string) => void }) {
           <h2>Atendimentos</h2>
           <p>Controle de serviços, custos e status.</p>
         </div>
-        <Button onClick={() => go("orders-new")}>
-          ＋ Nova ordem
-        </Button>
+        <span className="toolbar-actions">
+          <Button variant="secondary" onClick={() => go("quotes-new")}>
+            ＋ Novo orçamento
+          </Button>
+          <Button onClick={() => go("orders-new")}>＋ Nova ordem</Button>
+        </span>
       </div>
       <Table
-        headers={["OS", "Cliente", "Veículo", "KM", "Status", "Ação"]}
+        headers={["Atendimento", "Cliente", "Veículo", "KM", "Status", "Ação"]}
         rows={items.map((o) => [
-          `#${o.id}`,
+          `${o.status === "ORCAMENTO" ? "Orçamento" : "OS"} #${o.id}`,
           o.cliente.nome,
           `${o.veiculo.marcaModelo} · ${o.veiculo.placa}`,
           String(o.quilometragem),
           <Badge key="b" status={o.status} />,
-          <Button key="a" size="sm" variant="link" onClick={() => go("order-" + o.id)}>
-            Ver OS
+          <Button
+            key="a"
+            size="sm"
+            variant="link"
+            onClick={() => go("order-" + o.id)}
+          >
+            {o.status === "ORCAMENTO" ? "Ver orçamento" : "Ver OS"}
           </Button>,
         ])}
       />

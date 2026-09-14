@@ -8,6 +8,7 @@ import br.edu.fag.sputnik.auth.SessaoAutenticacao;
 import br.edu.fag.sputnik.auth.UsuarioAutenticado;
 import br.edu.fag.sputnik.auth.UsuarioService;
 import br.edu.fag.sputnik.domain.Perfil;
+import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.security.CsrfTokenService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
@@ -28,10 +30,12 @@ import java.util.Set;
 @SpringBootTest(
         properties = {
             "spring.datasource.url=jdbc:h2:mem:refactor_regression;DB_CLOSE_DELAY=-1",
-            "spring.jpa.hibernate.ddl-auto=create-drop"
+            "spring.jpa.hibernate.ddl-auto=create-drop",
+            "sputnik.saas.self-signup.enabled=true"
         })
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
 class FluxosApiIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
@@ -100,7 +104,8 @@ class FluxosApiIntegrationTest {
                         enviar(
                                         "/ordens",
                                         """
-{"clienteId":%d,"veiculoId":%d,"descricao":"Revisão","quilometragemAtual":120}
+{"clienteId":%d,"veiculoId":%d,"descricao":"Revisão","quilometragemAtual":120,
+ "agendamento":"2026-10-01T09:30:00","retornoEm":"2026-11-01","garantiaAte":"2026-12-01"}
 """
                                                 .formatted(cliente, veiculo))
                                 .andExpect(status().isCreated()));
@@ -119,6 +124,9 @@ class FluxosApiIntegrationTest {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.ordem.status").value("EM_ANDAMENTO"))
                         .andExpect(jsonPath("$.ordem.quilometragem").value(120))
+                        .andExpect(jsonPath("$.ordem.agendamento").value("2026-10-01T09:30:00"))
+                        .andExpect(jsonPath("$.ordem.retornoEm").value("2026-11-01"))
+                        .andExpect(jsonPath("$.ordem.garantiaAte").value("2026-12-01"))
                         .andReturn();
         var itens = json.readTree(detail.getResponse().getContentAsString()).get("itens");
         assertThat(itens).hasSize(2);
@@ -128,6 +136,94 @@ class FluxosApiIntegrationTest {
                                 .decimalValue()
                                 .add(itens.get(1).get("total").decimalValue()))
                 .isEqualByComparingTo("130.00");
+    }
+
+    @Test
+    void orcamentoSoBaixaEstoqueQuandoForAprovado() throws Exception {
+        long cliente =
+                id(
+                        enviar(
+                                        "/clientes",
+                                        """
+{"nome":"Cliente orçamento","cpf":"11111111111","telefone":"4500000001"}
+""")
+                                .andExpect(status().isCreated()));
+        long veiculo =
+                id(
+                        enviar(
+                                        "/veiculos",
+                                        """
+{"placa":"ORC1A23","marcaModelo":"Carro orçamento","ano":2021,
+ "chassi":"CHASSI-ORCAMENTO","quilometragemAtual":200,"clienteId":%d}
+"""
+                                                .formatted(cliente))
+                                .andExpect(status().isCreated()));
+        long orcamento =
+                id(
+                        enviar(
+                                        "/ordens",
+                                        """
+{"clienteId":%d,"veiculoId":%d,"descricao":"Orçamento de revisão",
+ "quilometragemAtual":220,"orcamento":true}
+"""
+                                                .formatted(cliente, veiculo))
+                                .andExpect(status().isCreated()));
+        long peca = peca();
+
+        enviar("/ordens/" + orcamento + "/itens/peca", "{\"pecaId\":" + peca + ",\"quantidade\":2}")
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/pecas").param("busca", "REF-TESTE").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].saldo").value(10));
+
+        enviar("/ordens/" + orcamento + "/aprovar", "{}")
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/ordens/" + orcamento).session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ordem.status").value("ABERTA"));
+        mvc.perform(get("/api/pecas").param("busca", "REF-TESTE").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].saldo").value(8));
+    }
+
+    @Test
+    void financeiroRegistraELiquidaLancamento() throws Exception {
+        long lancamento =
+                id(
+                        enviar(
+                                        "/financeiro",
+                                        """
+{"tipo":"RECEITA","descricao":"Serviço de teste","categoria":"Mão de obra",
+ "valor":150.50,"vencimento":"2026-10-10"}
+""")
+                                .andExpect(status().isCreated()));
+        mvc.perform(get("/api/financeiro").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].status").value("PENDENTE"));
+        enviar("/financeiro/" + lancamento + "/baixar", "{}")
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/financeiro").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].status").value("PAGO"));
+    }
+
+    @Test
+    void onboardingCriaEmpresaComAdminEPlanoDeTeste() throws Exception {
+        enviar(
+                        "/assinaturas/cadastro",
+                        """
+{"empresaNome":"Oficina SaaS","slug":"oficina-saas","nomeAdministrador":"Responsável",
+ "email":"admin@oficina-saas.test","senha":"SenhaForte#2026"}
+""")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.empresaNome").value("Oficina SaaS"));
+        mvc.perform(get("/api/empresa/assinatura").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.plano").value("STARTER"))
+                .andExpect(jsonPath("$.usuariosAtivos").value(1));
+        mvc.perform(get("/api/admin/usuarios").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
     }
 
     @Test
@@ -157,9 +253,14 @@ class FluxosApiIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"permissoes\":[\"ORDENS\"]}"))
                 .andExpect(status().isNoContent());
-        enviar("/admin/usuarios/" + usuario + "/resetar-senha", "{}")
-                .andExpect(status().isNoContent());
-        assertThat(usuarios.autenticar("refatoracao@example.test", "12345678"))
+        var reset =
+                enviar("/admin/usuarios/" + usuario + "/resetar-senha", "{}")
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String senhaTemporaria =
+                json.readTree(reset.getResponse().getContentAsString()).get("senhaTemporaria").asText();
+        assertThat(senhaTemporaria).hasSize(20).isNotEqualTo("12345678");
+        assertThat(usuarios.autenticar("refatoracao@example.test", senhaTemporaria))
                 .get()
                 .extracting(UsuarioAutenticado::trocaSenhaObrigatoria)
                 .isEqualTo(true);
@@ -189,5 +290,26 @@ class FluxosApiIntegrationTest {
                 }) {
             mvc.perform(get("/api" + rota).session(session)).andExpect(status().isForbidden());
         }
+    }
+
+    @Test
+    void permissaoFinanceiraESeparadaDoRelatorioMensal() throws Exception {
+        SessaoAutenticacao.iniciar(
+                session,
+                new UsuarioAutenticado(
+                        2L, "Financeiro", Perfil.BALCONISTA, Set.of(PermissaoModulo.FINANCEIRO), false));
+        mvc.perform(get("/api/financeiro").session(session)).andExpect(status().isOk());
+        mvc.perform(get("/api/relatorio-mensal").session(session)).andExpect(status().isForbidden());
+        mvc.perform(get("/api/dashboard").session(session)).andExpect(status().isForbidden());
+
+        SessaoAutenticacao.iniciar(
+                session,
+                new UsuarioAutenticado(
+                        3L,
+                        "Relatórios",
+                        Perfil.BALCONISTA,
+                        Set.of(PermissaoModulo.RELATORIO_MENSAL),
+                        false));
+        mvc.perform(get("/api/financeiro").session(session)).andExpect(status().isForbidden());
     }
 }

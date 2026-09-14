@@ -51,11 +51,15 @@ Para atualizar a interface servida na porta 8080, execute `npm run build:java` d
 - `templates`: telas Thymeleaf.
 - `static/app.css`: interface responsiva inspirada no protótipo Sputnik 2.0.
 
-## Acesso temporário
+## Primeiro acesso seguro
 
-| Login | Senha | Perfil | Acesso |
-| --- | --- | --- | --- |
-| `balconista@sputnik.com.br` | `Sputnik@123` | Balconista | Peças e ordens de serviço |
-| `admin` | `Admin#2026!` | Administrador | Todos os módulos e relatórios |
+Em um banco sem usuários, defina uma senha forte exclusivamente no ambiente antes de iniciar a aplicação. Ela precisa ter ao menos 12 caracteres, maiúscula, minúscula, número e símbolo:
 
-Os usuários ficam nas tabelas `usuarios_sistema` e `usuario_permissoes` do H2. O administrador pode criar novos usuários pela opção **Usuários** do menu. Os dois acessos acima são criados somente quando o banco ainda não tem usuários.
+```powershell
+$env:SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD = Read-Host "Digite uma senha forte para o primeiro administrador"
+mvn spring-boot:run
+```
+
+Opcionalmente, defina `SPUTNIK_BOOTSTRAP_ADMIN_USUARIO` para alterar o login inicial (o padrão é `admin`). A conta inicial é obrigada a trocar a senha no primeiro acesso. Não existem credenciais padrão no código ou na documentação.
+
+Os usuários ficam nas tabelas `usuarios_sistema` e `usuario_permissoes` do H2. O administrador pode criar novos usuários pela opção **Usuários** do menu.

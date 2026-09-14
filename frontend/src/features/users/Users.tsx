@@ -8,7 +8,8 @@ export function Users() {
   const [items, setItems] = useState<any[]>([]),
     [erro, setErro] = useState(""),
     [showCreate, setShowCreate] = useState(false),
-    [editing, setEditing] = useState<any>();
+    [editing, setEditing] = useState<any>(),
+    [senhaTemporaria, setSenhaTemporaria] = useState("");
   const load = () =>
     api<any[]>("/admin/usuarios")
       .then(setItems)
@@ -17,9 +18,16 @@ export function Users() {
     load();
   }, []);
   const reset = async (id: number) => {
-    if (!confirm("Redefinir a senha temporária para 12345678?")) return;
+    if (
+      !confirm("Gerar uma nova senha temporária aleatória para este usuário?")
+    )
+      return;
     try {
-      await api("/admin/usuarios/" + id + "/resetar-senha", { method: "POST" });
+      const resposta = await api<{ senhaTemporaria: string }>(
+        "/admin/usuarios/" + id + "/resetar-senha",
+        { method: "POST" },
+      );
+      setSenhaTemporaria(resposta.senhaTemporaria);
       load();
     } catch (e) {
       setErro((e as Error).message);
@@ -37,6 +45,12 @@ export function Users() {
   return (
     <>
       {erro && <div className="alert error">{erro}</div>}
+      {senhaTemporaria && (
+        <div className="alert success">
+          Senha temporária gerada: <code>{senhaTemporaria}</code>. Entregue-a ao
+          usuário por canal seguro; ela será exibida somente agora.
+        </div>
+      )}
       <div className="toolbar">
         <div>
           <h2>Acessos do sistema</h2>

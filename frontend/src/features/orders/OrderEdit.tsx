@@ -44,7 +44,8 @@ export function OrderEdit({
     <form className="card compact-form" onSubmit={submit}>
       <h2>Editar OS</h2>
       <p className="os-edit-hint">
-        Atualize o atendimento e use “Editar dados da OS” para completar os campos que aparecem na via impressa.
+        Atualize o atendimento e use “Editar dados da OS” para completar os
+        campos que aparecem na via impressa.
       </p>
       <label>
         Status

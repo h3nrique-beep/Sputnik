@@ -26,6 +26,8 @@ public final class ApiMapper {
     public static UsuarioDto usuarioDto(UsuarioAutenticado usuario) {
         return new UsuarioDto(
                 usuario.usuarioId(),
+                usuario.empresaId(),
+                usuario.empresaNome(),
                 usuario.nomeExibicao(),
                 usuario.perfil().name(),
                 usuario.permissoes().stream().map(Enum::name).toList(),
@@ -67,6 +69,9 @@ public final class ApiMapper {
                 ordem.getId(),
                 ordem.getStatus(),
                 ordem.getAbertura(),
+                ordem.getAgendamento(),
+                ordem.getRetornoEm(),
+                ordem.getGarantiaAte(),
                 ordem.getQuilometragemAbertura(),
                 ordem.getDescricao(),
                 clienteDto(ordem.getCliente()),

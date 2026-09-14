@@ -2,6 +2,7 @@ package br.edu.fag.sputnik.domain;
 
 /** Estados permitidos para o ciclo de vida de uma ordem de serviço. */
 public enum StatusOrdemServico {
+    ORCAMENTO("Orçamento"),
     ABERTA("Aberta"),
     EM_ANDAMENTO("Em andamento"),
     AGUARDANDO_PECA("Aguardando peça"),
@@ -20,5 +21,9 @@ public enum StatusOrdemServico {
 
     public boolean encerraAtendimento() {
         return this == CONCLUIDA || this == CANCELADA;
+    }
+
+    public boolean ehOrcamento() {
+        return this == ORCAMENTO;
     }
 }

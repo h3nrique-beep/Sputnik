@@ -3,6 +3,7 @@ package br.edu.fag.sputnik.controller.api;
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.usuarioSistemaDto;
 
 import br.edu.fag.sputnik.auth.UsuarioService;
+import br.edu.fag.sputnik.auth.SessaoAutenticacao;
 import br.edu.fag.sputnik.controller.api.mapper.ApiMapper;
 import br.edu.fag.sputnik.service.AutorizacaoService;
 import br.edu.fag.sputnik.web.UsuarioCadastroForm;
@@ -38,7 +39,7 @@ public class UsuariosApiController extends ApiSupport {
     public ResponseEntity<?> usuarios(HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         return ResponseEntity.ok(
-                usuarios.listar().stream().map(ApiMapper::usuarioSistemaDto).toList());
+                usuarios.listar(empresaId(session)).stream().map(ApiMapper::usuarioSistemaDto).toList());
     }
 
     @PostMapping("/admin/usuarios")
@@ -47,7 +48,7 @@ public class UsuariosApiController extends ApiSupport {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(usuarioSistemaDto(usuarios.cadastrar(form)));
+                    .body(usuarioSistemaDto(usuarios.cadastrar(form, empresaId(session))));
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
         }
@@ -58,7 +59,7 @@ public class UsuariosApiController extends ApiSupport {
             @PathVariable Long id, @RequestBody UsuarioPermissoesForm form, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         try {
-            usuarios.atualizarPermissoes(id, form.getPermissoes());
+            usuarios.atualizarPermissoes(id, form.getPermissoes(), empresaId(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
@@ -69,8 +70,7 @@ public class UsuariosApiController extends ApiSupport {
     public ResponseEntity<?> resetarSenha(@PathVariable Long id, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         try {
-            usuarios.resetarSenhaBalconista(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(Map.of("senhaTemporaria", usuarios.resetarSenhaBalconista(id, empresaId(session))));
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
         }
@@ -80,10 +80,14 @@ public class UsuariosApiController extends ApiSupport {
     public ResponseEntity<?> excluirUsuario(@PathVariable Long id, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         try {
-            usuarios.excluirBalconista(id);
+            usuarios.excluirBalconista(id, empresaId(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
         }
+    }
+
+    private Long empresaId(HttpSession session) {
+        return SessaoAutenticacao.usuario(session).map(usuario -> usuario.empresaId()).orElse(null);
     }
 }

@@ -23,6 +23,10 @@ public class OrdemServicoForm {
     private String descricao;
 
     @NotNull @PositiveOrZero private Integer quilometragemAtual;
+    private boolean orcamento;
+    private java.time.LocalDateTime agendamento;
+    private java.time.LocalDate retornoEm;
+    private java.time.LocalDate garantiaAte;
 
     public Long getClienteId() {
         return clienteId;
@@ -55,4 +59,25 @@ public class OrdemServicoForm {
     public void setQuilometragemAtual(Integer quilometragemAtual) {
         this.quilometragemAtual = quilometragemAtual;
     }
+
+    public boolean isOrcamento() {
+        return orcamento;
+    }
+
+    public void setOrcamento(boolean orcamento) {
+        this.orcamento = orcamento;
+    }
+
+    public java.time.LocalDateTime getAgendamento() {
+        return agendamento;
+    }
+
+    public void setAgendamento(java.time.LocalDateTime agendamento) {
+        this.agendamento = agendamento;
+    }
+
+    public java.time.LocalDate getRetornoEm() { return retornoEm; }
+    public void setRetornoEm(java.time.LocalDate retornoEm) { this.retornoEm = retornoEm; }
+    public java.time.LocalDate getGarantiaAte() { return garantiaAte; }
+    public void setGarantiaAte(java.time.LocalDate garantiaAte) { this.garantiaAte = garantiaAte; }
 }

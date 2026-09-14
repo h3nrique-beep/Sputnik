@@ -182,4 +182,9 @@ public class EstoqueService {
             Long ordemId, String descricao, BigDecimal valor, String responsavel) {
         ordensService.adicionarServicoNaOrdem(ordemId, descricao, valor, responsavel);
     }
+
+    @Transactional
+    public void aprovarOrcamento(Long ordemId, String responsavel) {
+        ordensService.aprovarOrcamento(ordemId, responsavel);
+    }
 }

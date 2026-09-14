@@ -2,11 +2,17 @@ import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 import { type User } from "../../types/domain";
 
+const selfSignupEnabled = import.meta.env.VITE_SELF_SIGNUP_ENABLED === "true";
+
 export function Login({ onLogin }: { onLogin: (u: User) => void }) {
   const [acesso, setAcesso] = useState(""),
     [senha, setSenha] = useState(""),
     [erro, setErro] = useState(""),
     [mostrar, setMostrar] = useState(false),
+    [cadastro, setCadastro] = useState(false),
+    [empresaNome, setEmpresaNome] = useState(""),
+    [slug, setSlug] = useState(""),
+    [nomeAdministrador, setNomeAdministrador] = useState(""),
     [entrando, setEntrando] = useState(false);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -15,9 +21,19 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
     setEntrando(true);
     try {
       onLogin(
-        await api<User>("/auth/login", {
+        await api<User>(cadastro ? "/assinaturas/cadastro" : "/auth/login", {
           method: "POST",
-          body: JSON.stringify({ acesso, senha }),
+          body: JSON.stringify(
+            cadastro
+              ? {
+                  empresaNome,
+                  slug: slug.toLowerCase(),
+                  nomeAdministrador,
+                  email: acesso,
+                  senha,
+                }
+              : { acesso, senha },
+          ),
         }),
       );
     } catch (e) {
@@ -60,11 +76,48 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
               <small>Gestão de Oficina</small>
             </span>
           </div>
-          <h2>Acesse sua conta</h2>
-          <p>Entre com seu e-mail ou usuário para continuar.</p>
+          <h2>{cadastro ? "Crie sua conta" : "Acesse sua conta"}</h2>
+          <p>
+            {cadastro
+              ? "Comece seu teste de 14 dias no plano Starter."
+              : "Entre com seu e-mail ou usuário para continuar."}
+          </p>
           {erro && <div className="alert error">{erro}</div>}
+          {cadastro && (
+            <>
+              <label>
+                Nome da oficina
+                <input
+                  required
+                  value={empresaNome}
+                  onChange={(e) => setEmpresaNome(e.target.value)}
+                />
+              </label>
+              <label>
+                Endereço da empresa
+                <input
+                  required
+                  value={slug}
+                  onChange={(e) =>
+                    setSlug(
+                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                    )
+                  }
+                  placeholder="minha-oficina"
+                />
+              </label>
+              <label>
+                Seu nome
+                <input
+                  required
+                  value={nomeAdministrador}
+                  onChange={(e) => setNomeAdministrador(e.target.value)}
+                />
+              </label>
+            </>
+          )}
           <label>
-            E-mail ou usuário
+            {cadastro ? "E-mail" : "E-mail ou usuário"}
             <input
               placeholder="Informe seu acesso"
               value={acesso}
@@ -89,8 +142,26 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
             </span>
           </label>
           <button className="primary" disabled={entrando}>
-            {entrando ? "Entrando..." : "Entrar no sistema"}
+            {entrando
+              ? "Aguarde..."
+              : cadastro
+                ? "Criar conta de teste"
+                : "Entrar no sistema"}
           </button>
+          {selfSignupEnabled && (
+            <button
+              type="button"
+              className="link mt-3"
+              onClick={() => {
+                setCadastro(!cadastro);
+                setErro("");
+              }}
+            >
+              {cadastro
+                ? "Já tenho uma conta"
+                : "Criar conta para minha oficina"}
+            </button>
+          )}
         </form>
       </section>
     </div>

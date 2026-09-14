@@ -1,6 +1,7 @@
 package br.edu.fag.sputnik.controller.api;
 
 import br.edu.fag.sputnik.controller.api.mapper.ApiMapper;
+import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.service.AutorizacaoService;
 import br.edu.fag.sputnik.service.EstoqueService;
 
@@ -27,6 +28,10 @@ public class DashboardApiController extends ApiSupport {
     @GetMapping("/dashboard")
     public ResponseEntity<?> dashboard(HttpSession session) {
         if (!autorizacao.estaLogado(session)) return naoAutorizado();
+        if (!temAcesso(session, PermissaoModulo.PECAS)
+                && !temAcesso(session, PermissaoModulo.ORDENS)
+                && !temAcesso(session, PermissaoModulo.RELATORIO_MENSAL)
+                && !temAcesso(session, PermissaoModulo.REPOSICAO)) return proibido();
         Map<String, Object> resposta = new LinkedHashMap<>();
         resposta.put("pecas", estoque.listar("").size());
         resposta.put("ordensAbertas", estoque.ordensAbertas());

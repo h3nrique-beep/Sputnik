@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class OrdemServico {
     private Integer quilometragemAbertura;
 
     private LocalDateTime ultimaAtualizacao;
+
+    private LocalDateTime agendamento;
+    private LocalDate retornoEm;
+    private LocalDate garantiaAte;
 
     @Embedded private DadosDocumentoOs documento;
 
@@ -109,6 +114,19 @@ public class OrdemServico {
     public void setUltimaAtualizacao(LocalDateTime ultimaAtualizacao) {
         this.ultimaAtualizacao = ultimaAtualizacao;
     }
+
+    public LocalDateTime getAgendamento() {
+        return agendamento;
+    }
+
+    public void setAgendamento(LocalDateTime agendamento) {
+        this.agendamento = agendamento;
+    }
+
+    public LocalDate getRetornoEm() { return retornoEm; }
+    public void setRetornoEm(LocalDate retornoEm) { this.retornoEm = retornoEm; }
+    public LocalDate getGarantiaAte() { return garantiaAte; }
+    public void setGarantiaAte(LocalDate garantiaAte) { this.garantiaAte = garantiaAte; }
 
     public List<ItemOrdemServico> getItens() {
         return itens;

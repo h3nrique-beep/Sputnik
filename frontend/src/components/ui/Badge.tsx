@@ -9,5 +9,7 @@ export function Badge({ status }: { status: string }) {
       : normalized.includes("CANCEL")
         ? "destructive"
         : "default";
-  return <ShadcnBadge variant={variant}>{status.replaceAll("_", " ")}</ShadcnBadge>;
+  return (
+    <ShadcnBadge variant={variant}>{status.replaceAll("_", " ")}</ShadcnBadge>
+  );
 }

@@ -59,6 +59,77 @@
 .module-shell .toolbar {
   margin-bottom: 20px;
 }
+/* O cabeçalho principal já nomeia o módulo; evita repetir título e descrição dentro dele. */
+.content > .module-shell > .toolbar > div:first-child {
+  display: none;
+}
+.content > .module-shell > .toolbar {
+  justify-content: flex-end;
+}
+.nav-toggle {
+  align-items: center;
+  background: #1b2a49;
+  border: 1px solid #344566;
+  border-radius: 8px;
+  color: #dce7ff;
+  cursor: pointer;
+  display: grid;
+  font-size: 22px;
+  height: 32px;
+  margin: -16px 8px 16px auto;
+  place-items: center;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+  width: 32px;
+}
+.nav-toggle:hover {
+  background: #2b416f;
+}
+.shell.menu-recolhido {
+  grid-template-columns: 76px 1fr;
+}
+.shell.menu-recolhido aside {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.shell.menu-recolhido .brand {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+.shell.menu-recolhido .brand > span,
+.shell.menu-recolhido .nav-label,
+.shell.menu-recolhido .profile div,
+.shell.menu-recolhido .profile button {
+  display: none;
+}
+.shell.menu-recolhido .nav-toggle {
+  margin-right: auto;
+  transform: rotate(180deg);
+}
+.shell.menu-recolhido nav button {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+.shell.menu-recolhido .profile {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+@media (max-width: 950px) {
+  .nav-toggle {
+    display: none;
+  }
+  .shell.menu-recolhido {
+    grid-template-columns: 1fr;
+  }
+  .shell.menu-recolhido .brand > span,
+  .shell.menu-recolhido .nav-label {
+    display: inline;
+  }
+}
 .metric-grid-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }

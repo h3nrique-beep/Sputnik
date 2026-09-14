@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /** Administração de contas de Balconista e das permissões de módulos. */
 @Controller
@@ -115,13 +116,14 @@ public class UsuarioAdminController {
     }
 
     @PostMapping("/admin/usuarios/{id}/resetar-senha")
-    public String resetarSenha(@PathVariable Long id, HttpSession session) {
+    public String resetarSenha(
+            @PathVariable Long id, HttpSession session, RedirectAttributes atributos) {
         if (!autorizacao.ehAdministrador(session)) {
             return autorizacao.redirecionarSemAcesso(session);
         }
 
         try {
-            usuarios.resetarSenhaBalconista(id);
+            atributos.addFlashAttribute("senhaTemporaria", usuarios.resetarSenhaBalconista(id));
             return "redirect:/admin/usuarios?sucesso=senhaResetada";
         } catch (IllegalArgumentException exception) {
             return "redirect:/admin/usuarios?erro=usuario";

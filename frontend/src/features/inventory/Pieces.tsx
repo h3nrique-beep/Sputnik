@@ -1,26 +1,20 @@
-import { useEffect, useState } from "react";
 import { Button, Table } from "../../components/ui";
-import { api } from "../../lib/api";
+import { useSearchList } from "../../hooks/useSearchList";
 import { money } from "../../lib/format";
 import { type Piece } from "../../types/domain";
 
 export function Pieces({ go }: { go: (v: string) => void }) {
-  const [items, setItems] = useState<Piece[]>([]);
-  const [query, setQuery] = useState("");
-  useEffect(() => {
-    api<Piece[]>("/pecas?busca=" + encodeURIComponent(query)).then(setItems);
-  }, [query]);
+  const { items, query, setQuery } = useSearchList<Piece>("/pecas");
   return (
-    <>
+    <div className="module-shell space-y-5">
       <div className="toolbar">
         <input
+          aria-label="Buscar peças"
           placeholder="Buscar por nome ou código"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button onClick={() => go("pieces-new")}>
-          ＋ Nova peça
-        </Button>
+        <Button onClick={() => go("pieces-new")}>＋ Nova peça</Button>
       </div>
       <Table
         headers={[
@@ -40,6 +34,6 @@ export function Pieces({ go }: { go: (v: string) => void }) {
           p.locacao,
         ])}
       />
-    </>
+    </div>
   );
 }

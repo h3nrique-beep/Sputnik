@@ -153,4 +153,15 @@ public class OrdensApiController extends ApiSupport {
             return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
         }
     }
+
+    @PostMapping("/ordens/{id}/aprovar")
+    public ResponseEntity<?> aprovarOrcamento(@PathVariable Long id, HttpSession session) {
+        if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
+        try {
+            estoque.aprovarOrcamento(id, operador(session));
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+        }
+    }
 }

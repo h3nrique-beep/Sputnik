@@ -4,13 +4,22 @@ import { type Client, type Vehicle } from "../../types/domain";
 import { type OrderDocumentData } from "../../types/order-document";
 import { OrderDocumentFields } from "./components/OrderDocumentFields";
 
-export function OrderCreate({ done }: { done: () => void }) {
+export function OrderCreate({
+  done,
+  asQuote = false,
+}: {
+  done: () => void;
+  asQuote?: boolean;
+}) {
   const [documento, setDocumento] = useState<OrderDocumentData>({});
   const [clients, setClients] = useState<Client[]>([]),
     [vehicles, setVehicles] = useState<Vehicle[]>([]),
     [client, setClient] = useState<number>(),
     [vehicle, setVehicle] = useState<number>(),
     [km, setKm] = useState(""),
+    [agendamento, setAgendamento] = useState(""),
+    [retornoEm, setRetornoEm] = useState(""),
+    [garantiaAte, setGarantiaAte] = useState(""),
     [descricao, setDescricao] = useState(""),
     [erro, setErro] = useState("");
   useEffect(() => {
@@ -29,6 +38,10 @@ export function OrderCreate({ done }: { done: () => void }) {
           veiculoId: vehicle,
           quilometragemAtual: Number(km),
           descricao,
+          orcamento: asQuote,
+          agendamento: agendamento || null,
+          retornoEm: retornoEm || null,
+          garantiaAte: garantiaAte || null,
         }),
       });
       done();
@@ -38,7 +51,13 @@ export function OrderCreate({ done }: { done: () => void }) {
   };
   return (
     <form className="form-card" onSubmit={submit}>
-      <h2>Abrir atendimento</h2>
+      <h2>{asQuote ? "Novo orçamento" : "Abrir atendimento"}</h2>
+      {asQuote && (
+        <p>
+          Inclua os itens previstos. O estoque só será baixado quando o cliente
+          aprovar.
+        </p>
+      )}
       {erro && <div className="alert error">{erro}</div>}
       <label>
         Cliente
@@ -85,6 +104,30 @@ export function OrderCreate({ done }: { done: () => void }) {
         />
       </label>
       <label>
+        Agendamento (opcional)
+        <input
+          type="datetime-local"
+          value={agendamento}
+          onChange={(e) => setAgendamento(e.target.value)}
+        />
+      </label>
+      <label>
+        Retorno preventivo
+        <input
+          type="date"
+          value={retornoEm}
+          onChange={(e) => setRetornoEm(e.target.value)}
+        />
+      </label>
+      <label>
+        Garantia até
+        <input
+          type="date"
+          value={garantiaAte}
+          onChange={(e) => setGarantiaAte(e.target.value)}
+        />
+      </label>
+      <label>
         Descrição
         <textarea
           required
@@ -93,7 +136,9 @@ export function OrderCreate({ done }: { done: () => void }) {
         />
       </label>
       <OrderDocumentFields value={documento} onChange={setDocumento} />
-      <button className="primary">Abrir ordem de serviço</button>
+      <button className="primary">
+        {asQuote ? "Criar orçamento" : "Abrir ordem de serviço"}
+      </button>
     </form>
   );
 }
