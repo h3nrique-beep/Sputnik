@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-public class LancamentoFinanceiro {
+public class LancamentoFinanceiro extends EntidadeDaEmpresa {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated(EnumType.STRING) @Column(nullable = false)

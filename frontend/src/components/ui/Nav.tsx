@@ -5,7 +5,7 @@ export function Nav({
   onClick,
 }: {
   label: string;
-  icon?: string;
+  icon?: ReactNode;
   active: boolean;
   onClick: () => void;
 }) {
@@ -20,3 +20,4 @@ export function Nav({
     </button>
   );
 }
+import { type ReactNode } from "react";

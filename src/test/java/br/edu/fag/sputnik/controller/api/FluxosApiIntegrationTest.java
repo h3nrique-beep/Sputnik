@@ -227,6 +227,44 @@ class FluxosApiIntegrationTest {
     }
 
     @Test
+    void empresaDaSessaoIsolaDadosOperacionais() throws Exception {
+        SessaoAutenticacao.iniciar(
+                session,
+                new UsuarioAutenticado(
+                        11L, 101L, "Oficina A", "Admin A", Perfil.ADMIN, Set.of(), false));
+        token = csrf.obterOuCriar(session);
+        long pecaEmpresaA = id(
+                enviar(
+                                "/pecas",
+                                """
+{"codigo":"TENANT-A","nome":"Peça da empresa A","fabricante":"Teste",
+ "categoria":"Teste","fornecedor":"Teste","localizacao":"A1","preco":10,
+ "saldo":1,"estoqueDisponivel":1,"estoqueMinimo":0}
+""")
+                        .andExpect(status().isCreated()));
+
+        MockHttpSession outraEmpresa = new MockHttpSession();
+        SessaoAutenticacao.iniciar(
+                outraEmpresa,
+                new UsuarioAutenticado(
+                        12L, 202L, "Oficina B", "Admin B", Perfil.ADMIN, Set.of(), false));
+        mvc.perform(get("/api/pecas").session(outraEmpresa))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.codigo == 'TENANT-A')]").isEmpty());
+        mvc.perform(
+                        post("/api/movimentacoes")
+                                .session(outraEmpresa)
+                                .header("X-CSRF-Token", csrf.obterOuCriar(outraEmpresa))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"pecaId\":" + pecaEmpresaA + ",\"tipo\":\"SAIDA\",\"quantidade\":1}"))
+                .andExpect(status().isBadRequest());
+
+        mvc.perform(get("/api/pecas").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.codigo == 'TENANT-A')]").exists());
+    }
+
+    @Test
     void saidaSemSaldoNaoAlteraEstoque() throws Exception {
         long peca = peca();
         enviar("/movimentacoes", "{\"pecaId\":" + peca + ",\"tipo\":\"SAIDA\",\"quantidade\":11}")

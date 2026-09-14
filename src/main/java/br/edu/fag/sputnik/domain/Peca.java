@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "pecas", uniqueConstraints = @UniqueConstraint(columnNames = "codigo"))
-public class Peca {
+public class Peca extends EntidadeDaEmpresa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

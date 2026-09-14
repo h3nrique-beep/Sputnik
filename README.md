@@ -25,7 +25,7 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 ### Financeiro e gestão
 
 - Lançamentos de receitas e despesas, vencimentos, vínculo opcional com OS e baixa de pagamentos.
-- Indicadores de contas a receber, a pagar, recebido e rentabilidade por OS.
+- Indicadores de contas a receber, a pagar, recebido e rentabilidade por OS, filtráveis por mês, próximos 30 dias ou histórico.
 - Painel operacional com métricas, itens críticos, atendimentos e indicadores de estoque.
 - Console administrativo com diagnóstico do ambiente e backups locais.
 
@@ -36,6 +36,7 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 - Administração de usuários e permissões por módulo: **Peças**, **Ordens de serviço**, **Relatório mensal**, **Financeiro** e **Reposição**.
 - Perfil financeiro isolado: acessa somente os lançamentos financeiros, sem acesso ao painel operacional.
 - Menu lateral recolhível, com preferência preservada após atualizar a página.
+- Dados operacionais separados pela empresa da sessão para clientes, veículos, peças, movimentações, OS e lançamentos financeiros.
 
 ## Stack
 
@@ -117,9 +118,9 @@ Os testes usam H2 em memória. Os dados locais da aplicação são gravados em `
 
 ## Multiempresa e assinaturas
 
-O projeto possui a base de empresas, planos e assinatura para a evolução SaaS. Por segurança, o cadastro público de empresas permanece desabilitado por padrão até que todos os dados operacionais estejam isolados por empresa.
+O Sputnik possui empresas, planos e assinaturas como base para a oferta SaaS. A empresa da sessão é aplicada aos registros operacionais e novos registros recebem automaticamente o identificador da empresa atual. Na atualização, registros legados são associados à primeira empresa existente para preservar a continuidade local.
 
-Não habilite `SPUTNIK_SAAS_SELF_SIGNUP_ENABLED=true` em produção antes de concluir essa separação de dados.
+O cadastro público continua **desativado por padrão** (`SPUTNIK_SAAS_SELF_SIGNUP_ENABLED=false`). Antes de ativá-lo em produção, use PostgreSQL e migrações versionadas, configure observabilidade e revise a capacidade dos planos — passos registrados no plano de evolução.
 
 ## Estrutura do projeto
 
@@ -147,6 +148,7 @@ frontend/src/
 - [Guia de abertura no IntelliJ IDEA](docs/INTELLIJ.md)
 - [Mapa de arquivos e responsabilidades](ARCHITECTURE.md)
 - [Modelo do documento de OS](docs/MODELO-OS.md)
+- [Plano de evolução do produto](docs/PLANO-EVOLUCAO-PRODUTO.md)
 - [Relatório de auditoria de segurança](docs/security-audit/relatorio-auditoria-seguranca.pdf)
 
 ## Segurança

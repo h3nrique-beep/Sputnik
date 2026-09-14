@@ -17,6 +17,7 @@ import br.edu.fag.sputnik.repository.MovimentacaoRepository;
 import br.edu.fag.sputnik.repository.OrdemServicoRepository;
 import br.edu.fag.sputnik.repository.PecaRepository;
 import br.edu.fag.sputnik.repository.VeiculoRepository;
+import br.edu.fag.sputnik.tenant.EmpresaContext;
 import br.edu.fag.sputnik.web.OrdemServicoForm;
 import br.edu.fag.sputnik.web.OrdemServicoEdicaoForm;
 
@@ -199,16 +200,20 @@ public class OrdensService {
     }
 
     public OrdemServico buscarOrdem(Long id) {
-        return ordens.findById(id)
-                .orElseThrow(
-                        () -> new IllegalArgumentException("Ordem de serviço não encontrada."));
+        return EmpresaContext.exigirPertencimento(
+                ordens.findById(id)
+                        .orElseThrow(
+                                () -> new IllegalArgumentException("Ordem de serviço não encontrada.")),
+                "Ordem de serviço não encontrada.");
     }
 
     public List<ItemOrdemServico> itensDaOrdem(Long ordemId) {
+        buscarOrdem(ordemId);
         return itensOrdem.findByOrdemServicoIdOrderByIdDesc(ordemId);
     }
 
     public List<HistoricoOrdemServico> historicoDaOrdem(Long ordemId) {
+        buscarOrdem(ordemId);
         return historicosOrdem.findByOrdemServicoIdOrderByDataDesc(ordemId);
     }
 
@@ -363,17 +368,23 @@ public class OrdensService {
     }
 
     private Peca buscarPeca(Long id) {
-        return pecas.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada."));
+        return EmpresaContext.exigirPertencimento(
+                pecas.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada.")),
+                "Peça não encontrada.");
     }
 
     private Cliente buscarCliente(Long id) {
-        return clientes.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada."));
+        return EmpresaContext.exigirPertencimento(
+                clientes.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada.")),
+                "Pessoa não encontrada.");
     }
 
     private Veiculo buscarVeiculo(Long id) {
-        return veiculos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Carro não encontrado."));
+        return EmpresaContext.exigirPertencimento(
+                veiculos.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Carro não encontrado.")),
+                "Carro não encontrado.");
     }
 }

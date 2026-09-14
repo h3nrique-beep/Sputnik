@@ -27,6 +27,7 @@ const hoje = new Date().toISOString().slice(0, 10);
 export function Finance({ go }: { go: (view: string) => void }) {
   const [entries, setEntries] = useState<Entry[]>(),
     [orders, setOrders] = useState<Order[]>([]);
+  const [period, setPeriod] = useState<"all" | "month" | "next30">("month");
   const [form, setForm] = useState({
     tipo: "RECEITA",
     descricao: "",
@@ -44,8 +45,27 @@ export function Finance({ go }: { go: (view: string) => void }) {
     void load();
     api<Order[]>("/ordens").then(setOrders);
   }, []);
+  const entriesInPeriod = useMemo(() => {
+    const date = new Date();
+    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1)
+      .toISOString()
+      .slice(0, 10);
+    const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 1)
+      .toISOString()
+      .slice(0, 10);
+    const next30 = new Date(date);
+    next30.setDate(date.getDate() + 30);
+    const limit = next30.toISOString().slice(0, 10);
+    return (entries ?? []).filter((entry) =>
+      period === "month"
+        ? entry.vencimento >= monthStart && entry.vencimento < monthEnd
+        : period === "next30"
+          ? entry.vencimento >= hoje && entry.vencimento <= limit
+          : true,
+    );
+  }, [entries, period]);
   const totals = useMemo(() => {
-    const all = entries ?? [];
+    const all = entriesInPeriod;
     const total = (tipo: Entry["tipo"], status: Entry["status"]) =>
       all
         .filter((entry) => entry.tipo === tipo && entry.status === status)
@@ -55,11 +75,11 @@ export function Finance({ go }: { go: (view: string) => void }) {
       pagar: total("DESPESA", "PENDENTE"),
       recebido: total("RECEITA", "PAGO"),
     };
-  }, [entries]);
+  }, [entriesInPeriod]);
   const profitability = useMemo(
     () =>
       Object.values(
-        (entries ?? [])
+        entriesInPeriod
           .filter((entry) => entry.ordemServicoId && entry.status === "PAGO")
           .reduce<
             Record<
@@ -76,7 +96,7 @@ export function Finance({ go }: { go: (view: string) => void }) {
             return acc;
           }, {}),
       ),
-    [entries],
+    [entriesInPeriod],
   );
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -130,6 +150,19 @@ export function Finance({ go }: { go: (view: string) => void }) {
         <Metric label="A receber" value={money(totals.receber) as any} />
         <Metric label="A pagar" value={money(totals.pagar) as any} />
         <Metric label="Recebido" value={money(totals.recebido) as any} />
+      </div>
+      <div className="toolbar compact-toolbar">
+        <p>
+          Indicadores e lista por vencimento: <b>{period === "month" ? "este mês" : period === "next30" ? "próximos 30 dias" : "todo o histórico"}</b>.
+        </p>
+        <label className="field-inline">
+          Período
+          <select value={period} onChange={(event) => setPeriod(event.target.value as typeof period)}>
+            <option value="month">Este mês</option>
+            <option value="next30">Próximos 30 dias</option>
+            <option value="all">Todo o histórico</option>
+          </select>
+        </label>
       </div>
       <Card title="Rentabilidade por OS baixada">
         {profitability.length ? (
@@ -232,7 +265,7 @@ export function Finance({ go }: { go: (view: string) => void }) {
         </Card>
       </div>
       <Card title="Lançamentos">
-        {entries.length ? (
+        {entriesInPeriod.length ? (
           <Table
             headers={[
               "Tipo",
@@ -242,7 +275,7 @@ export function Finance({ go }: { go: (view: string) => void }) {
               "Status",
               "Ação",
             ]}
-            rows={entries.map((entry) => [
+            rows={entriesInPeriod.map((entry) => [
               entry.tipo === "RECEITA" ? "Receita" : "Despesa",
               <span key={entry.id}>
                 {entry.descricao}
@@ -266,7 +299,7 @@ export function Finance({ go }: { go: (view: string) => void }) {
             ])}
           />
         ) : (
-          <Empty text="Nenhum lançamento financeiro cadastrado." />
+          <Empty text="Nenhum lançamento para o período selecionado." />
         )}
       </Card>
     </div>

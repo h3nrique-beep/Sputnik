@@ -8,6 +8,7 @@ import br.edu.fag.sputnik.domain.TipoMovimentacao;
 import br.edu.fag.sputnik.repository.ItemOrdemServicoRepository;
 import br.edu.fag.sputnik.repository.MovimentacaoRepository;
 import br.edu.fag.sputnik.repository.PecaRepository;
+import br.edu.fag.sputnik.tenant.EmpresaContext;
 import br.edu.fag.sputnik.web.MovimentacaoForm;
 
 import jakarta.transaction.Transactional;
@@ -157,8 +158,10 @@ public class PecasService {
     }
 
     private Peca buscarPeca(Long id) {
-        return pecas.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada."));
+        return EmpresaContext.exigirPertencimento(
+                pecas.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada.")),
+                "Peça não encontrada.");
     }
 
     private void validarSaldoParaSaida(MovimentacaoForm formulario, Peca peca) {

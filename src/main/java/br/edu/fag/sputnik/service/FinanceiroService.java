@@ -5,6 +5,7 @@ import br.edu.fag.sputnik.domain.OrdemServico;
 import br.edu.fag.sputnik.domain.StatusLancamentoFinanceiro;
 import br.edu.fag.sputnik.repository.LancamentoFinanceiroRepository;
 import br.edu.fag.sputnik.repository.OrdemServicoRepository;
+import br.edu.fag.sputnik.tenant.EmpresaContext;
 import br.edu.fag.sputnik.web.LancamentoFinanceiroForm;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -37,8 +38,10 @@ public class FinanceiroService {
         lancamento.setVencimento(form.getVencimento());
         lancamento.setCriadoEm(LocalDateTime.now());
         if (form.getOrdemServicoId() != null) {
-            OrdemServico ordem = ordens.findById(form.getOrdemServicoId())
-                    .orElseThrow(() -> new IllegalArgumentException("Ordem de serviço não encontrada."));
+            OrdemServico ordem = EmpresaContext.exigirPertencimento(
+                    ordens.findById(form.getOrdemServicoId())
+                            .orElseThrow(() -> new IllegalArgumentException("Ordem de serviço não encontrada.")),
+                    "Ordem de serviço não encontrada.");
             lancamento.setOrdemServico(ordem);
         }
         return lancamentos.save(lancamento);
@@ -46,8 +49,10 @@ public class FinanceiroService {
 
     @Transactional
     public void baixar(Long id) {
-        LancamentoFinanceiro lancamento = lancamentos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Lançamento financeiro não encontrado."));
+        LancamentoFinanceiro lancamento = EmpresaContext.exigirPertencimento(
+                lancamentos.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Lançamento financeiro não encontrado.")),
+                "Lançamento financeiro não encontrado.");
         if (lancamento.getStatus() == StatusLancamentoFinanceiro.PAGO) {
             throw new IllegalArgumentException("Este lançamento já foi baixado.");
         }

@@ -5,7 +5,7 @@
 O Sputnik utiliza React/TypeScript na interface principal e Spring Boot na API. O Spring entrega o frontend compilado em `/`; as chamadas `/api` passam pelos controladores, serviços e repositórios até o H2. As páginas Thymeleaf anteriores continuam presentes para compatibilidade, incluindo os fluxos de acesso existentes.
 
 ```text
-React (features) → cliente HTTP → /api → serviços → repositórios → H2
+React (features) → cliente HTTP → contexto da empresa → /api → serviços → repositórios → H2
 Thymeleaf (legado) → controladores → EstoqueService → serviços especializados
 ```
 
@@ -14,7 +14,7 @@ Thymeleaf (legado) → controladores → EstoqueService → serviços especializ
 | Pacote | Responsabilidade |
 | --- | --- |
 | `auth` | Login, sessão e autenticação de usuários persistidos. |
-| `config` | Beans técnicos, dados iniciais e migração do estoque disponível. |
+| `config` | Beans técnicos, dados iniciais e migrações locais de dados legados. |
 | `controller` | Páginas Thymeleaf legadas. |
 | `controller/api` | API React: autenticação, dashboard, estoque, cadastros, usuários, desenvolvedor e OS. |
 | `controller/api/dto` | Contratos de requisição e resposta, com validações preservadas. |
@@ -22,13 +22,20 @@ Thymeleaf (legado) → controladores → EstoqueService → serviços especializ
 | `domain` | Entidades JPA e enums que representam o negócio. |
 | `repository` | Interfaces Spring Data JPA para leitura e gravação no H2. |
 | `service` | Regras de negócio, autorização centralizada e preparação dos dados comuns das views. |
+| `tenant` | Contexto da empresa autenticada e filtro de isolamento de dados operacionais. |
 | `web` | Objetos de formulário usados nas telas de movimentação e ordem de serviço. |
 
 ## Inicialização
 
 `SputnikApplication` é o ponto de entrada. A anotação `@SpringBootApplication` ativa a configuração automática do Spring Boot, encontra os componentes e inicia o servidor na porta 8080.
 
-Na primeira inicialização, `DataInitializer` inclui seis peças de demonstração. `DisponivelMigration` preenche o campo `estoqueDisponivel` de registros antigos que ainda não o possuam. `UsuarioInitializer` cria os acessos iniciais caso a base não possua usuários.
+Na primeira inicialização, `DataInitializer` inclui seis peças de demonstração. `DisponivelMigration` preenche o campo `estoqueDisponivel` de registros antigos que ainda não o possuam. `UsuarioInitializer` cria a empresa e o administrador inicial caso a base não possua usuários. `MigracaoMultiempresa` associa os dados locais anteriores à empresa padrão.
+
+## Empresa e isolamento de dados
+
+`EmpresaContextFilter` identifica a empresa do usuário autenticado em cada requisição e ativa o filtro Hibernate `empresaAtual`. Clientes, veículos, peças, movimentações, ordens de serviço e lançamentos financeiros herdam `EntidadeDaEmpresa`: a empresa é atribuída no `@PrePersist` e as consultas da sessão recebem apenas os registros da empresa atual.
+
+O teste de integração `empresaDaSessaoIsolaDadosOperacionais` confirma que uma empresa não lista nem movimenta uma peça cadastrada por outra. Para a implantação SaaS, a expansão dessa cobertura para cada rota, exportação e agregação permanece prevista no [plano de evolução](PLANO-EVOLUCAO-PRODUTO.md).
 
 ## Autenticação e sessão
 
@@ -37,7 +44,7 @@ Na primeira inicialização, `DataInitializer` inclui seis peças de demonstraç
 1. Normaliza o usuário para minúsculas.
 2. Localiza o usuário na tabela `usuarios_sistema`.
 3. Compara a senha informada com o hash BCrypt armazenado.
-4. Retorna um `UsuarioAutenticado` com nome, perfil e módulos permitidos.
+4. Retorna um `UsuarioAutenticado` com empresa, nome, perfil e módulos permitidos.
 
 Quando a autenticação é válida, `SessaoAutenticacao.iniciar` grava esse objeto na `HttpSession`. As páginas consultam essa sessão antes de responder. O logout invalida a sessão inteira.
 
@@ -151,4 +158,4 @@ Os templates antigos ficam em `src/main/resources/templates`, com `static/app.cs
 
 ## Persistência e limitações atuais
 
-O banco H2 é gravado em `data/sputnik`; peças, ordens, usuários e dados complementares do documento sobrevivem ao reinício. Reset de senha, troca obrigatória, edição de permissões e histórico da OS continuam implementados. A refatoração não modifica o esquema ou as regras de persistência.
+O banco H2 é gravado em `data/sputnik`; peças, ordens, usuários e dados complementares do documento sobrevivem ao reinício. Reset de senha, troca obrigatória, edição de permissões e histórico da OS continuam implementados. O Hibernate atualiza localmente o esquema e inclui `empresa_id` nos registros operacionais principais; para produção, a migração deve ser versionada com Flyway e executada em PostgreSQL.

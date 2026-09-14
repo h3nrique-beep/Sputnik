@@ -1,4 +1,17 @@
 import { useEffect, useState } from "react";
+import {
+  BarChart3,
+  CalendarDays,
+  CircleDollarSign,
+  ClipboardList,
+  Cog,
+  LayoutDashboard,
+  PackageSearch,
+  RefreshCw,
+  Settings,
+  UsersRound,
+  Wrench,
+} from "lucide-react";
 import { Nav, Toast } from "../components/ui";
 import { Login } from "../features/auth/Login";
 import { ClientCreate } from "../features/clients/ClientCreate";
@@ -114,7 +127,7 @@ export function App() {
           {dashboardAllowed && (
             <Nav
               label="Visão geral"
-              icon="◫"
+              icon={<LayoutDashboard size={18} />}
               active={view === "dashboard"}
               onClick={() => change("dashboard")}
             />
@@ -122,7 +135,7 @@ export function App() {
           {(allowed("PECAS") || allowed("ORDENS")) && (
             <Nav
               label="Central de cadastros"
-              icon="⌂"
+              icon={<PackageSearch size={18} />}
               active={
                 view === "cadastros" ||
                 view.startsWith("clients") ||
@@ -135,7 +148,7 @@ export function App() {
           {allowed("PECAS") && (
             <Nav
               label="Movimentar estoque"
-              icon="⇄"
+              icon={<RefreshCw size={18} />}
               active={view === "movement"}
               onClick={() => change("movement")}
             />
@@ -143,7 +156,7 @@ export function App() {
           {allowed("ORDENS") && (
             <Nav
               label="Ordens de serviço"
-              icon="☷"
+              icon={<ClipboardList size={18} />}
               active={view.startsWith("orders") || view.startsWith("order-")}
               onClick={() => change("orders")}
             />
@@ -151,7 +164,7 @@ export function App() {
           {allowed("ORDENS") && (
             <Nav
               label="Agenda"
-              icon="◷"
+              icon={<CalendarDays size={18} />}
               active={view === "schedule"}
               onClick={() => change("schedule")}
             />
@@ -159,7 +172,7 @@ export function App() {
           {allowed("RELATORIO_MENSAL") && (
             <Nav
               label="Relatório mensal"
-              icon="▤"
+              icon={<BarChart3 size={18} />}
               active={view === "report"}
               onClick={() => change("report")}
             />
@@ -167,7 +180,7 @@ export function App() {
           {allowed("FINANCEIRO") && (
             <Nav
               label="Financeiro"
-              icon="R$"
+              icon={<CircleDollarSign size={18} />}
               active={view === "finance"}
               onClick={() => change("finance")}
             />
@@ -175,7 +188,7 @@ export function App() {
           {allowed("REPOSICAO") && (
             <Nav
               label="Reposição"
-              icon="!"
+              icon={<Wrench size={18} />}
               active={view === "reposition"}
               onClick={() => change("reposition")}
             />
@@ -184,19 +197,19 @@ export function App() {
             <>
               <Nav
                 label="Usuários"
-                icon="♙"
+                icon={<UsersRound size={18} />}
                 active={view === "users"}
                 onClick={() => change("users")}
               />
               <Nav
                 label="Assinatura"
-                icon="◇"
+                icon={<Settings size={18} />}
                 active={view === "subscription"}
                 onClick={() => change("subscription")}
               />
               <Nav
                 label="Desenvolvedor"
-                icon="⌘"
+                icon={<Cog size={18} />}
                 active={view === "developer"}
                 onClick={() => change("developer")}
               />

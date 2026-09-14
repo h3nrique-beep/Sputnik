@@ -4,6 +4,7 @@ import br.edu.fag.sputnik.domain.Cliente;
 import br.edu.fag.sputnik.domain.Veiculo;
 import br.edu.fag.sputnik.repository.ClienteRepository;
 import br.edu.fag.sputnik.repository.VeiculoRepository;
+import br.edu.fag.sputnik.tenant.EmpresaContext;
 
 import org.springframework.stereotype.Service;
 
@@ -62,12 +63,16 @@ public class CadastrosService {
     }
 
     private Cliente buscarCliente(Long id) {
-        return clientes.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada."));
+        return EmpresaContext.exigirPertencimento(
+                clientes.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada.")),
+                "Pessoa não encontrada.");
     }
 
     private Veiculo buscarVeiculo(Long id) {
-        return veiculos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Carro não encontrado."));
+        return EmpresaContext.exigirPertencimento(
+                veiculos.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Carro não encontrado.")),
+                "Carro não encontrado.");
     }
 }
