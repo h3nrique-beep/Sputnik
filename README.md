@@ -1,65 +1,161 @@
-# Sputnik 2.0 — Gestão de Estoque Automotivo
+# Sputnik 2.0
 
-Aplicação web de gestão de estoque e ordens de serviço para oficina, construída com **React, TypeScript, Java 17, Spring Boot e H2**. As páginas Thymeleaf anteriores permanecem disponíveis.
+> Gestão operacional para oficinas: estoque, atendimento, ordens de serviço e financeiro em uma única aplicação.
 
-## O que está implementado
+O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolvida com **React + TypeScript** no frontend e **Java 17 + Spring Boot + H2** no backend. O projeto combina controle de estoque, cadastros, ordens de serviço, agenda e acompanhamento financeiro, com acesso orientado por permissões.
 
-- Login por **e-mail (Balconista) ou usuário (Admin)** e senha protegida por hash BCrypt, com perfis e permissões persistidos no H2.
-- Área exclusiva do administrador para cadastrar usuários e definir os módulos liberados para cada Balconista.
-- Senha temporária definida pelo Admin e troca obrigatória no primeiro acesso do Balconista, com política de senha forte.
-- Cadastro de peças com validação e bloqueio de código duplicado (RN02).
-- Consulta por nome, código ou fabricante e filtros de itens críticos/zerados.
-- Entrada e saída de estoque, com bloqueio de saldo negativo (RN03/RN05).
-- Histórico auditável: operador, data, quantidade, saldo após a operação e observação.
-- Relatório de reposição e exportação CSV.
-- Banco H2 persistente em `data/sputnik`.
-- Clientes e veículos vinculados, abertura e edição de OS, status, itens, totais e histórico.
-- Documento A4 de OS com dados complementares em modal, impressão e download em PDF.
-- Console administrativo com diagnóstico do ambiente e backups.
+## Principais recursos
 
-## Documentação
+### Operação da oficina
 
-- [Arquitetura e lógica do sistema](docs/ARQUITETURA.md)
-- [Guia de abertura e execução no IntelliJ IDEA](docs/INTELLIJ.md)
-- [Mapa atual dos arquivos e responsabilidades](ARCHITECTURE.md)
-- [Modelo de documento da OS](docs/MODELO-OS.md)
+- Cadastro centralizado de **clientes, veículos e peças**.
+- Busca rápida por nome, CPF, telefone, placa, chassi, nome ou código da peça.
+- Controle de estoque com entradas, saídas, saldo disponível, estoque mínimo e bloqueio de saldo negativo.
+- Histórico de movimentações com operador, data, observação e saldo resultante.
+- Reposição de itens críticos e exportação CSV.
+
+### Ordens de serviço
+
+- Abertura de OS e orçamentos com cliente, veículo, quilometragem e descrição.
+- Inclusão de peças e serviços, totais automáticos, histórico e acompanhamento por status.
+- Aprovação de orçamento com baixa de estoque somente após a aprovação.
+- Agenda de atendimentos, retornos preventivos e período de garantia.
+- Documento A4 de OS com campos complementares, impressão na própria tela e download em PDF.
+
+### Financeiro e gestão
+
+- Lançamentos de receitas e despesas, vencimentos, vínculo opcional com OS e baixa de pagamentos.
+- Indicadores de contas a receber, a pagar, recebido e rentabilidade por OS.
+- Painel operacional com métricas, itens críticos, atendimentos e indicadores de estoque.
+- Console administrativo com diagnóstico do ambiente e backups locais.
+
+### Acesso e permissões
+
+- Autenticação por usuário ou e-mail, com senha protegida por BCrypt e sessão segura.
+- Primeiro acesso obrigatório com troca de senha e política de senha forte.
+- Administração de usuários e permissões por módulo: **Peças**, **Ordens de serviço**, **Relatório mensal**, **Financeiro** e **Reposição**.
+- Perfil financeiro isolado: acessa somente os lançamentos financeiros, sem acesso ao painel operacional.
+- Menu lateral recolhível, com preferência preservada após atualizar a página.
+
+## Stack
+
+| Camada | Tecnologias |
+| --- | --- |
+| Frontend | React, TypeScript, Vite, Tailwind, shadcn/ui e Recharts |
+| Backend | Java 17, Spring Boot, Spring MVC e Spring Data JPA |
+| Banco de dados | H2 persistente em arquivo |
+| Segurança | BCrypt, sessão HTTP, CSRF e permissões por módulo |
+| Testes | JUnit 5, Spring Boot Test e MockMvc |
+
+## Arquitetura
+
+```text
+React / TypeScript
+        │  /api
+        ▼
+Spring Boot Controllers
+        ▼
+Services (regras de negócio)
+        ▼
+Spring Data JPA
+        ▼
+H2 (data/sputnik)
+```
+
+As páginas Thymeleaf legadas continuam disponíveis para compatibilidade, enquanto a experiência principal é servida pelo frontend React compilado.
 
 ## Como executar
 
-1. Instale o JDK 17 e Maven 3.9+.
-2. Abra o terminal na pasta do projeto.
-3. Execute:
+### Pré-requisitos
+
+- JDK 17+
+- Maven 3.9+
+- Node.js 20+ (somente para alterar ou recompilar o frontend)
+
+### 1. Configure o primeiro administrador
+
+Em um banco vazio, defina uma senha forte com ao menos 12 caracteres, incluindo maiúscula, minúscula, número e símbolo.
+
+```powershell
+$env:SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD = Read-Host "Digite a senha do administrador"
+# Opcional: padrão é "admin"
+$env:SPUTNIK_BOOTSTRAP_ADMIN_USUARIO = "admin"
+```
+
+### 2. Inicie o backend
 
 ```bash
 mvn spring-boot:run
 ```
 
-4. Abra `http://localhost:8080`.
+Abra [http://localhost:8080](http://localhost:8080).
 
-Para atualizar a interface servida na porta 8080, execute `npm run build:java` dentro de `frontend`. Para desenvolvimento com Vite, use `npm run dev`. Os testes Java usam H2 em memória; os dados locais permanecem em `data/`.
+> A conta inicial deve trocar a senha no primeiro acesso. Não existem credenciais padrão no código.
 
-## Estrutura
+### Desenvolvimento do frontend
 
-- `domain`: entidades JPA e enums.
-- `repository`: acesso ao banco de dados.
-- `service`: regras separadas entre peças/estoque, cadastros e ordens; fachada compatível com as chamadas existentes.
-- `controller/api`: API REST separada por área, com DTOs e conversores próprios.
-- `controller`: controladores das páginas legadas.
-- `frontend/src/features`: telas React por funcionalidade.
-- `frontend/src/components/ui`: componentes compartilhados.
-- `frontend/src/styles`: estilos organizados por área, com cascata preservada.
-- `templates`: telas Thymeleaf.
-- `static/app.css`: interface responsiva inspirada no protótipo Sputnik 2.0.
-
-## Primeiro acesso seguro
-
-Em um banco sem usuários, defina uma senha forte exclusivamente no ambiente antes de iniciar a aplicação. Ela precisa ter ao menos 12 caracteres, maiúscula, minúscula, número e símbolo:
-
-```powershell
-$env:SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD = Read-Host "Digite uma senha forte para o primeiro administrador"
-mvn spring-boot:run
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-Opcionalmente, defina `SPUTNIK_BOOTSTRAP_ADMIN_USUARIO` para alterar o login inicial (o padrão é `admin`). A conta inicial é obrigada a trocar a senha no primeiro acesso. Não existem credenciais padrão no código ou na documentação.
+Para gerar os arquivos estáticos servidos pelo Spring Boot:
 
-Os usuários ficam nas tabelas `usuarios_sistema` e `usuario_permissoes` do H2. O administrador pode criar novos usuários pela opção **Usuários** do menu.
+```bash
+cd frontend
+npm run build:java
+```
+
+### Testes
+
+```bash
+mvn test
+```
+
+Os testes usam H2 em memória. Os dados locais da aplicação são gravados em `data/sputnik` e não são enviados ao Git.
+
+## Multiempresa e assinaturas
+
+O projeto possui a base de empresas, planos e assinatura para a evolução SaaS. Por segurança, o cadastro público de empresas permanece desabilitado por padrão até que todos os dados operacionais estejam isolados por empresa.
+
+Não habilite `SPUTNIK_SAAS_SELF_SIGNUP_ENABLED=true` em produção antes de concluir essa separação de dados.
+
+## Estrutura do projeto
+
+```text
+src/main/java/.../
+├── auth/                # autenticação e usuários
+├── controller/api/      # API REST por módulo
+├── domain/              # entidades e enums JPA
+├── repository/          # acesso a dados
+├── service/             # regras de negócio
+└── web/                 # formulários de entrada
+
+frontend/src/
+├── app/                 # composição e navegação
+├── components/          # UI compartilhada e shadcn
+├── features/            # módulos funcionais
+├── hooks/               # hooks reutilizáveis
+├── lib/                 # cliente HTTP e utilitários
+└── styles/              # estilos organizados por área
+```
+
+## Documentação
+
+- [Arquitetura e lógica do sistema](docs/ARQUITETURA.md)
+- [Guia de abertura no IntelliJ IDEA](docs/INTELLIJ.md)
+- [Mapa de arquivos e responsabilidades](ARCHITECTURE.md)
+- [Modelo do documento de OS](docs/MODELO-OS.md)
+- [Relatório de auditoria de segurança](docs/security-audit/relatorio-auditoria-seguranca.pdf)
+
+## Segurança
+
+- Nunca versione senhas, tokens ou arquivos de banco com dados reais.
+- Use variáveis de ambiente para configurações sensíveis.
+- Em produção com HTTPS, configure `SPUTNIK_COOKIE_SECURE=true`.
+- O console H2 é desativado por padrão; habilite-o somente em ambiente local quando necessário.
+
+---
+
+Projeto acadêmico de Engenharia de Software, evoluído como uma base prática de gestão para oficinas.
