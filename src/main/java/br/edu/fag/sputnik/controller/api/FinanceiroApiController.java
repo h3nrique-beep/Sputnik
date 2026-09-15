@@ -29,13 +29,13 @@ public class FinanceiroApiController extends ApiSupport {
     public ResponseEntity<?> criar(@Valid @RequestBody LancamentoFinanceiroForm form, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.FINANCEIRO)) return proibido();
         try { return ResponseEntity.status(HttpStatus.CREATED).body(dto(financeiro.criar(form))); }
-        catch (IllegalArgumentException exception) { return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage())); }
+        catch (IllegalArgumentException exception) { return invalido(exception); }
     }
     @PostMapping("/{id}/baixar")
     public ResponseEntity<?> baixar(@PathVariable Long id, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.FINANCEIRO)) return proibido();
         try { financeiro.baixar(id); return ResponseEntity.noContent().build(); }
-        catch (IllegalArgumentException exception) { return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage())); }
+        catch (IllegalArgumentException exception) { return invalido(exception); }
     }
     private Map<String, Object> dto(LancamentoFinanceiro l) {
         return Map.ofEntries(

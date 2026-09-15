@@ -104,6 +104,78 @@ export function App() {
     "RELATORIO_MENSAL",
     "REPOSICAO",
   ].some(allowed);
+  const menuItems = [
+    dashboardAllowed && {
+      label: "Visão geral",
+      icon: <LayoutDashboard size={18} />,
+      active: view === "dashboard",
+      view: "dashboard",
+    },
+    (allowed("PECAS") || allowed("ORDENS")) && {
+      label: "Central de cadastros",
+      icon: <PackageSearch size={18} />,
+      active:
+        view === "cadastros" ||
+        view.startsWith("clients") ||
+        view.startsWith("vehicles") ||
+        view.startsWith("pieces"),
+      view: "cadastros",
+    },
+    allowed("PECAS") && {
+      label: "Movimentar estoque",
+      icon: <RefreshCw size={18} />,
+      active: view === "movement",
+      view: "movement",
+    },
+    allowed("ORDENS") && {
+      label: "Ordens de serviço",
+      icon: <ClipboardList size={18} />,
+      active: view.startsWith("orders") || view.startsWith("order-"),
+      view: "orders",
+    },
+    allowed("ORDENS") && {
+      label: "Agenda",
+      icon: <CalendarDays size={18} />,
+      active: view === "schedule",
+      view: "schedule",
+    },
+    allowed("RELATORIO_MENSAL") && {
+      label: "Relatório mensal",
+      icon: <BarChart3 size={18} />,
+      active: view === "report",
+      view: "report",
+    },
+    allowed("FINANCEIRO") && {
+      label: "Financeiro",
+      icon: <CircleDollarSign size={18} />,
+      active: view === "finance",
+      view: "finance",
+    },
+    allowed("REPOSICAO") && {
+      label: "Reposição",
+      icon: <Wrench size={18} />,
+      active: view === "reposition",
+      view: "reposition",
+    },
+    user.perfil === "ADMIN" && {
+      label: "Usuários",
+      icon: <UsersRound size={18} />,
+      active: view === "users",
+      view: "users",
+    },
+    user.perfil === "ADMIN" && {
+      label: "Assinatura",
+      icon: <Settings size={18} />,
+      active: view === "subscription",
+      view: "subscription",
+    },
+    user.perfil === "ADMIN" && {
+      label: "Desenvolvedor",
+      icon: <Cog size={18} />,
+      active: view === "developer",
+      view: "developer",
+    },
+  ].filter((item) => item !== false);
   return (
     <div className={`shell${menuRecolhido ? " menu-recolhido" : ""}`}>
       <aside>
@@ -124,97 +196,15 @@ export function App() {
           {menuRecolhido ? "›" : "‹"}
         </button>
         <nav>
-          {dashboardAllowed && (
+          {menuItems.map((item) => (
             <Nav
-              label="Visão geral"
-              icon={<LayoutDashboard size={18} />}
-              active={view === "dashboard"}
-              onClick={() => change("dashboard")}
+              key={item.view}
+              label={item.label}
+              icon={item.icon}
+              active={item.active}
+              onClick={() => change(item.view)}
             />
-          )}
-          {(allowed("PECAS") || allowed("ORDENS")) && (
-            <Nav
-              label="Central de cadastros"
-              icon={<PackageSearch size={18} />}
-              active={
-                view === "cadastros" ||
-                view.startsWith("clients") ||
-                view.startsWith("vehicles") ||
-                view.startsWith("pieces")
-              }
-              onClick={() => change("cadastros")}
-            />
-          )}
-          {allowed("PECAS") && (
-            <Nav
-              label="Movimentar estoque"
-              icon={<RefreshCw size={18} />}
-              active={view === "movement"}
-              onClick={() => change("movement")}
-            />
-          )}
-          {allowed("ORDENS") && (
-            <Nav
-              label="Ordens de serviço"
-              icon={<ClipboardList size={18} />}
-              active={view.startsWith("orders") || view.startsWith("order-")}
-              onClick={() => change("orders")}
-            />
-          )}{" "}
-          {allowed("ORDENS") && (
-            <Nav
-              label="Agenda"
-              icon={<CalendarDays size={18} />}
-              active={view === "schedule"}
-              onClick={() => change("schedule")}
-            />
-          )}{" "}
-          {allowed("RELATORIO_MENSAL") && (
-            <Nav
-              label="Relatório mensal"
-              icon={<BarChart3 size={18} />}
-              active={view === "report"}
-              onClick={() => change("report")}
-            />
-          )}{" "}
-          {allowed("FINANCEIRO") && (
-            <Nav
-              label="Financeiro"
-              icon={<CircleDollarSign size={18} />}
-              active={view === "finance"}
-              onClick={() => change("finance")}
-            />
-          )}{" "}
-          {allowed("REPOSICAO") && (
-            <Nav
-              label="Reposição"
-              icon={<Wrench size={18} />}
-              active={view === "reposition"}
-              onClick={() => change("reposition")}
-            />
-          )}{" "}
-          {user.perfil === "ADMIN" && (
-            <>
-              <Nav
-                label="Usuários"
-                icon={<UsersRound size={18} />}
-                active={view === "users"}
-                onClick={() => change("users")}
-              />
-              <Nav
-                label="Assinatura"
-                icon={<Settings size={18} />}
-                active={view === "subscription"}
-                onClick={() => change("subscription")}
-              />
-              <Nav
-                label="Desenvolvedor"
-                icon={<Cog size={18} />}
-                active={view === "developer"}
-                onClick={() => change("developer")}
-              />
-            </>
-          )}
+          ))}
         </nav>
         <div className="profile">
           <span>{user.nome[0]}</span>

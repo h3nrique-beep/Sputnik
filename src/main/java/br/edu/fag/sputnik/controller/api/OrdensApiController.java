@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api")
 public class OrdensApiController extends ApiSupport {
@@ -60,7 +58,7 @@ public class OrdensApiController extends ApiSupport {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ordemResumo(estoque.abrirOrdem(form, operador(session))));
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -122,7 +120,7 @@ public class OrdensApiController extends ApiSupport {
             estoque.atualizarOrdem(id, form, operador(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -137,7 +135,7 @@ public class OrdensApiController extends ApiSupport {
                     id, form.getPecaId(), form.getQuantidade(), operador(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -150,7 +148,7 @@ public class OrdensApiController extends ApiSupport {
                     id, form.getDescricao(), form.getValor(), operador(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -161,7 +159,7 @@ public class OrdensApiController extends ApiSupport {
             estoque.aprovarOrcamento(id, operador(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 }

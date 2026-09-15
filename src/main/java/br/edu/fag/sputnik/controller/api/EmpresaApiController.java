@@ -20,6 +20,6 @@ public class EmpresaApiController extends ApiSupport {
         var usuario = SessaoAutenticacao.usuario(session).orElse(null);
         if (usuario == null || usuario.perfil() != Perfil.ADMIN || usuario.empresaId() == null) return proibido();
         try { return ResponseEntity.ok(empresas.assinatura(usuario.empresaId())); }
-        catch (IllegalArgumentException exception) { return ResponseEntity.badRequest().body(java.util.Map.of("mensagem", exception.getMessage())); }
+        catch (IllegalArgumentException exception) { return invalido(exception); }
     }
 }

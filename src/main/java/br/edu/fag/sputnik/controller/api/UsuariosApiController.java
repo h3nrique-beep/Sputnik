@@ -50,7 +50,7 @@ public class UsuariosApiController extends ApiSupport {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(usuarioSistemaDto(usuarios.cadastrar(form, empresaId(session))));
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -62,7 +62,7 @@ public class UsuariosApiController extends ApiSupport {
             usuarios.atualizarPermissoes(id, form.getPermissoes(), empresaId(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -72,7 +72,7 @@ public class UsuariosApiController extends ApiSupport {
         try {
             return ResponseEntity.ok(Map.of("senhaTemporaria", usuarios.resetarSenhaBalconista(id, empresaId(session))));
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -83,7 +83,7 @@ public class UsuariosApiController extends ApiSupport {
             usuarios.excluirBalconista(id, empresaId(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 

@@ -47,7 +47,7 @@ public class EstoqueApiController extends ApiSupport {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(pecaDto(estoque.salvar(peca)));
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
@@ -59,7 +59,7 @@ public class EstoqueApiController extends ApiSupport {
             estoque.movimentar(form, operador(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
+            return invalido(exception);
         }
     }
 
