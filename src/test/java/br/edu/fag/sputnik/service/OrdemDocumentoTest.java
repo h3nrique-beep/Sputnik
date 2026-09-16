@@ -67,7 +67,9 @@ class OrdemDocumentoTest {
         item.setValorUnitario(new BigDecimal("45.90"));
         byte[] pdf = service.gerar(o, List.of(item), List.of());
         String text = new String(pdf, Charset.forName("windows-1252"));
-        assertThat(text).startsWith("%PDF-1.4").contains("João", "45,90", "Assinatura", "/Count 1");
+        assertThat(text)
+                .startsWith("%PDF-1.4")
+                .contains("João", "45,90", "Assinatura", "/Count 1", "/Subtype /Image", "/Logo");
         Path directory = Path.of("target", "pdf-qa");
         Files.createDirectories(directory);
         Files.write(directory.resolve("modelo-os.pdf"), pdf);

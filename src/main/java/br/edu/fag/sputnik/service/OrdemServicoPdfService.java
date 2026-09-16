@@ -40,8 +40,9 @@ public class OrdemServicoPdfService {
         Cliente dono = o.getCliente();
         Veiculo v = o.getVeiculo();
         d.box(24, 24, 547, 48, "", List.of());
-        d.text(36, 39, 20, true, "SPUTNIK");
-        d.text(36, 61, 8, false, "GESTÃO DE OFICINA");
+        d.logo(37, 34, 27, 27);
+        d.text(72, 39, 20, true, "SPUTNIK");
+        d.text(72, 61, 8, false, "GESTÃO DE OFICINA");
         d.text(337, 40, 14, true, "ORDEM DE SERVIÇO #" + o.getId());
         d.text(
                 337,

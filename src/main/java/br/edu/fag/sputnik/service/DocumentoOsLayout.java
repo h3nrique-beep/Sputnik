@@ -1,20 +1,28 @@
 package br.edu.fag.sputnik.service;
 
-import java.io.ByteArrayOutputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
+import javax.imageio.ImageIO;
 
 /** Primitivas em pontos A4 compartilhadas por HTML e PDF; excedentes vão para anexos. */
 final class DocumentoOsLayout {
     private static final Charset ENCODING = Charset.forName("windows-1252");
+    private static final Logo LOGO = carregarLogo();
 
     private record Text(double x, double y, double size, boolean bold, String value) {}
 
     private record Line(double x, double y, double endX, double endY) {}
 
+    private record Image(double x, double y, double width, double height) {}
+
+    private record Logo(byte[] bytes, int width, int height) {}
+
     private static final class Page {
         final List<Text> texts = new ArrayList<>();
         final List<Line> lines = new ArrayList<>();
+        final List<Image> images = new ArrayList<>();
     }
 
     private final List<Page> pages = new ArrayList<>();
@@ -31,6 +39,10 @@ final class DocumentoOsLayout {
 
     void line(double x, double y, double endX, double endY) {
         page.lines.add(new Line(x, y, endX, endY));
+    }
+
+    void logo(double x, double y, double width, double height) {
+        page.images.add(new Image(x, y, width, height));
     }
 
     void box(double x, double y, double width, double height, String title, List<String> content) {
@@ -131,6 +143,16 @@ final class DocumentoOsLayout {
                         .append(
                                 "pt;border-top:0.6pt solid #222;border-left:0.6pt solid"
                                         + " #222\"></i>");
+            for (Image image : p.images)
+                h.append("<img src=\"/images/logo.jpg\" alt=\"Sputnik\" style=\"position:absolute;left:")
+                        .append(image.x)
+                        .append("pt;top:")
+                        .append(image.y)
+                        .append("pt;width:")
+                        .append(image.width)
+                        .append("pt;height:")
+                        .append(image.height)
+                        .append("pt;object-fit:contain\">");
             for (Text t : p.texts)
                 h.append("<span style=\"position:absolute;white-space:pre;left:")
                         .append(t.x)
@@ -169,8 +191,20 @@ final class DocumentoOsLayout {
         objects.add(
                 "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding"
                         + " /WinAnsiEncoding >>");
+        boolean usaLogo = pages.stream().anyMatch(p -> !p.images.isEmpty());
+        int objetoLogo = 5 + pages.size() * 2;
         for (Page p : pages) {
             StringBuilder stream = new StringBuilder("0.6 w\n");
+            for (Image image : p.images)
+                stream.append("q ")
+                        .append(image.width)
+                        .append(" 0 0 ")
+                        .append(image.height)
+                        .append(' ')
+                        .append(image.x)
+                        .append(' ')
+                        .append(842 - image.y - image.height)
+                        .append(" cm /Logo Do Q\n");
             for (Line l : p.lines)
                 stream.append(l.x)
                         .append(' ')
@@ -194,7 +228,9 @@ final class DocumentoOsLayout {
                         .append(") Tj ET\n");
             objects.add(
                     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F"
-                            + " 3 0 R /FB 4 0 R >> >> /Contents "
+                            + " 3 0 R /FB 4 0 R >> "
+                            + (p.images.isEmpty() ? "" : "/XObject << /Logo " + objetoLogo + " 0 R >> ")
+                            + ">> /Contents "
                             + (objects.size() + 2)
                             + " 0 R >>");
             objects.add(
@@ -204,12 +240,26 @@ final class DocumentoOsLayout {
                             + stream
                             + "endstream");
         }
+        if (usaLogo) objects.add(null);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         write(out, "%PDF-1.4\n%âãÏÓ\n");
         List<Integer> offsets = new ArrayList<>();
         for (int i = 0; i < objects.size(); i++) {
             offsets.add(out.size());
-            write(out, (i + 1) + " 0 obj\n" + objects.get(i) + "\nendobj\n");
+            if (usaLogo && i + 1 == objetoLogo) {
+                write(
+                        out,
+                        (i + 1)
+                                + " 0 obj\n<< /Type /XObject /Subtype /Image /Width "
+                                + LOGO.width
+                                + " /Height "
+                                + LOGO.height
+                                + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "
+                                + LOGO.bytes.length
+                                + " >>\nstream\n");
+                out.writeBytes(LOGO.bytes);
+                write(out, "\nendstream\nendobj\n");
+            } else write(out, (i + 1) + " 0 obj\n" + objects.get(i) + "\nendobj\n");
         }
         int xref = out.size();
         write(out, "xref\n0 " + (objects.size() + 1) + "\n0000000000 65535 f \n");
@@ -234,5 +284,18 @@ final class DocumentoOsLayout {
 
     private static void write(ByteArrayOutputStream out, String s) {
         out.writeBytes(s.getBytes(ENCODING));
+    }
+
+    private static Logo carregarLogo() {
+        try (InputStream entrada = DocumentoOsLayout.class.getResourceAsStream("/static/images/logo.jpg")) {
+            if (entrada == null) throw new IllegalStateException("Logo Sputnik não encontrada.");
+            byte[] bytes = entrada.readAllBytes();
+            BufferedImage imagem = ImageIO.read(new ByteArrayInputStream(bytes));
+            if (imagem == null || imagem.getColorModel().getNumColorComponents() != 3)
+                throw new IllegalStateException("Logo Sputnik deve ser uma imagem JPEG RGB.");
+            return new Logo(bytes, imagem.getWidth(), imagem.getHeight());
+        } catch (IOException exception) {
+            throw new IllegalStateException("Não foi possível carregar a logo Sputnik.", exception);
+        }
     }
 }
