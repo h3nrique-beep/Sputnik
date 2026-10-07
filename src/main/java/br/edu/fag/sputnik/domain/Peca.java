@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Table(name = "pecas", uniqueConstraints = @UniqueConstraint(columnNames = "codigo"))
 public class Peca extends EntidadeDaEmpresa {
     @Id
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -35,7 +36,7 @@ public class Peca extends EntidadeDaEmpresa {
 
     /** Estoque fisicamente disponível para novas ordens de serviço. */
     @Min(0)
-    private Integer estoqueDisponivel = 0;
+    private Integer estoqueDisponivel;
 
     @NotNull
     @Min(0)

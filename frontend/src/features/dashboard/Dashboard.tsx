@@ -1,300 +1,392 @@
-import { useEffect, useState } from "react";
-import { ClipboardPlus, PackagePlus, Search, Warehouse } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { Button, Card, Empty, Loading, Metric } from "../../components/ui";
-import {
-  CardContent,
-  CardHeader,
-  CardTitle,
-  ShadcnCard,
-} from "../../components/shadcn/card";
-import {
-  ChartContainer,
-  type ChartConfig,
-} from "../../components/shadcn/chart";
+  ArrowRight,
+  Bell,
+  CheckCircle2,
+  ClipboardList,
+  Package,
+  PackagePlus,
+  RefreshCw,
+  Search,
+  TriangleAlert,
+  Warehouse,
+} from "lucide-react";
 import { api } from "../../lib/api";
 import { type Order, type Piece } from "../../types/domain";
 
-export function Dashboard({ go }: { go: (v: string) => void }) {
-  const [data, setData] = useState<any>();
+type DashboardData = {
+  pecas: number;
+  ordensAbertas: number;
+  ordensConcluidasMes: number;
+  criticas: number;
+  porStatus: Record<string, number>;
+  aguardandoPeca: Order[];
+  retornos: Order[];
+  pecasMaisUsadas: Piece[];
+};
+
+const statusName = (status: string) =>
+  status.replaceAll("_", " ").toLocaleLowerCase("pt-BR");
+
+export function Dashboard({
+  go,
+  can,
+}: {
+  go: (view: string) => void;
+  can: (permission: string) => boolean;
+}) {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const notifications = useRef<HTMLElement>(null);
+
+  const refresh = async () => {
+    setRefreshing(true);
+    try {
+      setData(await api<DashboardData>("/dashboard"));
+      setUpdatedAt(new Date());
+      setError("");
+    } catch {
+      setError("Não foi possível atualizar o painel. Tente novamente.");
+    } finally {
+      setRefreshing(false);
+    }
+  };
   useEffect(() => {
-    api<any>("/dashboard").then(setData);
+    void refresh();
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refresh();
+    }, 60_000);
+    return () => window.clearInterval(timer);
   }, []);
-  if (!data) return <Loading />;
-  const statusData = Object.entries(data.porStatus).map(([status, total]) => ({
-    status: status.replaceAll("_", " "),
-    total: Number(total),
-  }));
-  const statusConfig = Object.fromEntries(
-    statusData.map((item, index) => [
-      item.status,
-      {
-        label: item.status,
-        color: ["#2563eb", "#f59e0b", "#10b981", "#ef4444", "#7c3aed"][
-          index % 5
-        ],
-      },
-    ]),
-  ) satisfies ChartConfig;
-  const pieceData = data.pecasMaisUsadas.slice(0, 5).map((piece: Piece) => ({
-    nome: piece.nome,
-    disponivel: piece.disponivel,
-  }));
-  const pieceConfig = {
-    disponivel: { label: "Disponível", color: "#2563eb" },
-  } satisfies ChartConfig;
+
+  if (!data)
+    return (
+      <div className="dashboard-state" role="status">
+        <p>{error || "Carregando visão geral..."}</p>
+        {error && (
+          <button onClick={() => void refresh()}>Tentar novamente</button>
+        )}
+      </div>
+    );
+
+  const statusEntries = Object.entries(data.porStatus).filter(
+    ([, count]) => count > 0,
+  );
+  const maxStatus = Math.max(1, ...statusEntries.map(([, count]) => count));
+  const notificationCount =
+    (data.criticas > 0 ? 1 : 0) +
+    data.aguardandoPeca.length +
+    data.retornos.length;
+  const actions = [
+    can("ORDENS") && {
+      label: "Nova ordem de serviço",
+      view: "orders-new",
+      icon: ClipboardList,
+    },
+    can("PECAS") && {
+      label: "Consultar estoque",
+      view: "pieces",
+      icon: Search,
+    },
+    can("PECAS") && {
+      label: "Cadastrar peça",
+      view: "pieces-new",
+      icon: PackagePlus,
+    },
+    can("PECAS") && {
+      label: "Movimentar estoque",
+      view: "movement",
+      icon: Warehouse,
+    },
+  ].filter((action) => action !== false);
+
   return (
-    <>
-      <div className="restock-banner">
-        <span>!</span>
+    <div className="dashboard">
+      <div className="dashboard-intro">
         <div>
-          <b>{data.criticas} itens exigem reposição</b>
-          <small>Estão abaixo do estoque mínimo configurado.</small>
+          <h2>O que precisa da sua atenção hoje</h2>
+          <p>
+            Disponibilidade de peças e atendimento para decidir o próximo passo.
+          </p>
         </div>
-        <Button size="sm" variant="secondary" onClick={() => go("reposition")}>
-          Ver reposição
-        </Button>
+        <div className="dashboard-toolbar">
+          <span className="dashboard-updated">
+            {updatedAt &&
+              `Atualizado às ${updatedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
+          </span>
+          <button
+            type="button"
+            className="dashboard-icon-button"
+            onClick={() => void refresh()}
+            disabled={refreshing}
+            aria-label="Atualizar painel"
+            title="Atualizar painel"
+          >
+            <RefreshCw size={18} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="dashboard-icon-button dashboard-bell"
+            onClick={() =>
+              notifications.current?.scrollIntoView({ behavior: "smooth" })
+            }
+            aria-label={`Ver notificações: ${notificationCount}`}
+            title="Ver notificações"
+          >
+            <Bell size={18} aria-hidden="true" />
+            {notificationCount > 0 && (
+              <span aria-hidden="true">{notificationCount}</span>
+            )}
+          </button>
+        </div>
       </div>
-      <div className="metrics">
-        <Metric
-          icon="▣"
-          label="Peças cadastradas"
-          value={data.pecas}
-          detail="SKUs ativos no catálogo"
-        />
-        <Metric
-          icon="↗"
-          label="Ordens abertas"
-          value={data.ordensAbertas}
-          detail="Serviços em andamento"
-        />
-        <Metric
-          icon="✓"
-          label="Concluídas no mês"
-          value={data.ordensConcluidasMes}
-          detail="Atendimentos finalizados"
-        />
-        <Metric
-          icon="!"
-          label="Estoque crítico"
-          value={data.criticas}
-          detail="Itens abaixo do mínimo"
-        />
+      {error && (
+        <p className="dashboard-error" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="dashboard-metrics">
+        {[
+          {
+            label: "Peças no catálogo",
+            value: data.pecas,
+            detail: "Itens de estoque automotivo",
+            icon: Package,
+            tone: "blue",
+          },
+          {
+            label: "Ordens em aberto",
+            value: data.ordensAbertas,
+            detail: "Na fila de atendimento",
+            icon: ClipboardList,
+            tone: "blue",
+          },
+          {
+            label: "Concluídas no mês",
+            value: data.ordensConcluidasMes,
+            detail: "Atendimentos finalizados",
+            icon: CheckCircle2,
+            tone: "green",
+          },
+          {
+            label: "Estoque crítico",
+            value: data.criticas,
+            detail: "Itens abaixo do mínimo",
+            icon: TriangleAlert,
+            tone: "amber",
+          },
+        ].map(({ label, value, detail, icon: Icon, tone }) => (
+          <article className={`dashboard-metric tone-${tone}`} key={label}>
+            <span className="dashboard-metric-icon">
+              <Icon size={19} aria-hidden="true" />
+            </span>
+            <span className="dashboard-metric-label">{label}</span>
+            <strong>{value.toLocaleString("pt-BR")}</strong>
+            <small>{detail}</small>
+          </article>
+        ))}
       </div>
-      <section className="mb-6 grid gap-4 lg:grid-cols-5">
-        <ShadcnCard className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Ordens por status</CardTitle>
-            <p className="text-sm text-slate-500">
-              Visão rápida da fila de atendimento atual.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={statusConfig} className="min-h-[260px]">
-              <BarChart
-                accessibilityLayer
-                data={statusData}
-                margin={{ top: 8, right: 8, left: -22, bottom: 8 }}
+      <div className="dashboard-grid">
+        <section
+          className="dashboard-panel"
+          aria-labelledby="dashboard-status-title"
+        >
+          <div className="dashboard-panel-heading">
+            <div>
+              <h3 id="dashboard-status-title">Fila de atendimento</h3>
+              <p>Ordens de serviço por etapa</p>
+            </div>
+            {can("ORDENS") && (
+              <button
+                className="dashboard-text-button"
+                onClick={() => go("orders")}
               >
-                <CartesianGrid vertical={false} stroke="#e2e8f0" />
-                <XAxis
-                  dataKey="status"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={10}
-                  tick={{ fontSize: 10 }}
-                />
-                <YAxis
-                  allowDecimals={false}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "#f8fafc" }}
-                  formatter={(value) => [value, "Ordens"]}
-                />
-                <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                  {statusData.map((item) => (
-                    <Cell
-                      key={item.status}
-                      fill={statusConfig[item.status].color}
+                Ver ordens <ArrowRight size={15} />
+              </button>
+            )}
+          </div>
+          {statusEntries.length ? (
+            <div className="dashboard-status-list">
+              {statusEntries.map(([status, count]) => (
+                <div className="dashboard-status-row" key={status}>
+                  <div>
+                    <span>{statusName(status)}</span>
+                    <strong>{count}</strong>
+                  </div>
+                  <div className="dashboard-status-track">
+                    <span
+                      style={{
+                        width: `${Math.max(6, (count / maxStatus) * 100)}%`,
+                      }}
                     />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </ShadcnCard>
-        <ShadcnCard className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Distribuição da operação</CardTitle>
-            <p className="text-sm text-slate-500">
-              Cada faixa representa um status de OS.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={statusConfig} className="min-h-[260px]">
-              <PieChart>
-                <Tooltip
-                  formatter={(value, _, item) => [value, item.payload.status]}
-                />
-                <Legend
-                  verticalAlign="bottom"
-                  height={34}
-                  wrapperStyle={{ fontSize: 10 }}
-                />
-                <Pie
-                  data={statusData}
-                  dataKey="total"
-                  nameKey="status"
-                  cx="50%"
-                  cy="45%"
-                  innerRadius={48}
-                  outerRadius={78}
-                  paddingAngle={3}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="dashboard-empty">Nenhuma ordem registrada ainda.</p>
+          )}
+        </section>
+        <section
+          className="dashboard-panel dashboard-notifications"
+          ref={notifications}
+          aria-labelledby="dashboard-notifications-title"
+        >
+          <div className="dashboard-panel-heading">
+            <div>
+              <h3 id="dashboard-notifications-title">Notificações</h3>
+              <p>
+                {notificationCount
+                  ? `${notificationCount} ${notificationCount === 1 ? "item precisa" : "itens precisam"} de atenção`
+                  : "Tudo em dia por aqui"}
+              </p>
+            </div>
+            <span className="dashboard-count">{notificationCount}</span>
+          </div>
+          {notificationCount ? (
+            <div className="dashboard-notification-list">
+              {data.criticas > 0 && (
+                <div className="dashboard-notification">
+                  <span className="dashboard-notification-icon tone-amber">
+                    <TriangleAlert size={18} />
+                  </span>
+                  <div>
+                    <strong>
+                      {data.criticas}{" "}
+                      {data.criticas === 1 ? "peça precisa" : "peças precisam"}{" "}
+                      de reposição
+                    </strong>
+                    <small>Estoque abaixo do mínimo</small>
+                  </div>
+                  {(can("REPOSICAO") || can("PECAS")) && (
+                    <button
+                      onClick={() =>
+                        go(can("REPOSICAO") ? "reposition" : "pieces")
+                      }
+                      aria-label={
+                        can("REPOSICAO") ? "Ver reposição" : "Ver estoque"
+                      }
+                    >
+                      <ArrowRight size={17} />
+                    </button>
+                  )}
+                </div>
+              )}
+              {data.aguardandoPeca.map((order) => (
+                <div
+                  className="dashboard-notification"
+                  key={`piece-${order.id}`}
                 >
-                  {statusData.map((item) => (
-                    <Cell
-                      key={item.status}
-                      fill={statusConfig[item.status].color}
-                    />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ChartContainer>
-          </CardContent>
-        </ShadcnCard>
-      </section>
-      <section className="mb-6 grid gap-4 lg:grid-cols-5">
-        <ShadcnCard className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Estoque das peças mais utilizadas</CardTitle>
-            <p className="text-sm text-slate-500">
-              Quantidade disponível dos cinco itens com maior uso.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={pieceConfig} className="min-h-[230px]">
-              <BarChart
-                accessibilityLayer
-                data={pieceData}
-                layout="vertical"
-                margin={{ top: 0, right: 8, left: 18, bottom: 0 }}
-              >
-                <CartesianGrid horizontal={false} stroke="#e2e8f0" />
-                <XAxis
-                  type="number"
-                  allowDecimals={false}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="nome"
-                  width={105}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 10 }}
-                />
-                <Tooltip
-                  cursor={{ fill: "#f8fafc" }}
-                  formatter={(value) => [value, "Disponível"]}
-                />
-                <Bar
-                  dataKey="disponivel"
-                  fill="var(--color-disponivel)"
-                  radius={[0, 6, 6, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </ShadcnCard>
-        <ShadcnCard className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Ações rápidas</CardTitle>
-            <p className="text-sm text-slate-500">
-              Atalhos para as rotinas mais frequentes.
-            </p>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => go("pieces-new")}
-            >
-              <PackagePlus size={16} />
-              Cadastrar peça
-            </Button>
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => go("pieces")}
-            >
-              <Search size={16} />
-              Consultar estoque
-            </Button>
-            <Button
-              variant="outline"
-              className="justify-start"
-              onClick={() => go("movement")}
-            >
-              <Warehouse size={16} />
-              Movimentar estoque
-            </Button>
-            <Button className="justify-start" onClick={() => go("orders-new")}>
-              <ClipboardPlus size={16} />
-              Abrir nova ordem
-            </Button>
-          </CardContent>
-        </ShadcnCard>
-      </section>
-      <div className="cards dashboard-cards">
-        <Card title="Ordens por status">
-          {Object.entries(data.porStatus).map(([s, n]) => (
-            <p key={s}>
-              <span>{s.replace("_", " ")}</span>
-              <b>{String(n)}</b>
-            </p>
-          ))}
-        </Card>
-        <Card title="Alertas">
-          {data.aguardandoPeca.length || data.retornos.length ? (
-            [...data.aguardandoPeca, ...data.retornos].map((o: Order) => (
-              <p key={o.id}>
-                <span>
-                  OS #{o.id} · {o.cliente.nome}
-                </span>
-                <b>{o.status}</b>
-              </p>
-            ))
+                  <span className="dashboard-notification-icon tone-blue">
+                    <Package size={18} />
+                  </span>
+                  <div>
+                    <strong>OS #{order.id} aguardando peça</strong>
+                    <small>{order.cliente.nome}</small>
+                  </div>
+                  {can("ORDENS") && (
+                    <button
+                      onClick={() => go(`order-${order.id}`)}
+                      aria-label={`Abrir OS ${order.id}`}
+                    >
+                      <ArrowRight size={17} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {data.retornos.map((order) => (
+                <div
+                  className="dashboard-notification"
+                  key={`return-${order.id}`}
+                >
+                  <span className="dashboard-notification-icon tone-violet">
+                    <RefreshCw size={18} />
+                  </span>
+                  <div>
+                    <strong>Retorno da OS #{order.id}</strong>
+                    <small>{order.cliente.nome}</small>
+                  </div>
+                  {can("ORDENS") && (
+                    <button
+                      onClick={() => go(`order-${order.id}`)}
+                      aria-label={`Abrir OS ${order.id}`}
+                    >
+                      <ArrowRight size={17} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           ) : (
-            <Empty text="Nenhum alerta no momento." />
+            <p className="dashboard-empty">
+              Nenhum alerta operacional no momento.
+            </p>
           )}
-        </Card>
-        <Card title="Peças mais utilizadas">
-          {data.pecasMaisUsadas.length ? (
-            data.pecasMaisUsadas.map((p: Piece) => (
-              <p key={p.id}>
-                <span>{p.nome}</span>
-                <b>{p.disponivel} disp.</b>
-              </p>
-            ))
-          ) : (
-            <Empty text="Nenhuma peça utilizada ainda." />
-          )}
-        </Card>
+        </section>
       </div>
-    </>
+      <div className="dashboard-grid dashboard-bottom">
+        <section
+          className="dashboard-panel"
+          aria-labelledby="dashboard-pieces-title"
+        >
+          <div className="dashboard-panel-heading">
+            <div>
+              <h3 id="dashboard-pieces-title">Peças mais utilizadas</h3>
+              <p>Disponibilidade dos itens com maior uso</p>
+            </div>
+            {can("PECAS") && (
+              <button
+                className="dashboard-text-button"
+                onClick={() => go("pieces")}
+              >
+                Ver estoque <ArrowRight size={15} />
+              </button>
+            )}
+          </div>
+          {data.pecasMaisUsadas.length ? (
+            <div className="dashboard-piece-list">
+              {data.pecasMaisUsadas.slice(0, 5).map((piece) => (
+                <div key={piece.id}>
+                  <span>{piece.nome}</span>
+                  <strong>{piece.disponivel} disponíveis</strong>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="dashboard-empty">
+              O uso de peças aparecerá aqui após os primeiros atendimentos.
+            </p>
+          )}
+        </section>
+        <section
+          className="dashboard-panel"
+          aria-labelledby="dashboard-actions-title"
+        >
+          <div className="dashboard-panel-heading">
+            <div>
+              <h3 id="dashboard-actions-title">Ações rápidas</h3>
+              <p>Acesse as rotinas mais frequentes</p>
+            </div>
+          </div>
+          <div className="dashboard-action-list">
+            {actions.length ? (
+              actions.map(({ label, view, icon: Icon }) => (
+                <button key={view} onClick={() => go(view)}>
+                  <Icon size={18} aria-hidden="true" />
+                  <span>{label}</span>
+                  <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              ))
+            ) : (
+              <p className="dashboard-empty">
+                Use o menu para acessar seus módulos.
+              </p>
+            )}
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

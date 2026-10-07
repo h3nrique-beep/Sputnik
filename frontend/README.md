@@ -6,9 +6,9 @@ Este diretório contém a nova interface em React + TypeScript. O back-end Sprin
 
 1. Instale o Node.js LTS (inclui o NPM).
 2. Abra um terminal nesta pasta (`frontend`).
-3. Execute `npm install`.
+3. Execute `pnpm install --frozen-lockfile`.
 4. Inicie o back-end Java na porta 8080.
-5. Execute `npm run dev`.
+5. Execute `pnpm run dev`.
 6. Abra `http://localhost:5173`.
 
 Durante o desenvolvimento, o Vite encaminha as chamadas `/api` para o Spring Boot em `http://localhost:8080` e mantém o login por sessão.

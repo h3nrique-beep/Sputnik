@@ -13,9 +13,12 @@ import org.hibernate.annotations.ParamDef;
 @Filter(name = "empresaAtual", condition = "empresa_id = :empresaId")
 public abstract class EntidadeDaEmpresa {
     @Column(name = "empresa_id")
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
     private Long empresaId;
     public Long getEmpresaId() { return empresaId; }
     public void setEmpresaId(Long empresaId) { this.empresaId = empresaId; }
     @PrePersist
-    void definirEmpresaDaRequisicao() { if (empresaId == null) empresaId = EmpresaContext.empresaId(); }
+    void definirEmpresaDaRequisicao() {
+        if (EmpresaContext.empresaId() != null) empresaId = EmpresaContext.empresaId();
+    }
 }

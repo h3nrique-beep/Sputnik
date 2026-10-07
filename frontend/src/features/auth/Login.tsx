@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from "react";
+import { PackageSearch, ClipboardList, RefreshCw } from "lucide-react";
 import { api } from "../../lib/api";
 import { type User } from "../../types/domain";
 
@@ -46,23 +47,32 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
     <div className="login">
       <section className="login-presentation">
         <div className="login-brand">
-          <img src="/images/logo.jpg" />
+          <img src="/images/logo.jpg" alt="" width="42" height="42" />
           <span>
             <b>SPUTNIK</b>
-            <small>Gestão de Oficina</small>
+            <small>Estoque automotivo e oficina</small>
           </span>
         </div>
         <div className="login-message">
           <h1>
-            Gestão de oficina,
+            Seu estoque em dia.
             <br />
-            sem perder o controle.
+            Sua operação no controle.
           </h1>
           <p>Estoque, ordens de serviço e atendimento em um só lugar.</p>
           <ul>
-            <li>Consulta de peças e estoque em segundos</li>
-            <li>Atendimentos organizados por status</li>
-            <li>Histórico e reposição sempre atualizados</li>
+            <li>
+              <PackageSearch size={20} aria-hidden="true" /> Peças,
+              disponibilidade e localização
+            </li>
+            <li>
+              <ClipboardList size={20} aria-hidden="true" /> Ordens de serviço e
+              atendimento
+            </li>
+            <li>
+              <RefreshCw size={20} aria-hidden="true" /> Movimentações,
+              histórico e reposição
+            </li>
           </ul>
         </div>
         <small className="login-footer">Sistema de gestão operacional</small>
@@ -70,10 +80,10 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
       <section className="login-access">
         <form onSubmit={submit}>
           <div className="access-brand">
-            <img src="/images/logo.jpg" />
+            <img src="/images/logo.jpg" alt="" width="42" height="42" />
             <span>
               <b>SPUTNIK</b>
-              <small>Gestão de Oficina</small>
+              <small>Estoque automotivo e oficina</small>
             </span>
           </div>
           <h2>{cadastro ? "Crie sua conta" : "Acesse sua conta"}</h2>
@@ -82,7 +92,11 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
               ? "Comece seu teste de 14 dias no plano Starter."
               : "Entre com seu e-mail ou usuário para continuar."}
           </p>
-          {erro && <div className="alert error">{erro}</div>}
+          {erro && (
+            <div className="alert error" role="alert">
+              {erro}
+            </div>
+          )}
           {cadastro && (
             <>
               <label>
@@ -123,6 +137,7 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
               value={acesso}
               onChange={(e) => setAcesso(e.target.value)}
               required
+              autoComplete="username"
               autoFocus
             />
           </label>
@@ -135,6 +150,7 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
+                autoComplete={cadastro ? "new-password" : "current-password"}
               />
               <button type="button" onClick={() => setMostrar(!mostrar)}>
                 {mostrar ? "Ocultar" : "Mostrar"}
@@ -148,6 +164,12 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
                 ? "Criar conta de teste"
                 : "Entrar no sistema"}
           </button>
+          {!cadastro && (
+            <details className="password-help">
+              <summary>Esqueci minha senha</summary>
+              <p>Peça ao administrador da oficina para redefinir seu acesso.</p>
+            </details>
+          )}
           {selfSignupEnabled && (
             <button
               type="button"

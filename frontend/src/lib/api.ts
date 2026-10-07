@@ -16,16 +16,17 @@ async function obterTokenCsrf() {
 export async function api<T>(url: string, options: RequestInit = {}) {
   const metodo = (options.method || "GET").toUpperCase();
   const requerToken = !["GET", "HEAD", "OPTIONS"].includes(metodo);
-  const enviar = async (token?: string) =>
-    fetch(`/api${url}`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { "X-CSRF-Token": token } : {}),
-        ...(options.headers || {}),
-      },
-      credentials: "include",
+  const enviar = async (token?: string) => {
+    const headers = new Headers(options.headers);
+    if (!headers.has("Content-Type") && !(options.body instanceof FormData))
+      headers.set("Content-Type", "application/json");
+    if (token) headers.set("X-CSRF-Token", token);
+    return fetch(`/api${url}`, {
       ...options,
+      headers,
+      credentials: "include",
     });
+  };
 
   let response = await enviar(requerToken ? await obterTokenCsrf() : undefined);
   if (requerToken && response.status === 403) {

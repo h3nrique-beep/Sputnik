@@ -5,11 +5,19 @@ import { type Order } from "../../types/domain";
 
 export function Orders({ go }: { go: (v: string) => void }) {
   const [items, setItems] = useState<Order[]>([]);
+  const [erro, setErro] = useState("");
   useEffect(() => {
-    api<Order[]>("/ordens").then(setItems);
+    api<Order[]>("/ordens")
+      .then(setItems)
+      .catch((e: Error) => setErro(e.message));
   }, []);
   return (
     <div className="module-shell space-y-5">
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <div className="toolbar">
         <div>
           <h2>Atendimentos</h2>

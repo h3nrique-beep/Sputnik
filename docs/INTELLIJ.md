@@ -21,7 +21,7 @@ O sistema abre em `http://localhost:8080`.
 
 O projeto contém `spring-boot-devtools`. Ao salvar classes Java compiladas ou recursos como HTML e CSS, o Spring Boot atualiza a aplicação. Caso uma alteração de Java não apareça automaticamente, use **Build → Build Project** e atualize o navegador.
 
-Para alterações React, execute `npm run build:java` no terminal em `frontend`. Esse comando verifica os tipos, gera o bundle e sincroniza os recursos do Spring. Use `npm run dev` para trabalhar com o Vite durante o desenvolvimento.
+Para alterações React, execute `pnpm run build:java` no terminal em `frontend`. Esse comando verifica os tipos, gera o bundle e sincroniza os recursos do Spring. Use `pnpm run dev` para trabalhar com o Vite durante o desenvolvimento.
 
 ## Estrutura que deve aparecer no painel Project
 
@@ -54,7 +54,7 @@ A API utilizada pelo React está em `controller/api`. Os tipos de resposta ficam
 
 A configuração local do módulo aponta para `sputnik.iml` e para o `pom.xml` deste projeto. Se o IntelliJ estiver aberto com uma árvore antiga, use **Reload All Maven Projects** na janela Maven. O Maven recompõe suas dependências ao importar o projeto. Não execute uma segunda instância se a porta 8080 já estiver ocupada.
 
-`target`, `frontend/node_modules`, `frontend/.node`, `frontend/dist`, `data`, `backups` e `logs` estão excluídos da indexação do módulo. Permanecem no disco; não são fontes para edição. Java usa quatro espaços e TypeScript/CSS, dois. Execute `npm run format` para padronizar o frontend.
+`target`, `frontend/node_modules`, `frontend/.node`, `frontend/dist`, `data`, `backups` e `logs` estão excluídos da indexação do módulo. Permanecem no disco; não são fontes para edição. Java usa quatro espaços e TypeScript/CSS, dois. Execute `pnpm run format` para padronizar o frontend.
 
 ## Testes
 

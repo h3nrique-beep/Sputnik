@@ -31,7 +31,7 @@ public class BackupService {
     public synchronized BackupInfo criar() {
         try {
             Files.createDirectories(pastaBackups);
-            String nome = "sputnik-" + NOME.format(LocalDateTime.now()) + ".zip";
+            String nome = "sputnik-" + NOME.format(LocalDateTime.now()) + "-" + java.util.UUID.randomUUID() + ".zip";
             Path destino = pastaBackups.resolve(nome).normalize();
             if (!destino.startsWith(pastaBackups))
                 throw new IllegalStateException("Destino de backup inválido.");

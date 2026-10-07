@@ -17,7 +17,7 @@
         <p>Informe seus dados de acesso e senha para entrar no sistema.</p>
         <div th:if="${param.erro}" class="alert alert-danger" role="alert" aria-live="assertive"><strong>Não foi possível entrar.</strong><br>Confira seus dados de acesso e tente novamente.</div>
         <div th:if="${param.logout}" class="alert alert-success" role="status">Sessão encerrada com sucesso.</div>
-        <form id="login-form" method="post" action="/login">
+        <form id="login-form" method="post" th:action="@{/login}">
             <label for="usuario">E-mail<input id="usuario" class="form-control" th:classappend="${param.erro} ? ' is-invalid' : ''" required autofocus name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Informe seu e-mail"></label>
             <label for="senha">Senha<span class="password-field"><input id="senha" class="form-control" th:classappend="${param.erro} ? ' is-invalid' : ''" required type="password" name="senha" autocomplete="current-password" placeholder="Informe sua senha" aria-describedby="caps-lock-message"><button id="password-toggle" class="btn btn-outline-secondary password-toggle" type="button" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button></span></label>
             <div id="caps-lock-message" class="form-text text-warning-emphasis mb-3" role="status" aria-live="polite" hidden>Caps Lock está ativado.</div>
@@ -26,10 +26,5 @@
         <div class="demo-note"><strong>Ambiente de demonstração:</strong> cada perfil vê somente os recursos necessários para sua função.</div>
     </div>
 </main>
-<script>
-const password = document.getElementById('senha'); const toggle = document.getElementById('password-toggle'); const capsLockMessage = document.getElementById('caps-lock-message'); const form = document.getElementById('login-form'); const submitButton = document.getElementById('login-submit');
-toggle.addEventListener('click', () => { const showing = password.type === 'text'; password.type = showing ? 'password' : 'text'; toggle.textContent = showing ? 'Mostrar' : 'Ocultar'; toggle.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha'); toggle.setAttribute('aria-pressed', String(!showing)); password.focus(); });
-password.addEventListener('keyup', event => { capsLockMessage.hidden = !event.getModifierState('CapsLock'); });
-form.addEventListener('submit', () => { if (!form.checkValidity()) return; submitButton.disabled = true; submitButton.querySelector('.button-label').textContent = 'Entrando...'; submitButton.querySelector('.spinner-border').hidden = false; });
-</script>
+<script src="/js/legacy.js" defer></script>
 </body></html>

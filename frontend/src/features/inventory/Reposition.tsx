@@ -24,7 +24,7 @@ export function Reposition() {
         headers={[
           "Código",
           "Peça",
-          "Saldo",
+          "Disponível",
           "Mínimo",
           "Sugestão",
           "Custo estimado",
@@ -32,7 +32,7 @@ export function Reposition() {
         rows={data.pecas.map((r: any) => [
           r.peca.codigo,
           r.peca.nome,
-          r.peca.saldo,
+          r.peca.disponivel,
           r.peca.minimo,
           r.sugestao,
           money(r.peca.preco * r.sugestao),

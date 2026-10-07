@@ -7,8 +7,11 @@ import { type Order } from "../../types/domain";
 export function Schedule({ go }: { go: (view: string) => void }) {
   const [orders, setOrders] = useState<Order[]>();
   const [filter, setFilter] = useState("");
+  const [erro, setErro] = useState("");
   useEffect(() => {
-    api<Order[]>("/ordens").then(setOrders);
+    api<Order[]>("/ordens")
+      .then(setOrders)
+      .catch((e: Error) => setErro(e.message));
   }, []);
   const scheduled = useMemo(
     () =>
@@ -40,7 +43,14 @@ export function Schedule({ go }: { go: (view: string) => void }) {
         .filter(Boolean) as { order: Order; tipo: string; data: string }[],
     [orders],
   );
-  if (!orders) return <Loading />;
+  if (!orders)
+    return erro ? (
+      <div className="alert error" role="alert">
+        {erro}
+      </div>
+    ) : (
+      <Loading />
+    );
   return (
     <div className="module-shell space-y-5">
       <div className="toolbar">

@@ -9,3 +9,4 @@ frontend/dist/
 frontend/*.tsbuildinfo
 logs/
 backups/
+sputnik-run*.log

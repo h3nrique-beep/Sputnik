@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { KeyRound, ShieldCheck, Trash2 } from "lucide-react";
 import { Badge, Button, Table } from "../../components/ui";
 import { api } from "../../lib/api";
 import { UserCreate } from "./UserCreate";
@@ -70,6 +71,7 @@ export function Users() {
       )}
       {editing && (
         <UserPermissions
+          key={editing.id}
           user={editing}
           done={() => {
             setEditing(undefined);
@@ -90,15 +92,29 @@ export function Users() {
             <span className="muted">Protegido</span>
           ) : (
             <span className="row-actions">
-              <button className="link" onClick={() => setEditing(u)}>
-                Permissões
-              </button>
-              <button className="link" onClick={() => reset(u.id)}>
-                Resetar senha
-              </button>
-              <button className="link danger" onClick={() => remove(u.id)}>
-                Remover
-              </button>
+              <Button variant="outline" size="sm" onClick={() => setEditing(u)}>
+                <ShieldCheck size={15} aria-hidden="true" /> Permissões
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="row-action-icon"
+                onClick={() => reset(u.id)}
+                aria-label={`Resetar senha de ${u.nome}`}
+                title="Resetar senha"
+              >
+                <KeyRound size={15} aria-hidden="true" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="row-action-icon row-action-danger"
+                onClick={() => remove(u.id)}
+                aria-label={`Remover ${u.nome}`}
+                title="Remover usuário"
+              >
+                <Trash2 size={15} aria-hidden="true" />
+              </Button>
             </span>
           ),
         ])}

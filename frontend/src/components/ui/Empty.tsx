@@ -1,3 +1,7 @@
 export function Empty({ text }: { text: string }) {
-  return <p className="muted">{text}</p>;
+  return (
+    <div className="empty-state" role="status">
+      <p>{text}</p>
+    </div>
+  );
 }

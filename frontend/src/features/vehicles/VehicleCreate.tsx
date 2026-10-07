@@ -7,7 +7,9 @@ export function VehicleCreate({ done }: { done: () => void }) {
     [form, setForm] = useState<any>({}),
     [erro, setErro] = useState("");
   useEffect(() => {
-    api<Client[]>("/clientes").then(setClients);
+    api<Client[]>("/clientes")
+      .then(setClients)
+      .catch((e: Error) => setErro(e.message));
   }, []);
   const set = (key: string, value: any) => setForm({ ...form, [key]: value });
   const submit = async (e: FormEvent) => {

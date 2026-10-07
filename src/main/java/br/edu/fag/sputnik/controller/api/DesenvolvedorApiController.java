@@ -22,6 +22,13 @@ import java.util.Map;
 @RequestMapping("/api")
 public class DesenvolvedorApiController extends ApiSupport {
     private final BackupService backups;
+    @org.springframework.beans.factory.annotation.Value("${sputnik.backup.admin-empresa-id:1}")
+    private Long empresaAdministradora;
+
+    private boolean podeAdministrarInstalacao(HttpSession session) {
+        return autorizacao.ehAdministrador(session) && autorizacao.usuarioAtual(session)
+                .map(usuario -> empresaAdministradora.equals(usuario.empresaId())).orElse(false);
+    }
 
     public DesenvolvedorApiController(AutorizacaoService autorizacao, BackupService backups) {
         super(autorizacao);
@@ -30,19 +37,19 @@ public class DesenvolvedorApiController extends ApiSupport {
 
     @GetMapping("/admin/desenvolvedor")
     public ResponseEntity<?> diagnosticoDesenvolvedor(HttpSession session) {
-        if (!autorizacao.ehAdministrador(session)) return proibido();
+        if (!podeAdministrarInstalacao(session)) return proibido();
         return ResponseEntity.ok(backups.diagnostico());
     }
 
     @GetMapping("/admin/desenvolvedor/backups")
     public ResponseEntity<?> listarBackups(HttpSession session) {
-        if (!autorizacao.ehAdministrador(session)) return proibido();
+        if (!podeAdministrarInstalacao(session)) return proibido();
         return ResponseEntity.ok(backups.listar());
     }
 
     @PostMapping("/admin/desenvolvedor/backups")
     public ResponseEntity<?> criarBackup(HttpSession session) {
-        if (!autorizacao.ehAdministrador(session)) return proibido();
+        if (!podeAdministrarInstalacao(session)) return proibido();
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(backups.criar());
         } catch (IllegalStateException exception) {
@@ -53,7 +60,7 @@ public class DesenvolvedorApiController extends ApiSupport {
 
     @GetMapping("/admin/desenvolvedor/backups/{nome:.+}")
     public ResponseEntity<?> baixarBackup(@PathVariable String nome, HttpSession session) {
-        if (!autorizacao.ehAdministrador(session)) return proibido();
+        if (!podeAdministrarInstalacao(session)) return proibido();
         try {
             var arquivo = backups.localizar(nome);
             return ResponseEntity.ok()
@@ -62,7 +69,7 @@ public class DesenvolvedorApiController extends ApiSupport {
                             "attachment; filename=\"" + arquivo.getFileName() + "\"")
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(Files.size(arquivo))
-                    .body(Files.readAllBytes(arquivo));
+                    .body(new org.springframework.core.io.FileSystemResource(arquivo));
         } catch (Exception exception) {
             return ResponseEntity.notFound().build();
         }

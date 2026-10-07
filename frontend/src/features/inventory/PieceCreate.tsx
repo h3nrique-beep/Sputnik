@@ -8,9 +8,13 @@ export function PieceCreate({ done }: { done: () => void }) {
       estoqueMinimo: 0,
     }),
     [erro, setErro] = useState("");
+  const [saving, setSaving] = useState(false);
   const set = (key: string, value: any) => setForm({ ...form, [key]: value });
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    setErro("");
     try {
       await api("/pecas", {
         method: "POST",
@@ -25,6 +29,8 @@ export function PieceCreate({ done }: { done: () => void }) {
       done();
     } catch (e) {
       setErro((e as Error).message);
+    } finally {
+      setSaving(false);
     }
   };
   return (
@@ -121,7 +127,9 @@ export function PieceCreate({ done }: { done: () => void }) {
           onChange={(e) => set("estoqueMinimo", e.target.value)}
         />
       </label>
-      <button className="primary">Cadastrar peça</button>
+      <button className="primary" disabled={saving}>
+        {saving ? "Salvando…" : "Cadastrar peça"}
+      </button>
     </form>
   );
 }

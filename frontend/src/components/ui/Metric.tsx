@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 
 export function Metric({
-  icon = "•",
+  icon,
   label,
   value,
   detail = "",
@@ -13,7 +13,7 @@ export function Metric({
 }) {
   return (
     <article className="metric">
-      <i>{icon}</i>
+      {icon && <i aria-hidden="true">{icon}</i>}
       <div>
         <small>{label}</small>
         <b>{value}</b>

@@ -97,15 +97,15 @@ Abra [http://localhost:8080](http://localhost:8080).
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install --frozen-lockfile
+pnpm run dev
 ```
 
 Para gerar os arquivos estáticos servidos pelo Spring Boot:
 
 ```bash
 cd frontend
-npm run build:java
+pnpm run build:java
 ```
 
 ### Testes

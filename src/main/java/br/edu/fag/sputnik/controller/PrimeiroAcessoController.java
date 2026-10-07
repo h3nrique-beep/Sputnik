@@ -39,7 +39,7 @@ public class PrimeiroAcessoController {
         var usuario = SessaoAutenticacao.usuario(session);
         if (usuario.isEmpty()) return "redirect:/login";
         if (!usuario.get().trocaSenhaObrigatoria()) return "redirect:/inicio";
-        if (!form.getSenha().equals(form.getConfirmacaoSenha()))
+        if (!java.util.Objects.equals(form.getSenha(), form.getConfirmacaoSenha()))
             resultado.rejectValue("confirmacaoSenha", "diferente", "As senhas não coincidem.");
         if (resultado.hasErrors()) return "primeiro-acesso";
         SessaoAutenticacao.iniciar(

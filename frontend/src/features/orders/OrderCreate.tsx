@@ -23,8 +23,12 @@ export function OrderCreate({
     [descricao, setDescricao] = useState(""),
     [erro, setErro] = useState("");
   useEffect(() => {
-    api<Client[]>("/clientes").then(setClients);
-    api<Vehicle[]>("/veiculos").then(setVehicles);
+    api<Client[]>("/clientes")
+      .then(setClients)
+      .catch((e: Error) => setErro(e.message));
+    api<Vehicle[]>("/veiculos")
+      .then(setVehicles)
+      .catch((e: Error) => setErro(e.message));
   }, []);
   const filtered = vehicles.filter((v) => v.cliente?.id === client);
   const submit = async (e: FormEvent) => {

@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -20,11 +19,6 @@ public class AuthController {
     public AuthController(UsuarioService usuarios, LoginAttemptService tentativasLogin) {
         this.usuarios = usuarios;
         this.tentativasLogin = tentativasLogin;
-    }
-
-    @GetMapping("/login")
-    public String login(HttpSession session) {
-        return SessaoAutenticacao.estaAutenticado(session) ? "redirect:/" : "login";
     }
 
     @PostMapping("/login")

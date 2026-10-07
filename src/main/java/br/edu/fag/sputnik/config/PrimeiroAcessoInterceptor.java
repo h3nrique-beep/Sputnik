@@ -24,8 +24,16 @@ public class PrimeiroAcessoInterceptor implements HandlerInterceptor {
 
         boolean rotaPermitida =
                 request.getRequestURI().startsWith("/primeiro-acesso")
-                        || request.getRequestURI().startsWith("/logout");
+                        || request.getRequestURI().equals("/logout")
+                        || java.util.Set.of("/", "/index.html", "/api/auth/session",
+                                "/api/auth/logout", "/api/security/csrf").contains(request.getRequestURI());
         if (deveTrocarSenha && !rotaPermitida) {
+            if (request.getRequestURI().startsWith("/api/")) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"mensagem\":\"Defina sua senha definitiva antes de continuar.\"}");
+                return false;
+            }
             response.sendRedirect("/primeiro-acesso");
             return false;
         }

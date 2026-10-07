@@ -10,7 +10,12 @@ export function Nav({
   onClick: () => void;
 }) {
   return (
-    <button className={active ? "active" : ""} onClick={onClick} title={label}>
+    <button
+      className={active ? "active" : ""}
+      onClick={onClick}
+      title={label}
+      aria-current={active ? "page" : undefined}
+    >
       {icon && (
         <i className="nav-icon" aria-hidden="true">
           {icon}

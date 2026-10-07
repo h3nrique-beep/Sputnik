@@ -136,6 +136,7 @@ public class UsuarioService {
         UsuarioSistema usuario = buscarBalconista(id, empresaId);
         usuario.setPermissoes(copiarPermissoes(permissoes));
         usuarios.save(usuario);
+        SessaoAutenticacao.revogar(id);
     }
 
     public void atualizarPermissoes(Long id, Set<PermissaoModulo> permissoes) { atualizarPermissoes(id, permissoes, empresaPadrao().getId()); }
@@ -147,6 +148,7 @@ public class UsuarioService {
         usuario.setSenhaHash(encoder.encode(senhaTemporaria));
         usuario.setTrocaSenhaObrigatoria(true);
         usuarios.save(usuario);
+        SessaoAutenticacao.revogar(id);
         return senhaTemporaria;
     }
 
@@ -154,6 +156,7 @@ public class UsuarioService {
 
     public void excluirBalconista(Long id, Long empresaId) {
         usuarios.delete(buscarBalconista(id, empresaId));
+        SessaoAutenticacao.revogar(id);
     }
 
     public void excluirBalconista(Long id) { excluirBalconista(id, empresaPadrao().getId()); }
@@ -164,7 +167,9 @@ public class UsuarioService {
                         .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
         usuario.setSenhaHash(encoder.encode(senha));
         usuario.setTrocaSenhaObrigatoria(false);
-        return paraSessao(usuarios.save(usuario));
+        UsuarioAutenticado atualizado = paraSessao(usuarios.save(usuario));
+        SessaoAutenticacao.revogar(usuarioId);
+        return atualizado;
     }
 
     /** Cria exclusivamente o primeiro administrador com segredo fornecido pelo ambiente. */

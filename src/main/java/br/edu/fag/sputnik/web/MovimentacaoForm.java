@@ -15,6 +15,7 @@ public class MovimentacaoForm {
     @Min(1)
     private Integer quantidade;
 
+    @jakarta.validation.constraints.Size(max = 255, message = "A observação deve ter até 255 caracteres.")
     private String observacao;
 
     public Long getPecaId() {

@@ -23,6 +23,7 @@ export function TabsTrigger({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
   return (
     <button
+      aria-pressed={Boolean(active)}
       className={cn(
         "inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-medium transition-all hover:text-slate-900",
         active && "bg-white text-slate-950 shadow-sm",

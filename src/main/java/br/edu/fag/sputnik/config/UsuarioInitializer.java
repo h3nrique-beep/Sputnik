@@ -12,7 +12,6 @@ import org.springframework.core.annotation.Order;
 @Configuration
 @Profile("!test")
 public class UsuarioInitializer {
-
     @Value("${sputnik.bootstrap.admin.usuario:admin}")
     private String usuarioAdministrador;
 
@@ -28,4 +27,5 @@ public class UsuarioInitializer {
             usuarios.migrarBalconistaPadrao();
         };
     }
+
 }

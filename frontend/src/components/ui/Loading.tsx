@@ -1,3 +1,12 @@
 export function Loading() {
-  return <p className="muted">Carregando informações...</p>;
+  return (
+    <div className="loading-state" role="status" aria-live="polite">
+      Carregando informações…
+      <div className="loading-lines" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
+  );
 }

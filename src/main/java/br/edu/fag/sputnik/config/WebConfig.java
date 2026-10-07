@@ -20,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/login",
                         "/app.css",
                         "/assets/**",
+                        "/js/**",
                         "/images/**",
                         "/favicon.ico",
                         "/h2-console/**");

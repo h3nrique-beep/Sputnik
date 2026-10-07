@@ -13,7 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Set;
 
-/** Exige token anti-CSRF em toda alteração realizada pela API React. */
+/** Exige token anti-CSRF nas alterações da API e dos formulários MVC. */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 20)
 public class ApiCsrfFilter extends OncePerRequestFilter {
@@ -22,11 +22,6 @@ public class ApiCsrfFilter extends OncePerRequestFilter {
 
     public ApiCsrfFilter(CsrfTokenService csrfTokens) {
         this.csrfTokens = csrfTokens;
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/");
     }
 
     @Override
@@ -39,6 +34,9 @@ public class ApiCsrfFilter extends OncePerRequestFilter {
         }
 
         String token = request.getHeader("X-CSRF-Token");
+        if (token == null && !request.getRequestURI().startsWith("/api/")) {
+            token = request.getParameter("_csrf");
+        }
         if (!csrfTokens.corresponde(request.getSession(false), token)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json;charset=UTF-8");

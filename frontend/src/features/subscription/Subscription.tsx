@@ -13,10 +13,20 @@ type Subscription = {
 };
 export function Subscription() {
   const [data, setData] = useState<Subscription>();
+  const [erro, setErro] = useState("");
   useEffect(() => {
-    api<Subscription>("/empresa/assinatura").then(setData);
+    api<Subscription>("/empresa/assinatura")
+      .then(setData)
+      .catch((e: Error) => setErro(e.message));
   }, []);
-  if (!data) return <Loading />;
+  if (!data)
+    return erro ? (
+      <div className="alert error" role="alert">
+        {erro}
+      </div>
+    ) : (
+      <Loading />
+    );
   return (
     <div className="module-shell space-y-5">
       <div className="metrics">

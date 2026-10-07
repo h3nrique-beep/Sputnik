@@ -12,7 +12,10 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
     [baixandoPdf, setBaixandoPdf] = useState(false);
   const reload = () => {
     void api<any>("/ordens/" + id)
-      .then(setData)
+      .then((result) => {
+        setData(result);
+        setErro("");
+      })
       .catch((e) => setErro(e.message));
   };
   useEffect(reload, [id]);
@@ -20,7 +23,9 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
     return erro ? (
       <div className="space-y-4">
         <div className="alert error">{erro}</div>
-        <Button variant="secondary" onClick={back}>Voltar para ordens</Button>
+        <Button variant="secondary" onClick={back}>
+          Voltar para ordens
+        </Button>
       </div>
     ) : (
       <Loading />
@@ -313,7 +318,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
         <Card title="Itens e custos">
           {data.itens.length ? (
             data.itens.map((i: any) => (
-              <p key={i}>
+              <p key={i.id}>
                 <span>
                   {i.quantidade}× {i.descricao}
                 </span>

@@ -9,6 +9,7 @@ export function StockMovement({ done }: { done: () => void }) {
     [quantidade, setQuantidade] = useState("1"),
     [observacao, setObservacao] = useState(""),
     [erro, setErro] = useState("");
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
     api<Piece[]>("/pecas")
       .then(setPieces)
@@ -16,6 +17,9 @@ export function StockMovement({ done }: { done: () => void }) {
   }, []);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    setErro("");
     try {
       await api("/movimentacoes", {
         method: "POST",
@@ -30,8 +34,17 @@ export function StockMovement({ done }: { done: () => void }) {
       setQuantidade("1");
       setObservacao("");
       done();
+      await api<Piece[]>("/pecas")
+        .then(setPieces)
+        .catch(() =>
+          setErro(
+            "Movimentação registrada. Reabra esta tela para atualizar os saldos.",
+          ),
+        );
     } catch (e) {
       setErro((e as Error).message);
+    } finally {
+      setSaving(false);
     }
   };
   return (
@@ -74,12 +87,15 @@ export function StockMovement({ done }: { done: () => void }) {
       <label>
         Observação
         <textarea
+          maxLength={255}
           value={observacao}
           onChange={(e) => setObservacao(e.target.value)}
           placeholder="Motivo da movimentação"
         />
       </label>
-      <button className="primary">Registrar movimentação</button>
+      <button className="primary" disabled={saving}>
+        {saving ? "Registrando…" : "Registrar movimentação"}
+      </button>
     </form>
   );
 }

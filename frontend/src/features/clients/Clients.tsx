@@ -1,9 +1,10 @@
-import { Button, Table } from "../../components/ui";
+import { Button, Loading, Table } from "../../components/ui";
 import { useSearchList } from "../../hooks/useSearchList";
 import { type Client } from "../../types/domain";
 
 export function Clients({ go }: { go: (v: string) => void }) {
-  const { items, query, setQuery } = useSearchList<Client>("/clientes");
+  const { items, query, setQuery, error, loading } =
+    useSearchList<Client>("/clientes");
   return (
     <div className="module-shell space-y-5">
       <div className="toolbar">
@@ -15,10 +16,21 @@ export function Clients({ go }: { go: (v: string) => void }) {
         />
         <Button onClick={() => go("clients-new")}>＋ Novo cliente</Button>
       </div>
-      <Table
-        headers={["Nome", "CPF", "Telefone"]}
-        rows={items.map((c) => [c.nome, c.cpf, c.telefone])}
-      />
+      {error && (
+        <div className="alert error" role="alert">
+          {error}
+        </div>
+      )}
+      {loading ? (
+        <Loading />
+      ) : (
+        !error && (
+          <Table
+            headers={["Nome", "CPF", "Telefone"]}
+            rows={items.map((c) => [c.nome, c.cpf, c.telefone])}
+          />
+        )
+      )}
     </div>
   );
 }

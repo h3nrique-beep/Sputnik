@@ -43,6 +43,7 @@ public class OrdensService {
     private final OrdemServicoRepository ordens;
     private final ItemOrdemServicoRepository itensOrdem;
     private final HistoricoOrdemServicoRepository historicosOrdem;
+    private final jakarta.persistence.EntityManager entityManager;
 
     public OrdensService(
             PecaRepository pecas,
@@ -51,7 +52,7 @@ public class OrdensService {
             VeiculoRepository veiculos,
             OrdemServicoRepository ordens,
             ItemOrdemServicoRepository itensOrdem,
-            HistoricoOrdemServicoRepository historicosOrdem) {
+            HistoricoOrdemServicoRepository historicosOrdem, jakarta.persistence.EntityManager entityManager) {
         this.pecas = pecas;
         this.movimentacoes = movimentacoes;
         this.clientes = clientes;
@@ -59,6 +60,7 @@ public class OrdensService {
         this.ordens = ordens;
         this.itensOrdem = itensOrdem;
         this.historicosOrdem = historicosOrdem;
+        this.entityManager = entityManager;
     }
 
     private static final String STATUS_ABERTA = StatusOrdemServico.ABERTA.name();
@@ -220,11 +222,14 @@ public class OrdensService {
     @Transactional
     public void atualizarOrdem(
             Long ordemId, OrdemServicoEdicaoForm formulario, String responsavel) {
-        OrdemServico ordem = buscarOrdem(ordemId);
+        OrdemServico ordem = buscarOrdemParaAlterar(ordemId);
         StatusOrdemServico statusAnterior = statusDaOrdem(ordem);
         if (statusAnterior.ehOrcamento()) {
             throw new IllegalArgumentException(
                     "Aprove o orçamento para convertê-lo em ordem de serviço antes de editar o status.");
+        }
+        if (formulario.getStatus().ehOrcamento()) {
+            throw new IllegalArgumentException("Uma ordem já aberta não pode voltar a ser orçamento.");
         }
         if (formulario.getDocumento() != null) ordem.setDocumento(formulario.getDocumento());
         ordem.setDescricao(formulario.getDescricao().trim());
@@ -248,7 +253,7 @@ public class OrdensService {
     @Transactional
     public void adicionarPecaNaOrdem(
             Long ordemId, Long pecaId, Integer quantidade, String responsavel) {
-        OrdemServico ordem = buscarOrdem(ordemId);
+        OrdemServico ordem = buscarOrdemParaAlterar(ordemId);
         validarOrdemEditavel(ordem);
         Peca peca = buscarPeca(pecaId);
         boolean orcamento = statusDaOrdem(ordem).ehOrcamento();
@@ -275,7 +280,7 @@ public class OrdensService {
     @Transactional
     public void adicionarServicoNaOrdem(
             Long ordemId, String descricao, BigDecimal valor, String responsavel) {
-        OrdemServico ordem = buscarOrdem(ordemId);
+        OrdemServico ordem = buscarOrdemParaAlterar(ordemId);
         validarOrdemEditavel(ordem);
         ItemOrdemServico item = new ItemOrdemServico();
         item.setOrdemServico(ordem);
@@ -291,7 +296,7 @@ public class OrdensService {
 
     @Transactional
     public void aprovarOrcamento(Long ordemId, String responsavel) {
-        OrdemServico ordem = buscarOrdem(ordemId);
+        OrdemServico ordem = buscarOrdemParaAlterar(ordemId);
         if (!statusDaOrdem(ordem).ehOrcamento()) {
             throw new IllegalArgumentException("Somente um orçamento pendente pode ser aprovado.");
         }
@@ -353,6 +358,9 @@ public class OrdensService {
 
     private void baixarEstoqueDaPeca(
             Peca peca, Integer quantidade, String responsavel, OrdemServico ordem) {
+        if (quantidade <= 0 || quantidade > peca.getSaldo() || quantidade > peca.getEstoqueDisponivel()) {
+            throw new IllegalArgumentException("Estoque insuficiente para esta operação.");
+        }
         peca.setSaldo(peca.getSaldo() - quantidade);
         peca.setEstoqueDisponivel(peca.getEstoqueDisponivel() - quantidade);
         registrarMovimentacaoDaOrdem(peca, quantidade, responsavel, ordem);
@@ -368,10 +376,20 @@ public class OrdensService {
     }
 
     private Peca buscarPeca(Long id) {
-        return EmpresaContext.exigirPertencimento(
+        Peca peca = EmpresaContext.exigirPertencimento(
                 pecas.findById(id)
                         .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada.")),
                 "Peça não encontrada.");
+        entityManager.flush();
+        entityManager.refresh(peca, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        return peca;
+    }
+
+    private OrdemServico buscarOrdemParaAlterar(Long id) {
+        OrdemServico ordem = buscarOrdem(id);
+        entityManager.flush();
+        entityManager.refresh(ordem, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        return ordem;
     }
 
     private Cliente buscarCliente(Long id) {

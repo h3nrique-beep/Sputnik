@@ -29,14 +29,16 @@ public class PecasService {
     private final PecaRepository pecas;
     private final MovimentacaoRepository movimentacoes;
     private final ItemOrdemServicoRepository itensOrdem;
+    private final jakarta.persistence.EntityManager entityManager;
 
     public PecasService(
             PecaRepository pecas,
             MovimentacaoRepository movimentacoes,
-            ItemOrdemServicoRepository itensOrdem) {
+            ItemOrdemServicoRepository itensOrdem, jakarta.persistence.EntityManager entityManager) {
         this.pecas = pecas;
         this.movimentacoes = movimentacoes;
         this.itensOrdem = itensOrdem;
+        this.entityManager = entityManager;
     }
 
     public List<Peca> listar(String busca) {
@@ -55,8 +57,11 @@ public class PecasService {
         }
 
         peca.setCodigo(codigo);
-        if (peca.getEstoqueDisponivel() == null) {
+        if (!peca.temEstoqueDisponivel()) {
             peca.setEstoqueDisponivel(peca.getSaldo());
+        }
+        if (peca.getEstoqueDisponivel() > peca.getSaldo()) {
+            throw new IllegalArgumentException("O estoque disponível não pode superar o saldo total.");
         }
         return pecas.save(peca);
     }
@@ -67,8 +72,9 @@ public class PecasService {
         validarSaldoParaSaida(formulario, peca);
 
         int saldoAtualizado = calcularSaldoAtualizado(formulario, peca);
+        int disponivelAtualizado = peca.getEstoqueDisponivel() + (saldoAtualizado - peca.getSaldo());
         peca.setSaldo(saldoAtualizado);
-        peca.setEstoqueDisponivel(saldoAtualizado);
+        peca.setEstoqueDisponivel(disponivelAtualizado);
 
         Movimentacao movimentacao = new Movimentacao();
         movimentacao.setPeca(peca);
@@ -101,12 +107,12 @@ public class PecasService {
     public List<Peca> criticas() {
         return pecas.findAll().stream()
                 .filter(Peca::estaAbaixoDoMinimo)
-                .sorted(Comparator.comparingInt(peca -> peca.getSaldo() - peca.getEstoqueMinimo()))
+                .sorted(Comparator.comparingInt(peca -> peca.getEstoqueDisponivel() - peca.getEstoqueMinimo()))
                 .toList();
     }
 
     public int sugestao(Peca peca) {
-        return Math.max((peca.getEstoqueMinimo() * 2) - peca.getSaldo(), 1);
+        return (int) Math.min(Integer.MAX_VALUE, Math.max((peca.getEstoqueMinimo() * 2L) - peca.getEstoqueDisponivel(), 1L));
     }
 
     public BigDecimal custoReposicao() {
@@ -123,11 +129,11 @@ public class PecasService {
         StringBuilder conteudo =
                 new StringBuilder("Código;Peça;Fornecedor;Saldo;Mínimo;Sugestão\n");
         for (Peca peca : criticas()) {
-            conteudo.append(peca.getCodigo())
+            conteudo.append(campoCsv(peca.getCodigo()))
                     .append(';')
-                    .append(peca.getNome())
+                    .append(campoCsv(peca.getNome()))
                     .append(';')
-                    .append(peca.getFornecedor())
+                    .append(campoCsv(peca.getFornecedor()))
                     .append(';')
                     .append(peca.getSaldo())
                     .append(';')
@@ -140,11 +146,13 @@ public class PecasService {
     }
 
     public List<Peca> pecasMaisUsadas() {
-        return itensOrdem.findAll().stream()
+        Long empresaId = EmpresaContext.empresaId();
+        var itens = empresaId == null ? itensOrdem.findAll() : itensOrdem.findByOrdemServicoEmpresaId(empresaId);
+        return itens.stream()
                 .filter(
                         item ->
                                 item.getTipo() == TipoItemOrdemServico.PECA
-                                        && item.getPeca() != null)
+                                        && item.getPeca() != null && item.isEstoqueBaixado())
                 .collect(
                         Collectors.groupingBy(
                                 ItemOrdemServico::getPeca,
@@ -158,16 +166,19 @@ public class PecasService {
     }
 
     private Peca buscarPeca(Long id) {
-        return EmpresaContext.exigirPertencimento(
+        Peca peca = EmpresaContext.exigirPertencimento(
                 pecas.findById(id)
                         .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada.")),
                 "Peça não encontrada.");
+        entityManager.refresh(peca, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        return peca;
     }
 
     private void validarSaldoParaSaida(MovimentacaoForm formulario, Peca peca) {
         boolean saldoInsuficiente =
                 formulario.getTipo() == TipoMovimentacao.SAIDA
-                        && formulario.getQuantidade() > peca.getSaldo();
+                        && (formulario.getQuantidade() > peca.getSaldo()
+                            || formulario.getQuantidade() > peca.getEstoqueDisponivel());
         if (saldoInsuficiente) {
             throw new IllegalArgumentException("Saída bloqueada: saldo insuficiente (RN03/RN05).");
         }
@@ -175,8 +186,21 @@ public class PecasService {
 
     private int calcularSaldoAtualizado(MovimentacaoForm formulario, Peca peca) {
         if (formulario.getTipo() == TipoMovimentacao.ENTRADA) {
-            return peca.getSaldo() + formulario.getQuantidade();
+            try { return Math.addExact(peca.getSaldo(), formulario.getQuantidade()); }
+            catch (ArithmeticException exception) {
+                throw new IllegalArgumentException("A quantidade excede o limite de estoque.");
+            }
         }
         return peca.getSaldo() - formulario.getQuantidade();
+    }
+
+    private String campoCsv(String valor) {
+        if (valor == null) return "\"\"";
+        String inicio = valor.stripLeading();
+        if (!inicio.isEmpty() && "=+-@".indexOf(inicio.charAt(0)) >= 0
+                || valor.startsWith("\t") || valor.startsWith("\r") || valor.startsWith("\n")) {
+            valor = "'" + valor;
+        }
+        return "\"" + valor.replace("\"", "\"\"") + "\"";
     }
 }

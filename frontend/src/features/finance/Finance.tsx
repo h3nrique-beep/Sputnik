@@ -9,7 +9,7 @@ import {
   Table,
 } from "../../components/ui";
 import { api } from "../../lib/api";
-import { money } from "../../lib/format";
+import { localDate, money } from "../../lib/format";
 import { type Order } from "../../types/domain";
 
 type Entry = {
@@ -22,9 +22,15 @@ type Entry = {
   vencimento: string;
   ordemServicoId: number | "";
 };
-const hoje = new Date().toISOString().slice(0, 10);
 
-export function Finance({ go }: { go: (view: string) => void }) {
+export function Finance({
+  go,
+  canOrders,
+}: {
+  go: (view: string) => void;
+  canOrders: boolean;
+}) {
+  const hoje = localDate(new Date());
   const [entries, setEntries] = useState<Entry[]>(),
     [orders, setOrders] = useState<Order[]>([]);
   const [period, setPeriod] = useState<"all" | "month" | "next30">("month");
@@ -43,19 +49,26 @@ export function Finance({ go }: { go: (view: string) => void }) {
       .catch((e) => setErro(e.message));
   useEffect(() => {
     void load();
-    api<Order[]>("/ordens").then(setOrders);
-  }, []);
+    if (canOrders)
+      api<Order[]>("/ordens")
+        .then(setOrders)
+        .catch((e: Error) =>
+          setErro(
+            "Não foi possível carregar as ordens para vínculo: " + e.message,
+          ),
+        );
+  }, [canOrders]);
   const entriesInPeriod = useMemo(() => {
     const date = new Date();
-    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1)
-      .toISOString()
-      .slice(0, 10);
-    const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 1)
-      .toISOString()
-      .slice(0, 10);
+    const monthStart = localDate(
+      new Date(date.getFullYear(), date.getMonth(), 1),
+    );
+    const monthEnd = localDate(
+      new Date(date.getFullYear(), date.getMonth() + 1, 1),
+    );
     const next30 = new Date(date);
     next30.setDate(date.getDate() + 30);
-    const limit = next30.toISOString().slice(0, 10);
+    const limit = localDate(next30);
     return (entries ?? []).filter((entry) =>
       period === "month"
         ? entry.vencimento >= monthStart && entry.vencimento < monthEnd
@@ -63,7 +76,7 @@ export function Finance({ go }: { go: (view: string) => void }) {
           ? entry.vencimento >= hoje && entry.vencimento <= limit
           : true,
     );
-  }, [entries, period]);
+  }, [entries, period, hoje]);
   const totals = useMemo(() => {
     const all = entriesInPeriod;
     const total = (tipo: Entry["tipo"], status: Entry["status"]) =>
@@ -133,7 +146,14 @@ export function Finance({ go }: { go: (view: string) => void }) {
       setErro((e as Error).message);
     }
   };
-  if (!entries) return <Loading />;
+  if (!entries)
+    return erro ? (
+      <div className="alert error" role="alert">
+        {erro}
+      </div>
+    ) : (
+      <Loading />
+    );
   return (
     <div className="module-shell space-y-5">
       <div className="toolbar">
@@ -141,9 +161,11 @@ export function Finance({ go }: { go: (view: string) => void }) {
           <h2>Financeiro</h2>
           <p>Controle contas a receber, despesas e pagamentos efetivados.</p>
         </div>
-        <Button variant="secondary" onClick={() => go("orders")}>
-          Ver ordens
-        </Button>
+        {canOrders && (
+          <Button variant="secondary" onClick={() => go("orders")}>
+            Ver ordens
+          </Button>
+        )}
       </div>
       {erro && <div className="alert error">{erro}</div>}
       <div className="metrics">
@@ -153,11 +175,22 @@ export function Finance({ go }: { go: (view: string) => void }) {
       </div>
       <div className="toolbar compact-toolbar">
         <p>
-          Indicadores e lista por vencimento: <b>{period === "month" ? "este mês" : period === "next30" ? "próximos 30 dias" : "todo o histórico"}</b>.
+          Indicadores e lista por vencimento:{" "}
+          <b>
+            {period === "month"
+              ? "este mês"
+              : period === "next30"
+                ? "próximos 30 dias"
+                : "todo o histórico"}
+          </b>
+          .
         </p>
         <label className="field-inline">
           Período
-          <select value={period} onChange={(event) => setPeriod(event.target.value as typeof period)}>
+          <select
+            value={period}
+            onChange={(event) => setPeriod(event.target.value as typeof period)}
+          >
             <option value="month">Este mês</option>
             <option value="next30">Próximos 30 dias</option>
             <option value="all">Todo o histórico</option>
@@ -239,22 +272,24 @@ export function Finance({ go }: { go: (view: string) => void }) {
               onChange={(e) => setForm({ ...form, vencimento: e.target.value })}
             />
           </label>
-          <label>
-            OS vinculada (opcional)
-            <select
-              value={form.ordemServicoId}
-              onChange={(e) =>
-                setForm({ ...form, ordemServicoId: e.target.value })
-              }
-            >
-              <option value="">Nenhuma</option>
-              {orders.map((order) => (
-                <option key={order.id} value={order.id}>
-                  OS #{order.id} · {order.cliente.nome}
-                </option>
-              ))}
-            </select>
-          </label>
+          {canOrders && (
+            <label>
+              OS vinculada (opcional)
+              <select
+                value={form.ordemServicoId}
+                onChange={(e) =>
+                  setForm({ ...form, ordemServicoId: e.target.value })
+                }
+              >
+                <option value="">Nenhuma</option>
+                {orders.map((order) => (
+                  <option key={order.id} value={order.id}>
+                    OS #{order.id} · {order.cliente.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <button className="primary">Adicionar lançamento</button>
         </form>
         <Card title="Como usar">

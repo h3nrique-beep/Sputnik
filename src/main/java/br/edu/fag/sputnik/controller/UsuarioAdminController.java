@@ -40,7 +40,7 @@ public class UsuarioAdminController {
         }
 
         pagina.preparar(model, session, "usuarios");
-        model.addAttribute("usuarios", usuarios.listar());
+        model.addAttribute("usuarios", usuarios.listar(empresaId(session)));
         return "usuarios";
     }
 
@@ -66,7 +66,7 @@ public class UsuarioAdminController {
         }
         if (!resultado.hasErrors()) {
             try {
-                usuarios.cadastrar(form);
+                usuarios.cadastrar(form, empresaId(session));
                 return "redirect:/admin/usuarios?sucesso=usuario";
             } catch (IllegalArgumentException exception) {
                 resultado.reject("cadastro", exception.getMessage());
@@ -84,7 +84,7 @@ public class UsuarioAdminController {
         }
 
         try {
-            var usuario = usuarios.buscarBalconista(id);
+            var usuario = usuarios.buscarBalconista(id, empresaId(session));
             var form = new UsuarioPermissoesForm();
             form.setPermissoes(usuario.getPermissoes());
 
@@ -108,7 +108,7 @@ public class UsuarioAdminController {
         }
 
         try {
-            usuarios.atualizarPermissoes(id, form.getPermissoes());
+            usuarios.atualizarPermissoes(id, form.getPermissoes(), empresaId(session));
             return "redirect:/admin/usuarios?sucesso=permissoes";
         } catch (IllegalArgumentException exception) {
             return "redirect:/admin/usuarios?erro=usuario";
@@ -123,7 +123,7 @@ public class UsuarioAdminController {
         }
 
         try {
-            atributos.addFlashAttribute("senhaTemporaria", usuarios.resetarSenhaBalconista(id));
+            atributos.addFlashAttribute("senhaTemporaria", usuarios.resetarSenhaBalconista(id, empresaId(session)));
             return "redirect:/admin/usuarios?sucesso=senhaResetada";
         } catch (IllegalArgumentException exception) {
             return "redirect:/admin/usuarios?erro=usuario";
@@ -137,7 +137,7 @@ public class UsuarioAdminController {
         }
 
         try {
-            usuarios.excluirBalconista(id);
+            usuarios.excluirBalconista(id, empresaId(session));
             return "redirect:/admin/usuarios?sucesso=excluido";
         } catch (IllegalArgumentException exception) {
             return "redirect:/admin/usuarios?erro=usuario";
@@ -147,5 +147,9 @@ public class UsuarioAdminController {
     private void prepararFormularioCadastro(Model model, HttpSession session) {
         pagina.preparar(model, session, "usuarios");
         model.addAttribute("permissoes", PermissaoModulo.values());
+    }
+
+    private Long empresaId(HttpSession session) {
+        return autorizacao.usuarioAtual(session).orElseThrow().empresaId();
     }
 }

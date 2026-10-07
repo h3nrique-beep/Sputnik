@@ -48,7 +48,7 @@ class FluxosApiIntegrationTest {
     void autenticar() {
         session = new MockHttpSession();
         SessaoAutenticacao.iniciar(
-                session, new UsuarioAutenticado(1L, "Teste", Perfil.ADMIN, Set.of(), false));
+                session, new UsuarioAutenticado(900000L, "Teste", Perfil.ADMIN, Set.of(), false));
         token = csrf.obterOuCriar(session);
     }
 
