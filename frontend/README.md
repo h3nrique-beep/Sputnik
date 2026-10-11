@@ -15,7 +15,19 @@ Durante o desenvolvimento, o Vite encaminha as chamadas `/api` para o Spring Boo
 
 ## Estrutura
 
-- `src/main.tsx`: telas e fluxos principais da aplicação.
-- `src/styles.css`: novo visual responsivo.
+- `src/main.tsx`: ponto de entrada da aplicação.
+- `src/app/`: shell, navegação e roteamento entre telas.
+- `src/features/`: telas por módulo (estoque, ordens, financeiro, usuários etc.).
+- `src/components/`: UI compartilhada; `components/shadcn/` guarda os componentes shadcn/ui já copiados para o projeto.
+- `src/lib/api.ts`: cliente HTTP único, com sessão e token anti-CSRF.
+- `src/styles/`: tema, layout e estilos de impressão.
 - `vite.config.ts`: servidor do React e proxy para o Java.
-- `package.json`: dependências e comandos do front-end.
+- `pnpm-workspace.yaml`: overrides de segurança de dependências transitivas.
+
+## Comandos
+
+- `pnpm run check`: verificação de tipos.
+- `pnpm run test`: testes do cliente HTTP, datas, layout, modal e impressão.
+- `pnpm run build:java`: gera o bundle e o sincroniza em `src/main/resources/static`.
+
+Para adicionar um novo componente shadcn/ui, use a CLI sob demanda (`pnpm dlx shadcn@latest add <componente>`); ela não faz parte das dependências da aplicação.

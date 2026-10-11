@@ -1,0 +1,3 @@
+overrides:
+  # Correção de segurança (GHSA de source-map-js < 1.2.2), dependência apenas de build.
+  source-map-js: ^1.2.2
