@@ -78,9 +78,9 @@ export function App() {
     };
   }, [mobileMenu]);
   useLayoutEffect(() => {
-    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    document.documentElement.dataset.theme = user && dark ? "dark" : "light";
     window.localStorage.setItem(TEMA_STORAGE_KEY, dark ? "dark" : "light");
-  }, [dark]);
+  }, [dark, user]);
   const landingView = (account: User) => {
     const acessoOperacional =
       account.perfil === "ADMIN" ||

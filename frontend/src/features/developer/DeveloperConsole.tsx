@@ -1,4 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  CircleCheck,
+  Clock3,
+  Pause,
+  Play,
+  Plus,
+  ShieldCheck,
+} from "lucide-react";
 import { Loading, Table } from "../../components/ui";
 import { api, downloadApi } from "../../lib/api";
 import {
@@ -11,6 +19,30 @@ export function DeveloperConsole() {
   const [backups, setBackups] = useState<BackupEntry[]>([]);
   const [erro, setErro] = useState("");
   const [criando, setCriando] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const [motionPaused, setMotionPaused] = useState(false);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    let visible = false;
+    const update = () =>
+      hero.classList.toggle(
+        "motion-running",
+        visible && !document.hidden && !motionPaused,
+      );
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      update();
+    });
+    observer.observe(hero);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", update);
+      hero.classList.remove("motion-running");
+    };
+  }, [diagnostico, motionPaused]);
 
   const carregar = () => {
     Promise.all([
@@ -71,47 +103,66 @@ export function DeveloperConsole() {
 
   return (
     <div className="developer-console">
-      <section className="developer-hero">
+      <section className="developer-hero" ref={heroRef}>
         <div>
-          <small>AMBIENTE TÉCNICO</small>
           <h2>Console do Desenvolvedor</h2>
           <p>
             Monitoramento operacional, manutenção e ferramentas seguras para o
             Sputnik.
           </p>
           <span className="developer-tags">
-            ● Controle administrativo&nbsp;&nbsp; ◷ Ambiente local
+            <span>
+              <ShieldCheck size={14} aria-hidden="true" />
+              Controle administrativo
+            </span>
+            <span>
+              <Clock3 size={14} aria-hidden="true" />
+              Ambiente local
+            </span>
+            <button
+              type="button"
+              className="developer-motion-toggle"
+              aria-pressed={motionPaused}
+              onClick={() => setMotionPaused(!motionPaused)}
+            >
+              {motionPaused ? (
+                <Play size={14} aria-hidden="true" />
+              ) : (
+                <Pause size={14} aria-hidden="true" />
+              )}
+              {motionPaused ? "Retomar animação" : "Pausar animação"}
+            </button>
           </span>
         </div>
         <div className="developer-runtime">
-          <small>VERSÃO DO SISTEMA</small>
+          <small>Versão do sistema</small>
           <b>v{diagnostico.versao}</b>
           <small>JAVA</small>
           <strong>{diagnostico.java}</strong>
-          <small>AMBIENTE</small>
+          <small>Ambiente</small>
           <strong>{diagnostico.sistemaOperacional}</strong>
         </div>
       </section>
       {erro && <div className="alert error">{erro}</div>}
       <section className="developer-metrics">
         <Metric
-          label="BACKUPS"
+          label="Backups"
           value={diagnostico.backups}
           detail="Arquivos disponíveis"
         />
         <Metric
-          label="BANCO H2"
+          label="Banco H2"
           value={formatGb(diagnostico.bancoMb)}
           detail="Base local do Sputnik"
         />
         <Metric
-          label="MEMÓRIA JVM"
+          label="Memória JVM"
           value={`${memoria}%`}
           detail={`${formatGb(diagnostico.memoriaUsadaMb)} usados de ${formatGb(diagnostico.memoriaMaximaMb)}`}
           emphasis={`${formatGb(memoriaLivre)} disponíveis`}
         />
         <Metric
-          label="DISCO LOCAL"
+          label="Disco local"
           value={`${disco}%`}
           detail={`${formatGb(discoUsado)} usados de ${formatGb(diagnostico.discoTotalMb)}`}
           emphasis={`${formatGb(diagnostico.discoLivreMb)} livres`}
@@ -123,7 +174,10 @@ export function DeveloperConsole() {
             <h2>Saúde do ambiente</h2>
             <p>Resumo técnico do Sputnik neste computador.</p>
           </div>
-          <span className="developer-status">● Operacional</span>
+          <span className="developer-status">
+            <CircleCheck size={14} aria-hidden="true" />
+            Operacional
+          </span>
         </div>
         <div className="developer-summary">
           <Summary
@@ -150,7 +204,8 @@ export function DeveloperConsole() {
           </p>
         </div>
         <button className="primary" onClick={criarBackup} disabled={criando}>
-          {criando ? "Criando backup..." : "＋ Criar backup"}
+          <Plus size={16} aria-hidden="true" />
+          {criando ? "Criando backup..." : "Criar backup"}
         </button>
       </section>
       <Table

@@ -11,10 +11,60 @@
   box-shadow: 0 12px 30px #0b12201c;
 }
 .developer-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   justify-content: space-between;
-  gap: 32px;
-  padding: 30px;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  /* Entrada do admin do Sentinela, aplicada uma vez ao abrir o console. */
+  animation: developer-rise 360ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.developer-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #f3b638, transparent);
+  pointer-events: none;
+  z-index: -1;
+  animation: developer-scan 7s linear infinite;
+  animation-play-state: paused;
+}
+.developer-hero.motion-running::after {
+  animation-play-state: running;
+}
+.developer-motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 1px solid #53617b;
+  border-radius: 8px;
+  background: transparent;
+  color: #e5c774;
+  cursor: pointer;
+  font-size: 12px;
+}
+.developer-motion-toggle:hover {
+  background: #ffffff0d;
+}
+@keyframes developer-scan {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  8%,
+  92% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(min(220px, 26vh));
+    opacity: 0;
+  }
 }
 .developer-hero > div:first-child {
   max-width: 640px;
@@ -24,9 +74,8 @@
 .developer-runtime small {
   color: #8ea3c4;
   display: block;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 700;
 }
 .developer-hero h2 {
   color: #f8e7ae;
@@ -41,10 +90,22 @@
 }
 .developer-tags {
   color: #e5c774;
-  display: inline-block;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   font-size: 12px;
   font-weight: 700;
-  margin-top: 24px;
+  margin-top: 12px;
+}
+.developer-tags > span,
+.developer-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.developer-runtime b,
+.developer-metrics b {
+  font-variant-numeric: tabular-nums;
 }
 .developer-runtime {
   align-content: start;
@@ -69,19 +130,28 @@
 }
 .developer-metrics {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   grid-template-columns: repeat(4, 1fr);
   margin: 18px 0;
 }
 .developer-metrics article {
-  min-height: 135px;
-  padding: 18px;
+  padding: 16px;
+  animation: developer-rise 340ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.developer-metrics article:nth-child(2) {
+  animation-delay: 20ms;
+}
+.developer-metrics article:nth-child(3) {
+  animation-delay: 40ms;
+}
+.developer-metrics article:nth-child(4) {
+  animation-delay: 60ms;
 }
 .developer-metrics b {
   color: #fff;
   display: block;
   font: 800 28px Manrope;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 .developer-metrics span {
   color: #9aabc5;
@@ -97,7 +167,8 @@
   margin-top: 5px;
 }
 .developer-health {
-  padding: 22px;
+  padding: 16px;
+  animation: developer-rise 350ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 .developer-health h2,
 .developer-backups h2 {
@@ -158,6 +229,27 @@
 .developer-backups h2 {
   color: var(--ink);
   margin-bottom: 3px;
+}
+@keyframes developer-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .developer-hero::after,
+  .developer-hero,
+  .developer-metrics article,
+  .developer-health {
+    animation: none;
+  }
+  .developer-motion-toggle {
+    display: none;
+  }
 }
 @media (max-width: 900px) {
   .developer-hero {

@@ -25,17 +25,16 @@
   font-size: 13px !important;
   padding: 9px 11px !important;
 }
-.content:has(.compact-form) {
-  max-width: 980px;
-}
 .content:has(.compact-form) .cards {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .content:has(.compact-form) .card {
   padding: 18px;
 }
-.content:has(.compact-form) .metrics {
-  margin-bottom: 18px;
+@media (max-width: 600px) {
+  .content:has(.compact-form) .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .login-access {
   background: #f7f8fc !important;
@@ -82,7 +81,7 @@ body:has(.login) {
     min-height: 0;
   }
   .shell aside,
-  .shell header,
+  .shell > main > header,
   .toast,
   .toolbar,
   .content:has(.compact-form) .compact-form,

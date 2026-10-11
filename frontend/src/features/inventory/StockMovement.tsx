@@ -48,7 +48,7 @@ export function StockMovement({ done }: { done: () => void }) {
     }
   };
   return (
-    <form className="form-card" onSubmit={submit}>
+    <form className="form-card movement-form" onSubmit={submit}>
       <h2>Registrar entrada ou saída</h2>
       <p>O saldo contábil e disponível são atualizados automaticamente.</p>
       {erro && <div className="alert error">{erro}</div>}

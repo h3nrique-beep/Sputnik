@@ -10,10 +10,10 @@ export function Card({
 }) {
   return (
     <ShadcnCard className="card">
-      <CardHeader className="p-5 pb-3">
+      <CardHeader className="card-heading p-0 pb-3">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="p-0">{children}</CardContent>
     </ShadcnCard>
   );
 }
