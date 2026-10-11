@@ -5,11 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import br.edu.fag.sputnik.domain.Empresa;
 import br.edu.fag.sputnik.domain.Peca;
 import br.edu.fag.sputnik.repository.*;
-import java.math.BigDecimal;
+
+import jakarta.persistence.EntityManager;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import jakarta.persistence.EntityManager;
+
+import java.math.BigDecimal;
 
 @DataJpaTest
 class MigracaoMultiempresaTest {
@@ -40,11 +43,12 @@ class MigracaoMultiempresaTest {
         peca.setEstoqueDisponivel(1);
         pecas.saveAndFlush(peca);
 
-        new MigracaoMultiempresa().migrar(
-                empresas, clientes, pecas, veiculos, ordens, movimentacoes, lancamentos);
+        new MigracaoMultiempresa()
+                .migrar(empresas, clientes, pecas, veiculos, ordens, movimentacoes, lancamentos);
         entityManager.flush();
         entityManager.clear();
 
-        assertThat(pecas.findById(peca.getId()).orElseThrow().getEmpresaId()).isEqualTo(empresa.getId());
+        assertThat(pecas.findById(peca.getId()).orElseThrow().getEmpresaId())
+                .isEqualTo(empresa.getId());
     }
 }

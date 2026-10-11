@@ -1,5 +1,7 @@
 package br.edu.fag.sputnik.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -9,7 +11,7 @@ import java.math.BigDecimal;
 @Table(name = "pecas", uniqueConstraints = @UniqueConstraint(columnNames = "codigo"))
 public class Peca extends EntidadeDaEmpresa {
     @Id
-    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

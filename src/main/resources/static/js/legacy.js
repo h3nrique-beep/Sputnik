@@ -1,8 +1,58 @@
-if (document.getElementById('login-form')) {
-const password = document.getElementById('senha'); const toggle = document.getElementById('password-toggle'); const capsLockMessage = document.getElementById('caps-lock-message'); const form = document.getElementById('login-form'); const submitButton = document.getElementById('login-submit');
-toggle.addEventListener('click', () => { const showing = password.type === 'text'; password.type = showing ? 'password' : 'text'; toggle.textContent = showing ? 'Mostrar' : 'Ocultar'; toggle.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha'); toggle.setAttribute('aria-pressed', String(!showing)); password.focus(); });
-password.addEventListener('keyup', event => { capsLockMessage.hidden = !event.getModifierState('CapsLock'); });
-form.addEventListener('submit', () => { if (!form.checkValidity()) return; submitButton.disabled = true; submitButton.querySelector('.button-label').textContent = 'Entrando...'; submitButton.querySelector('.spinner-border').hidden = false; });
+if (document.getElementById("login-form")) {
+  const password = document.getElementById("senha");
+  const toggle = document.getElementById("password-toggle");
+  const capsLockMessage = document.getElementById("caps-lock-message");
+  const form = document.getElementById("login-form");
+  const submitButton = document.getElementById("login-submit");
+  toggle.addEventListener("click", () => {
+    const showing = password.type === "text";
+    password.type = showing ? "password" : "text";
+    toggle.textContent = showing ? "Mostrar" : "Ocultar";
+    toggle.setAttribute(
+      "aria-label",
+      showing ? "Mostrar senha" : "Ocultar senha",
+    );
+    toggle.setAttribute("aria-pressed", String(!showing));
+    password.focus();
+  });
+  password.addEventListener("keyup", (event) => {
+    capsLockMessage.hidden = !event.getModifierState("CapsLock");
+  });
+  form.addEventListener("submit", () => {
+    if (!form.checkValidity()) return;
+    submitButton.disabled = true;
+    submitButton.querySelector(".button-label").textContent = "Entrando...";
+    submitButton.querySelector(".spinner-border").hidden = false;
+  });
 }
-document.addEventListener('DOMContentLoaded',()=>{const modal=document.getElementById('confirmation-modal');if(!modal)return;let form;document.addEventListener('submit',event=>{const target=event.target;if(!(target instanceof HTMLFormElement)||!target.dataset.confirm||target.dataset.confirmed)return;event.preventDefault();form=target;document.getElementById('confirmation-title').textContent=target.dataset.confirmTitle||'Confirmar alteração';document.getElementById('confirmation-message').textContent=target.dataset.confirm;modal.showModal();});document.getElementById('confirmation-approve').addEventListener('click',()=>{if(!form)return;form.dataset.confirmed='true';form.requestSubmit();});});
-document.querySelectorAll('[data-print]').forEach(button => button.addEventListener('click', () => window.print()));
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("confirmation-modal");
+  if (!modal) return;
+  let form;
+  document.addEventListener("submit", (event) => {
+    const target = event.target;
+    if (
+      !(target instanceof HTMLFormElement) ||
+      !target.dataset.confirm ||
+      target.dataset.confirmed
+    )
+      return;
+    event.preventDefault();
+    form = target;
+    document.getElementById("confirmation-title").textContent =
+      target.dataset.confirmTitle || "Confirmar alteração";
+    document.getElementById("confirmation-message").textContent =
+      target.dataset.confirm;
+    modal.showModal();
+  });
+  document
+    .getElementById("confirmation-approve")
+    .addEventListener("click", () => {
+      if (!form) return;
+      form.dataset.confirmed = "true";
+      form.requestSubmit();
+    });
+});
+document
+  .querySelectorAll("[data-print]")
+  .forEach((button) => button.addEventListener("click", () => window.print()));

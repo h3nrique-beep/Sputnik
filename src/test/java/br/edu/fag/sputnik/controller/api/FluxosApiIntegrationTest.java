@@ -20,9 +20,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
@@ -176,8 +176,7 @@ class FluxosApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].saldo").value(10));
 
-        enviar("/ordens/" + orcamento + "/aprovar", "{}")
-                .andExpect(status().isNoContent());
+        enviar("/ordens/" + orcamento + "/aprovar", "{}").andExpect(status().isNoContent());
         mvc.perform(get("/api/ordens/" + orcamento).session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ordem.status").value("ABERTA"));
@@ -200,8 +199,7 @@ class FluxosApiIntegrationTest {
         mvc.perform(get("/api/financeiro").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status").value("PENDENTE"));
-        enviar("/financeiro/" + lancamento + "/baixar", "{}")
-                .andExpect(status().isNoContent());
+        enviar("/financeiro/" + lancamento + "/baixar", "{}").andExpect(status().isNoContent());
         mvc.perform(get("/api/financeiro").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status").value("PAGO"));
@@ -233,15 +231,16 @@ class FluxosApiIntegrationTest {
                 new UsuarioAutenticado(
                         11L, 101L, "Oficina A", "Admin A", Perfil.ADMIN, Set.of(), false));
         token = csrf.obterOuCriar(session);
-        long pecaEmpresaA = id(
-                enviar(
-                                "/pecas",
-                                """
+        long pecaEmpresaA =
+                id(
+                        enviar(
+                                        "/pecas",
+                                        """
 {"codigo":"TENANT-A","nome":"Peça da empresa A","fabricante":"Teste",
  "categoria":"Teste","fornecedor":"Teste","localizacao":"A1","preco":10,
  "saldo":1,"estoqueDisponivel":1,"estoqueMinimo":0}
 """)
-                        .andExpect(status().isCreated()));
+                                .andExpect(status().isCreated()));
 
         MockHttpSession outraEmpresa = new MockHttpSession();
         SessaoAutenticacao.iniciar(
@@ -256,7 +255,10 @@ class FluxosApiIntegrationTest {
                                 .session(outraEmpresa)
                                 .header("X-CSRF-Token", csrf.obterOuCriar(outraEmpresa))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"pecaId\":" + pecaEmpresaA + ",\"tipo\":\"SAIDA\",\"quantidade\":1}"))
+                                .content(
+                                        "{\"pecaId\":"
+                                                + pecaEmpresaA
+                                                + ",\"tipo\":\"SAIDA\",\"quantidade\":1}"))
                 .andExpect(status().isBadRequest());
 
         mvc.perform(get("/api/pecas").session(session))
@@ -296,7 +298,9 @@ class FluxosApiIntegrationTest {
                         .andExpect(status().isOk())
                         .andReturn();
         String senhaTemporaria =
-                json.readTree(reset.getResponse().getContentAsString()).get("senhaTemporaria").asText();
+                json.readTree(reset.getResponse().getContentAsString())
+                        .get("senhaTemporaria")
+                        .asText();
         assertThat(senhaTemporaria).hasSize(20).isNotEqualTo("12345678");
         assertThat(usuarios.autenticar("refatoracao@example.test", senhaTemporaria))
                 .get()
@@ -335,9 +339,14 @@ class FluxosApiIntegrationTest {
         SessaoAutenticacao.iniciar(
                 session,
                 new UsuarioAutenticado(
-                        2L, "Financeiro", Perfil.BALCONISTA, Set.of(PermissaoModulo.FINANCEIRO), false));
+                        2L,
+                        "Financeiro",
+                        Perfil.BALCONISTA,
+                        Set.of(PermissaoModulo.FINANCEIRO),
+                        false));
         mvc.perform(get("/api/financeiro").session(session)).andExpect(status().isOk());
-        mvc.perform(get("/api/relatorio-mensal").session(session)).andExpect(status().isForbidden());
+        mvc.perform(get("/api/relatorio-mensal").session(session))
+                .andExpect(status().isForbidden());
         mvc.perform(get("/api/dashboard").session(session)).andExpect(status().isForbidden());
 
         SessaoAutenticacao.iniciar(

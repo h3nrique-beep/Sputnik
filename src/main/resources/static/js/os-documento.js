@@ -1,1 +1,3 @@
-document.getElementById("imprimir-os").addEventListener("click", () => window.print());
+document
+  .getElementById("imprimir-os")
+  .addEventListener("click", () => window.print());

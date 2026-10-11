@@ -123,7 +123,8 @@ public class UsuarioAdminController {
         }
 
         try {
-            atributos.addFlashAttribute("senhaTemporaria", usuarios.resetarSenhaBalconista(id, empresaId(session)));
+            atributos.addFlashAttribute(
+                    "senhaTemporaria", usuarios.resetarSenhaBalconista(id, empresaId(session)));
             return "redirect:/admin/usuarios?sucesso=senhaResetada";
         } catch (IllegalArgumentException exception) {
             return "redirect:/admin/usuarios?erro=usuario";

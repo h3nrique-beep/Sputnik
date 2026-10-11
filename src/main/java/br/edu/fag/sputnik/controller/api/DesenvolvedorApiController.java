@@ -5,6 +5,8 @@ import br.edu.fag.sputnik.service.BackupService;
 
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,12 +24,16 @@ import java.util.Map;
 @RequestMapping("/api")
 public class DesenvolvedorApiController extends ApiSupport {
     private final BackupService backups;
-    @org.springframework.beans.factory.annotation.Value("${sputnik.backup.admin-empresa-id:1}")
+
+    @Value("${sputnik.backup.admin-empresa-id:1}")
     private Long empresaAdministradora;
 
     private boolean podeAdministrarInstalacao(HttpSession session) {
-        return autorizacao.ehAdministrador(session) && autorizacao.usuarioAtual(session)
-                .map(usuario -> empresaAdministradora.equals(usuario.empresaId())).orElse(false);
+        return autorizacao.ehAdministrador(session)
+                && autorizacao
+                        .usuarioAtual(session)
+                        .map(usuario -> empresaAdministradora.equals(usuario.empresaId()))
+                        .orElse(false);
     }
 
     public DesenvolvedorApiController(AutorizacaoService autorizacao, BackupService backups) {
@@ -69,7 +75,7 @@ public class DesenvolvedorApiController extends ApiSupport {
                             "attachment; filename=\"" + arquivo.getFileName() + "\"")
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(Files.size(arquivo))
-                    .body(new org.springframework.core.io.FileSystemResource(arquivo));
+                    .body(new FileSystemResource(arquivo));
         } catch (Exception exception) {
             return ResponseEntity.notFound().build();
         }

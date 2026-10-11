@@ -3,8 +3,8 @@ package br.edu.fag.sputnik.domain;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,10 +123,21 @@ public class OrdemServico extends EntidadeDaEmpresa {
         this.agendamento = agendamento;
     }
 
-    public LocalDate getRetornoEm() { return retornoEm; }
-    public void setRetornoEm(LocalDate retornoEm) { this.retornoEm = retornoEm; }
-    public LocalDate getGarantiaAte() { return garantiaAte; }
-    public void setGarantiaAte(LocalDate garantiaAte) { this.garantiaAte = garantiaAte; }
+    public LocalDate getRetornoEm() {
+        return retornoEm;
+    }
+
+    public void setRetornoEm(LocalDate retornoEm) {
+        this.retornoEm = retornoEm;
+    }
+
+    public LocalDate getGarantiaAte() {
+        return garantiaAte;
+    }
+
+    public void setGarantiaAte(LocalDate garantiaAte) {
+        this.garantiaAte = garantiaAte;
+    }
 
     public List<ItemOrdemServico> getItens() {
         return itens;

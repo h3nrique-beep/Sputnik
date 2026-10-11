@@ -1,27 +1,28 @@
 package br.edu.fag.sputnik.auth;
 
-import br.edu.fag.sputnik.domain.Perfil;
 import br.edu.fag.sputnik.domain.Empresa;
+import br.edu.fag.sputnik.domain.Perfil;
+import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.domain.PlanoAssinatura;
 import br.edu.fag.sputnik.domain.StatusAssinatura;
-import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.domain.UsuarioSistema;
-import br.edu.fag.sputnik.repository.UsuarioSistemaRepository;
 import br.edu.fag.sputnik.repository.EmpresaRepository;
-import br.edu.fag.sputnik.web.UsuarioCadastroForm;
+import br.edu.fag.sputnik.repository.UsuarioSistemaRepository;
 import br.edu.fag.sputnik.web.CadastroEmpresaForm;
+import br.edu.fag.sputnik.web.UsuarioCadastroForm;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.time.LocalDate;
 
 /** Autenticação e ciclo de vida das contas de usuário. */
 @Service
@@ -29,15 +30,17 @@ public class UsuarioService {
     private static final String EMAIL_BALCONISTA_PADRAO = "balconista@sputnik.com.br";
     private static final SecureRandom ALEATORIO = new SecureRandom();
     private static final char[] ALFABETO_SENHA =
-            "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*-_"
-                    .toCharArray();
+            "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*-_".toCharArray();
 
     private final UsuarioSistemaRepository usuarios;
     private final EmpresaRepository empresas;
     private final PasswordEncoder encoder;
     private volatile String hashReferencia;
 
-    public UsuarioService(UsuarioSistemaRepository usuarios, EmpresaRepository empresas, PasswordEncoder encoder) {
+    public UsuarioService(
+            UsuarioSistemaRepository usuarios,
+            EmpresaRepository empresas,
+            PasswordEncoder encoder) {
         this.usuarios = usuarios;
         this.empresas = empresas;
         this.encoder = encoder;
@@ -72,7 +75,7 @@ public class UsuarioService {
     }
 
     /** Provisiona uma nova empresa em teste com o seu administrador inicial. */
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public UsuarioAutenticado cadastrarEmpresa(CadastroEmpresaForm form) {
         String email = normalizarLogin(form.getEmail());
         validarLoginDisponivel(email);
@@ -102,12 +105,17 @@ public class UsuarioService {
 
     public List<UsuarioSistema> listar(Long empresaId) {
         return usuarios.findAll().stream()
-                .filter(usuario -> usuario.getEmpresa() != null && usuario.getEmpresa().getId().equals(empresaId))
+                .filter(
+                        usuario ->
+                                usuario.getEmpresa() != null
+                                        && usuario.getEmpresa().getId().equals(empresaId))
                 .toList();
     }
 
     /** Compatibilidade para as telas MVC legadas; a SPA usa o escopo de empresa explícito. */
-    public List<UsuarioSistema> listar() { return listar(empresaPadrao().getId()); }
+    public List<UsuarioSistema> listar() {
+        return listar(empresaPadrao().getId());
+    }
 
     public UsuarioSistema cadastrar(UsuarioCadastroForm form, Long empresaId) {
         validarEmail(form.getEmail());
@@ -124,13 +132,16 @@ public class UsuarioService {
         usuario.setPermissoes(copiarPermissoes(form.getPermissoes()));
         Empresa empresa = buscarEmpresa(empresaId);
         if (listar(empresa.getId()).size() >= empresa.getPlano().getLimiteUsuarios()) {
-            throw new IllegalArgumentException("O plano " + empresa.getPlano() + " atingiu o limite de usuários.");
+            throw new IllegalArgumentException(
+                    "O plano " + empresa.getPlano() + " atingiu o limite de usuários.");
         }
         usuario.setEmpresa(empresa);
         return usuarios.save(usuario);
     }
 
-    public UsuarioSistema cadastrar(UsuarioCadastroForm form) { return cadastrar(form, empresaPadrao().getId()); }
+    public UsuarioSistema cadastrar(UsuarioCadastroForm form) {
+        return cadastrar(form, empresaPadrao().getId());
+    }
 
     public UsuarioSistema buscarBalconista(Long id, Long empresaId) {
         UsuarioSistema usuario =
@@ -147,7 +158,9 @@ public class UsuarioService {
         return usuario;
     }
 
-    public UsuarioSistema buscarBalconista(Long id) { return buscarBalconista(id, empresaPadrao().getId()); }
+    public UsuarioSistema buscarBalconista(Long id) {
+        return buscarBalconista(id, empresaPadrao().getId());
+    }
 
     public void atualizarPermissoes(Long id, Set<PermissaoModulo> permissoes, Long empresaId) {
         UsuarioSistema usuario = buscarBalconista(id, empresaId);
@@ -156,7 +169,9 @@ public class UsuarioService {
         SessaoAutenticacao.revogar(id);
     }
 
-    public void atualizarPermissoes(Long id, Set<PermissaoModulo> permissoes) { atualizarPermissoes(id, permissoes, empresaPadrao().getId()); }
+    public void atualizarPermissoes(Long id, Set<PermissaoModulo> permissoes) {
+        atualizarPermissoes(id, permissoes, empresaPadrao().getId());
+    }
 
     /** Retorna a senha temporária somente para que o administrador a entregue ao usuário. */
     public String resetarSenhaBalconista(Long id, Long empresaId) {
@@ -169,14 +184,18 @@ public class UsuarioService {
         return senhaTemporaria;
     }
 
-    public String resetarSenhaBalconista(Long id) { return resetarSenhaBalconista(id, empresaPadrao().getId()); }
+    public String resetarSenhaBalconista(Long id) {
+        return resetarSenhaBalconista(id, empresaPadrao().getId());
+    }
 
     public void excluirBalconista(Long id, Long empresaId) {
         usuarios.delete(buscarBalconista(id, empresaId));
         SessaoAutenticacao.revogar(id);
     }
 
-    public void excluirBalconista(Long id) { excluirBalconista(id, empresaPadrao().getId()); }
+    public void excluirBalconista(Long id) {
+        excluirBalconista(id, empresaPadrao().getId());
+    }
 
     public UsuarioAutenticado definirSenhaDefinitiva(Long usuarioId, String senha) {
         UsuarioSistema usuario =
@@ -196,12 +215,15 @@ public class UsuarioService {
         }
         if (senhaAdministrador == null || senhaAdministrador.isBlank()) {
             throw new IllegalStateException(
-                    "Banco sem usuários: defina SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD antes de iniciar.");
+                    "Banco sem usuários: defina SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD antes de"
+                            + " iniciar.");
         }
         validarSenhaForte(senhaAdministrador);
-        String login = normalizarLogin(usuarioAdministrador == null || usuarioAdministrador.isBlank()
-                ? "admin"
-                : usuarioAdministrador);
+        String login =
+                normalizarLogin(
+                        usuarioAdministrador == null || usuarioAdministrador.isBlank()
+                                ? "admin"
+                                : usuarioAdministrador);
         criarUsuarioPadrao(
                 "Administrador",
                 login,
@@ -246,27 +268,34 @@ public class UsuarioService {
 
     public void migrarEmpresasLegadas() {
         Empresa empresa = empresaPadrao();
-        usuarios.findAll().stream().filter(usuario -> usuario.getEmpresa() == null).forEach(usuario -> {
-            usuario.setEmpresa(empresa);
-            usuarios.save(usuario);
-        });
+        usuarios.findAll().stream()
+                .filter(usuario -> usuario.getEmpresa() == null)
+                .forEach(
+                        usuario -> {
+                            usuario.setEmpresa(empresa);
+                            usuarios.save(usuario);
+                        });
     }
 
     private Empresa buscarEmpresa(Long empresaId) {
         if (empresaId == null) return empresaPadrao();
-        return empresas.findById(empresaId).orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada."));
+        return empresas.findById(empresaId)
+                .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada."));
     }
 
     private Empresa empresaPadrao() {
-        return empresas.findAll().stream().findFirst().orElseGet(() -> {
-            Empresa empresa = new Empresa();
-            empresa.setNome("Sputnik - Gestão de Oficina");
-            empresa.setSlug("sputnik");
-            empresa.setPlano(PlanoAssinatura.PREMIUM);
-            empresa.setStatusAssinatura(StatusAssinatura.ATIVA);
-            empresa.setPeriodoTesteAte(LocalDate.now().plusDays(14));
-            return empresas.save(empresa);
-        });
+        return empresas.findAll().stream()
+                .findFirst()
+                .orElseGet(
+                        () -> {
+                            Empresa empresa = new Empresa();
+                            empresa.setNome("Sputnik - Gestão de Oficina");
+                            empresa.setSlug("sputnik");
+                            empresa.setPlano(PlanoAssinatura.PREMIUM);
+                            empresa.setStatusAssinatura(StatusAssinatura.ATIVA);
+                            empresa.setPeriodoTesteAte(LocalDate.now().plusDays(14));
+                            return empresas.save(empresa);
+                        });
     }
 
     private void validarEmail(String email) {
@@ -296,13 +325,16 @@ public class UsuarioService {
     private void validarSenhaForte(String senha) {
         if (!senha.matches("(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{12,}")) {
             throw new IllegalStateException(
-                    "SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD deve ter ao menos 12 caracteres, maiúscula, minúscula, número e símbolo.");
+                    "SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD deve ter ao menos 12 caracteres, maiúscula,"
+                            + " minúscula, número e símbolo.");
         }
     }
 
     private void validarSenhaCadastro(String senha) {
         if (!senha.matches("(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{12,}")) {
-            throw new IllegalArgumentException("A senha deve ter ao menos 12 caracteres, maiúscula, minúscula, número e símbolo.");
+            throw new IllegalArgumentException(
+                    "A senha deve ter ao menos 12 caracteres, maiúscula, minúscula, número e"
+                            + " símbolo.");
         }
     }
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,9 +35,10 @@ public class DashboardApiController extends ApiSupport {
                 && !temAcesso(session, PermissaoModulo.REPOSICAO)) return proibido();
         Map<String, Object> resposta = new LinkedHashMap<>();
         boolean podeOrdens = temAcesso(session, PermissaoModulo.ORDENS);
-        boolean podeEstoque = temAcesso(session, PermissaoModulo.PECAS)
-                || temAcesso(session, PermissaoModulo.REPOSICAO)
-                || temAcesso(session, PermissaoModulo.RELATORIO_MENSAL);
+        boolean podeEstoque =
+                temAcesso(session, PermissaoModulo.PECAS)
+                        || temAcesso(session, PermissaoModulo.REPOSICAO)
+                        || temAcesso(session, PermissaoModulo.RELATORIO_MENSAL);
         resposta.put("pecas", podeEstoque ? estoque.listar("").size() : 0);
         resposta.put("ordensAbertas", podeOrdens ? estoque.ordensAbertas() : 0);
         resposta.put("ordensConcluidasMes", podeOrdens ? estoque.ordensConcluidasNoMes() : 0);
@@ -44,13 +46,21 @@ public class DashboardApiController extends ApiSupport {
         resposta.put("porStatus", podeOrdens ? estoque.resumoOrdensPorStatus() : Map.of());
         resposta.put(
                 "aguardandoPeca",
-                podeOrdens ? estoque.ordensAguardandoPeca().stream().map(ApiMapper::ordemResumo).toList() : java.util.List.of());
+                podeOrdens
+                        ? estoque.ordensAguardandoPeca().stream()
+                                .map(ApiMapper::ordemResumo)
+                                .toList()
+                        : List.of());
         resposta.put(
                 "retornos",
-                podeOrdens ? estoque.veiculosEmRetorno().stream().map(ApiMapper::ordemResumo).toList() : java.util.List.of());
+                podeOrdens
+                        ? estoque.veiculosEmRetorno().stream().map(ApiMapper::ordemResumo).toList()
+                        : List.of());
         resposta.put(
                 "pecasMaisUsadas",
-                podeEstoque ? estoque.pecasMaisUsadas().stream().map(ApiMapper::pecaDto).toList() : java.util.List.of());
+                podeEstoque
+                        ? estoque.pecasMaisUsadas().stream().map(ApiMapper::pecaDto).toList()
+                        : List.of());
         if (autorizacao.ehAdministrador(session))
             resposta.put("valorEstoque", estoque.valorEstoque());
         return ResponseEntity.ok(resposta);

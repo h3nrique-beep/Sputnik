@@ -1,11 +1,16 @@
 package br.edu.fag.sputnik.web;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class OrdemServicoForm {
-    @jakarta.validation.Valid private br.edu.fag.sputnik.domain.DadosDocumentoOs documento;
+    @Valid private br.edu.fag.sputnik.domain.DadosDocumentoOs documento;
 
     public br.edu.fag.sputnik.domain.DadosDocumentoOs getDocumento() {
         return documento;
@@ -19,14 +24,14 @@ public class OrdemServicoForm {
     @NotNull private Long veiculoId;
 
     @NotBlank
-    @jakarta.validation.constraints.Size(max = 1200)
+    @Size(max = 1200)
     private String descricao;
 
     @NotNull @PositiveOrZero private Integer quilometragemAtual;
     private boolean orcamento;
-    private java.time.LocalDateTime agendamento;
-    private java.time.LocalDate retornoEm;
-    private java.time.LocalDate garantiaAte;
+    private LocalDateTime agendamento;
+    private LocalDate retornoEm;
+    private LocalDate garantiaAte;
 
     public Long getClienteId() {
         return clienteId;
@@ -68,16 +73,27 @@ public class OrdemServicoForm {
         this.orcamento = orcamento;
     }
 
-    public java.time.LocalDateTime getAgendamento() {
+    public LocalDateTime getAgendamento() {
         return agendamento;
     }
 
-    public void setAgendamento(java.time.LocalDateTime agendamento) {
+    public void setAgendamento(LocalDateTime agendamento) {
         this.agendamento = agendamento;
     }
 
-    public java.time.LocalDate getRetornoEm() { return retornoEm; }
-    public void setRetornoEm(java.time.LocalDate retornoEm) { this.retornoEm = retornoEm; }
-    public java.time.LocalDate getGarantiaAte() { return garantiaAte; }
-    public void setGarantiaAte(java.time.LocalDate garantiaAte) { this.garantiaAte = garantiaAte; }
+    public LocalDate getRetornoEm() {
+        return retornoEm;
+    }
+
+    public void setRetornoEm(LocalDate retornoEm) {
+        this.retornoEm = retornoEm;
+    }
+
+    public LocalDate getGarantiaAte() {
+        return garantiaAte;
+    }
+
+    public void setGarantiaAte(LocalDate garantiaAte) {
+        this.garantiaAte = garantiaAte;
+    }
 }

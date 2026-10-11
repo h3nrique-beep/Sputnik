@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.Objects;
+
 @Controller
 public class PrimeiroAcessoController {
     private final UsuarioService usuarios;
@@ -39,7 +41,7 @@ public class PrimeiroAcessoController {
         var usuario = SessaoAutenticacao.usuario(session);
         if (usuario.isEmpty()) return "redirect:/login";
         if (!usuario.get().trocaSenhaObrigatoria()) return "redirect:/inicio";
-        if (!java.util.Objects.equals(form.getSenha(), form.getConfirmacaoSenha()))
+        if (!Objects.equals(form.getSenha(), form.getConfirmacaoSenha()))
             resultado.rejectValue("confirmacaoSenha", "diferente", "As senhas não coincidem.");
         if (resultado.hasErrors()) return "primeiro-acesso";
         SessaoAutenticacao.iniciar(

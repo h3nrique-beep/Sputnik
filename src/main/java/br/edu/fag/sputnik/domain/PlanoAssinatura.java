@@ -7,6 +7,11 @@ public enum PlanoAssinatura {
 
     private final int limiteUsuarios;
 
-    PlanoAssinatura(int limiteUsuarios) { this.limiteUsuarios = limiteUsuarios; }
-    public int getLimiteUsuarios() { return limiteUsuarios; }
+    PlanoAssinatura(int limiteUsuarios) {
+        this.limiteUsuarios = limiteUsuarios;
+    }
+
+    public int getLimiteUsuarios() {
+        return limiteUsuarios;
+    }
 }

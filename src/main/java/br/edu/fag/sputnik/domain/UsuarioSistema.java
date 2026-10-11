@@ -37,8 +37,7 @@ public class UsuarioSistema {
     @Column(name = "permissao", nullable = false)
     private Set<PermissaoModulo> permissoes = new HashSet<>();
 
-    @ManyToOne
-    private Empresa empresa;
+    @ManyToOne private Empresa empresa;
 
     public Long getId() {
         return id;
@@ -100,6 +99,11 @@ public class UsuarioSistema {
         this.permissoes = permissoes;
     }
 
-    public Empresa getEmpresa() { return empresa; }
-    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+    public Empresa getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(Empresa empresa) {
+        this.empresa = empresa;
+    }
 }

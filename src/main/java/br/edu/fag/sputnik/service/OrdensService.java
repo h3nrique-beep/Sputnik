@@ -18,9 +18,11 @@ import br.edu.fag.sputnik.repository.OrdemServicoRepository;
 import br.edu.fag.sputnik.repository.PecaRepository;
 import br.edu.fag.sputnik.repository.VeiculoRepository;
 import br.edu.fag.sputnik.tenant.EmpresaContext;
-import br.edu.fag.sputnik.web.OrdemServicoForm;
 import br.edu.fag.sputnik.web.OrdemServicoEdicaoForm;
+import br.edu.fag.sputnik.web.OrdemServicoForm;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -43,7 +45,7 @@ public class OrdensService {
     private final OrdemServicoRepository ordens;
     private final ItemOrdemServicoRepository itensOrdem;
     private final HistoricoOrdemServicoRepository historicosOrdem;
-    private final jakarta.persistence.EntityManager entityManager;
+    private final EntityManager entityManager;
 
     public OrdensService(
             PecaRepository pecas,
@@ -52,7 +54,8 @@ public class OrdensService {
             VeiculoRepository veiculos,
             OrdemServicoRepository ordens,
             ItemOrdemServicoRepository itensOrdem,
-            HistoricoOrdemServicoRepository historicosOrdem, jakarta.persistence.EntityManager entityManager) {
+            HistoricoOrdemServicoRepository historicosOrdem,
+            EntityManager entityManager) {
         this.pecas = pecas;
         this.movimentacoes = movimentacoes;
         this.clientes = clientes;
@@ -191,13 +194,19 @@ public class OrdensService {
             registrarHistorico(
                     salva,
                     responsavel,
-                    "Atendimento agendado para " + form.getAgendamento().toString().replace('T', ' ') + ".");
+                    "Atendimento agendado para "
+                            + form.getAgendamento().toString().replace('T', ' ')
+                            + ".");
         }
         if (form.getRetornoEm() != null) {
-            registrarHistorico(salva, responsavel, "Retorno preventivo programado para " + form.getRetornoEm() + ".");
+            registrarHistorico(
+                    salva,
+                    responsavel,
+                    "Retorno preventivo programado para " + form.getRetornoEm() + ".");
         }
         if (form.getGarantiaAte() != null) {
-            registrarHistorico(salva, responsavel, "Garantia registrada até " + form.getGarantiaAte() + ".");
+            registrarHistorico(
+                    salva, responsavel, "Garantia registrada até " + form.getGarantiaAte() + ".");
         }
         return salva;
     }
@@ -206,7 +215,9 @@ public class OrdensService {
         return EmpresaContext.exigirPertencimento(
                 ordens.findById(id)
                         .orElseThrow(
-                                () -> new IllegalArgumentException("Ordem de serviço não encontrada.")),
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Ordem de serviço não encontrada.")),
                 "Ordem de serviço não encontrada.");
     }
 
@@ -227,10 +238,12 @@ public class OrdensService {
         StatusOrdemServico statusAnterior = statusDaOrdem(ordem);
         if (statusAnterior.ehOrcamento()) {
             throw new IllegalArgumentException(
-                    "Aprove o orçamento para convertê-lo em ordem de serviço antes de editar o status.");
+                    "Aprove o orçamento para convertê-lo em ordem de serviço antes de editar o"
+                            + " status.");
         }
         if (formulario.getStatus().ehOrcamento()) {
-            throw new IllegalArgumentException("Uma ordem já aberta não pode voltar a ser orçamento.");
+            throw new IllegalArgumentException(
+                    "Uma ordem já aberta não pode voltar a ser orçamento.");
         }
         if (formulario.getDocumento() != null) ordem.setDocumento(formulario.getDocumento());
         ordem.setDescricao(formulario.getDescricao().trim());
@@ -317,7 +330,8 @@ public class OrdensService {
         ordem.setStatus(STATUS_ABERTA);
         ordem.setUltimaAtualizacao(LocalDateTime.now());
         ordens.save(ordem);
-        registrarHistorico(ordem, responsavel, "Orçamento aprovado e convertido em ordem de serviço.");
+        registrarHistorico(
+                ordem, responsavel, "Orçamento aprovado e convertido em ordem de serviço.");
     }
 
     private StatusOrdemServico statusDaOrdem(OrdemServico ordem) {
@@ -359,7 +373,9 @@ public class OrdensService {
 
     private void baixarEstoqueDaPeca(
             Peca peca, Integer quantidade, String responsavel, OrdemServico ordem) {
-        if (quantidade <= 0 || quantidade > peca.getSaldo() || quantidade > peca.getEstoqueDisponivel()) {
+        if (quantidade <= 0
+                || quantidade > peca.getSaldo()
+                || quantidade > peca.getEstoqueDisponivel()) {
             throw new IllegalArgumentException("Estoque insuficiente para esta operação.");
         }
         peca.setSaldo(peca.getSaldo() - quantidade);
@@ -377,19 +393,21 @@ public class OrdensService {
     }
 
     private Peca buscarPeca(Long id) {
-        Peca peca = EmpresaContext.exigirPertencimento(
-                pecas.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada.")),
-                "Peça não encontrada.");
+        Peca peca =
+                EmpresaContext.exigirPertencimento(
+                        pecas.findById(id)
+                                .orElseThrow(
+                                        () -> new IllegalArgumentException("Peça não encontrada.")),
+                        "Peça não encontrada.");
         entityManager.flush();
-        entityManager.refresh(peca, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(peca, LockModeType.PESSIMISTIC_WRITE);
         return peca;
     }
 
     private OrdemServico buscarOrdemParaAlterar(Long id) {
         OrdemServico ordem = buscarOrdem(id);
         entityManager.flush();
-        entityManager.refresh(ordem, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(ordem, LockModeType.PESSIMISTIC_WRITE);
         return ordem;
     }
 

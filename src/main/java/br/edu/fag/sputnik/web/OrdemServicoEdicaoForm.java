@@ -2,12 +2,14 @@ package br.edu.fag.sputnik.web;
 
 import br.edu.fag.sputnik.domain.StatusOrdemServico;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 public class OrdemServicoEdicaoForm {
-    @jakarta.validation.Valid private br.edu.fag.sputnik.domain.DadosDocumentoOs documento;
+    @Valid private br.edu.fag.sputnik.domain.DadosDocumentoOs documento;
 
     public br.edu.fag.sputnik.domain.DadosDocumentoOs getDocumento() {
         return documento;
@@ -18,7 +20,7 @@ public class OrdemServicoEdicaoForm {
     }
 
     @NotBlank
-    @jakarta.validation.constraints.Size(max = 1200)
+    @Size(max = 1200)
     private String descricao;
 
     @NotNull @PositiveOrZero private Integer quilometragemAtual;

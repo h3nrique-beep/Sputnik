@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface ItemOrdemServicoRepository extends JpaRepository<ItemOrdemServico, Long> {
     List<ItemOrdemServico> findByOrdemServicoEmpresaId(Long empresaId);
+
     List<ItemOrdemServico> findByOrdemServicoIdOrderByIdDesc(Long ordemServicoId);
 }

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /** Gerencia consulta e cadastro do catálogo de peças. */
 @Controller
 public class PecaController {
@@ -78,7 +80,7 @@ public class PecaController {
         return "peca-form";
     }
 
-    private java.util.List<Peca> filtrar(String busca, String status) {
+    private List<Peca> filtrar(String busca, String status) {
         var pecas = estoque.listar(busca);
         if ("baixo".equals(status)) return pecas.stream().filter(Peca::estaAbaixoDoMinimo).toList();
         if ("zerado".equals(status)) return pecas.stream().filter(Peca::estaZerada).toList();

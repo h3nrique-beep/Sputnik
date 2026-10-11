@@ -68,11 +68,4 @@ public class CadastrosService {
                         .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada.")),
                 "Pessoa não encontrada.");
     }
-
-    private Veiculo buscarVeiculo(Long id) {
-        return EmpresaContext.exigirPertencimento(
-                veiculos.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Carro não encontrado.")),
-                "Carro não encontrado.");
-    }
 }

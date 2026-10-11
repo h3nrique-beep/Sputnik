@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -38,8 +40,8 @@ public class CsrfTokenService {
     }
 
     private boolean constanteIgual(String esperado, String recebido) {
-        byte[] a = esperado.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        byte[] b = recebido.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        return java.security.MessageDigest.isEqual(a, b);
+        byte[] a = esperado.getBytes(StandardCharsets.UTF_8);
+        byte[] b = recebido.getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(a, b);
     }
 }

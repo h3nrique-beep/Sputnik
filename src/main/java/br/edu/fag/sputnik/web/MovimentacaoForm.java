@@ -4,6 +4,7 @@ import br.edu.fag.sputnik.domain.TipoMovimentacao;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /** Dados validados para uma entrada ou saída manual de estoque. */
 public class MovimentacaoForm {
@@ -15,7 +16,7 @@ public class MovimentacaoForm {
     @Min(1)
     private Integer quantidade;
 
-    @jakarta.validation.constraints.Size(max = 255, message = "A observação deve ter até 255 caracteres.")
+    @Size(max = 255, message = "A observação deve ter até 255 caracteres.")
     private String observacao;
 
     public Long getPecaId() {

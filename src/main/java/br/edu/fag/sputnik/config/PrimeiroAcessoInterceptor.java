@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.Set;
+
 @Component
 public class PrimeiroAcessoInterceptor implements HandlerInterceptor {
     @Override
@@ -25,13 +27,21 @@ public class PrimeiroAcessoInterceptor implements HandlerInterceptor {
         boolean rotaPermitida =
                 request.getRequestURI().startsWith("/primeiro-acesso")
                         || request.getRequestURI().equals("/logout")
-                        || java.util.Set.of("/", "/index.html", "/api/auth/session",
-                                "/api/auth/logout", "/api/security/csrf").contains(request.getRequestURI());
+                        || Set.of(
+                                        "/",
+                                        "/index.html",
+                                        "/api/auth/session",
+                                        "/api/auth/logout",
+                                        "/api/security/csrf")
+                                .contains(request.getRequestURI());
         if (deveTrocarSenha && !rotaPermitida) {
             if (request.getRequestURI().startsWith("/api/")) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"mensagem\":\"Defina sua senha definitiva antes de continuar.\"}");
+                response.getWriter()
+                        .write(
+                                "{\"mensagem\":\"Defina sua senha definitiva antes de"
+                                        + " continuar.\"}");
                 return false;
             }
             response.sendRedirect("/primeiro-acesso");

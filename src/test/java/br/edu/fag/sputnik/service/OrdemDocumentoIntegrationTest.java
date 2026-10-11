@@ -10,6 +10,7 @@ import br.edu.fag.sputnik.web.*;
 
 import jakarta.persistence.EntityManager;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -84,8 +85,7 @@ class OrdemDocumentoIntegrationTest {
                 .andExpect(content().contentType("application/pdf"));
         mvc.perform(get("/api/ordens/" + id + "/impressao").session(session))
                 .andExpect(status().isOk())
-                .andExpect(
-                        content().string(org.hamcrest.Matchers.containsString("Empresa pagadora")));
+                .andExpect(content().string(Matchers.containsString("Empresa pagadora")));
         MockHttpSession restricted = new MockHttpSession();
         SessaoAutenticacao.iniciar(
                 restricted,

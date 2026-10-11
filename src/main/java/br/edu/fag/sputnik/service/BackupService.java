@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /** Administração segura dos backups do banco H2 utilizado pelo Sputnik. */
 @Service
@@ -31,7 +32,12 @@ public class BackupService {
     public synchronized BackupInfo criar() {
         try {
             Files.createDirectories(pastaBackups);
-            String nome = "sputnik-" + NOME.format(LocalDateTime.now()) + "-" + java.util.UUID.randomUUID() + ".zip";
+            String nome =
+                    "sputnik-"
+                            + NOME.format(LocalDateTime.now())
+                            + "-"
+                            + UUID.randomUUID()
+                            + ".zip";
             Path destino = pastaBackups.resolve(nome).normalize();
             if (!destino.startsWith(pastaBackups))
                 throw new IllegalStateException("Destino de backup inválido.");

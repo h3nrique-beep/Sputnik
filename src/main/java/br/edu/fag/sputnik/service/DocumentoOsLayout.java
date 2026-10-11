@@ -1,9 +1,12 @@
 package br.edu.fag.sputnik.service;
 
+import java.awt.Font;
+import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
+
 import javax.imageio.ImageIO;
 
 /** Primitivas em pontos A4 compartilhadas por HTML e PDF; excedentes vão para anexos. */
@@ -96,9 +99,8 @@ final class DocumentoOsLayout {
     }
 
     private static List<String> wrap(String value, double width, int size) {
-        java.awt.Font font = new java.awt.Font("Arial", java.awt.Font.PLAIN, size);
-        java.awt.font.FontRenderContext metrics =
-                new java.awt.font.FontRenderContext(null, true, true);
+        Font font = new Font("Arial", Font.PLAIN, size);
+        FontRenderContext metrics = new FontRenderContext(null, true, true);
         List<String> result = new ArrayList<>();
         for (String paragraph : value.replace('\r', ' ').replace('\t', ' ').split("\n", -1)) {
             String rest = paragraph;
@@ -144,7 +146,9 @@ final class DocumentoOsLayout {
                                 "pt;border-top:0.6pt solid #222;border-left:0.6pt solid"
                                         + " #222\"></i>");
             for (Image image : p.images)
-                h.append("<img src=\"/images/logo.jpg\" alt=\"Sputnik\" style=\"position:absolute;left:")
+                h.append(
+                                "<img src=\"/images/logo.jpg\" alt=\"Sputnik\""
+                                        + " style=\"position:absolute;left:")
                         .append(image.x)
                         .append("pt;top:")
                         .append(image.y)
@@ -229,7 +233,9 @@ final class DocumentoOsLayout {
             objects.add(
                     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F"
                             + " 3 0 R /FB 4 0 R >> "
-                            + (p.images.isEmpty() ? "" : "/XObject << /Logo " + objetoLogo + " 0 R >> ")
+                            + (p.images.isEmpty()
+                                    ? ""
+                                    : "/XObject << /Logo " + objetoLogo + " 0 R >> ")
                             + ">> /Contents "
                             + (objects.size() + 2)
                             + " 0 R >>");
@@ -254,7 +260,8 @@ final class DocumentoOsLayout {
                                 + LOGO.width
                                 + " /Height "
                                 + LOGO.height
-                                + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "
+                                + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode"
+                                + " /Length "
                                 + LOGO.bytes.length
                                 + " >>\nstream\n");
                 out.writeBytes(LOGO.bytes);
@@ -287,7 +294,8 @@ final class DocumentoOsLayout {
     }
 
     private static Logo carregarLogo() {
-        try (InputStream entrada = DocumentoOsLayout.class.getResourceAsStream("/static/images/logo.jpg")) {
+        try (InputStream entrada =
+                DocumentoOsLayout.class.getResourceAsStream("/static/images/logo.jpg")) {
             if (entrada == null) throw new IllegalStateException("Logo Sputnik não encontrada.");
             byte[] bytes = entrada.readAllBytes();
             BufferedImage imagem = ImageIO.read(new ByteArrayInputStream(bytes));

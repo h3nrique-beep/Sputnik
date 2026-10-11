@@ -2,11 +2,13 @@ package br.edu.fag.sputnik.auth;
 
 import jakarta.servlet.http.HttpSession;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 
 public final class SessaoAutenticacao {
     public static final String USUARIO_AUTENTICADO = "usuarioAutenticado";
-    private static final java.util.Map<HttpSession, Long> SESSOES = new java.util.WeakHashMap<>();
+    private static final Map<HttpSession, Long> SESSOES = new WeakHashMap<>();
 
     private SessaoAutenticacao() {}
 
@@ -21,8 +23,11 @@ public final class SessaoAutenticacao {
         while (iterator.hasNext()) {
             var entry = iterator.next();
             if (!entry.getValue().equals(usuarioId)) continue;
-            try { entry.getKey().removeAttribute(USUARIO_AUTENTICADO); }
-            catch (IllegalStateException ignored) { /* Sessão já expirada pelo contêiner. */ }
+            try {
+                entry.getKey().removeAttribute(USUARIO_AUTENTICADO);
+            } catch (IllegalStateException ignored) {
+                /* Sessão já expirada pelo contêiner. */
+            }
             iterator.remove();
         }
     }

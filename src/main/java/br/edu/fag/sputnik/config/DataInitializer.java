@@ -1,8 +1,8 @@
 package br.edu.fag.sputnik.config;
 
 import br.edu.fag.sputnik.domain.Peca;
-import br.edu.fag.sputnik.repository.PecaRepository;
 import br.edu.fag.sputnik.repository.EmpresaRepository;
+import br.edu.fag.sputnik.repository.PecaRepository;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +22,11 @@ public class DataInitializer {
             if (pecas.count() > 0) {
                 return;
             }
-            Long empresaId = empresas.findAll().stream().findFirst().map(empresa -> empresa.getId()).orElse(null);
+            Long empresaId =
+                    empresas.findAll().stream()
+                            .findFirst()
+                            .map(empresa -> empresa.getId())
+                            .orElse(null);
 
             adicionar(
                     pecas,
@@ -34,7 +38,8 @@ public class DataInitializer {
                     "Corredor B · Prateleira 4",
                     5,
                     8,
-                    "Tecfil", empresaId);
+                    "Tecfil",
+                    empresaId);
             adicionar(
                     pecas,
                     "PF-220",
@@ -45,7 +50,8 @@ public class DataInitializer {
                     "Corredor A · Prateleira 2",
                     12,
                     6,
-                    "Autopeças Sul", empresaId);
+                    "Autopeças Sul",
+                    empresaId);
             adicionar(
                     pecas,
                     "CD-310",
@@ -56,7 +62,8 @@ public class DataInitializer {
                     "Corredor C · Prateleira 1",
                     0,
                     5,
-                    "Autopeças Sul", empresaId);
+                    "Autopeças Sul",
+                    empresaId);
             adicionar(
                     pecas,
                     "VI-118",
@@ -67,7 +74,8 @@ public class DataInitializer {
                     "Corredor B · Prateleira 1",
                     2,
                     8,
-                    "Cofap", empresaId);
+                    "Cofap",
+                    empresaId);
             adicionar(
                     pecas,
                     "FA-090",
@@ -78,7 +86,8 @@ public class DataInitializer {
                     "Corredor B · Prateleira 3",
                     3,
                     10,
-                    "Tecfil", empresaId);
+                    "Tecfil",
+                    empresaId);
             adicionar(
                     pecas,
                     "AD-405",
@@ -89,7 +98,8 @@ public class DataInitializer {
                     "Corredor C · Prateleira 2",
                     7,
                     4,
-                    "Cofap", empresaId);
+                    "Cofap",
+                    empresaId);
         };
     }
 
@@ -103,7 +113,8 @@ public class DataInitializer {
             String locacao,
             int saldo,
             int estoqueMinimo,
-            String fornecedor, Long empresaId) {
+            String fornecedor,
+            Long empresaId) {
         Peca peca = new Peca();
         peca.setCodigo(codigo);
         peca.setNome(nome);

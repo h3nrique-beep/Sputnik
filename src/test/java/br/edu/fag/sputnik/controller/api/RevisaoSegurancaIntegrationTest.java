@@ -46,7 +46,12 @@ class RevisaoSegurancaIntegrationTest {
         SessaoAutenticacao.iniciar(
                 session,
                 new UsuarioAutenticado(
-                        empresa, empresa, "Empresa teste", "Admin teste", Perfil.ADMIN, Set.of(),
+                        empresa,
+                        empresa,
+                        "Empresa teste",
+                        "Admin teste",
+                        Perfil.ADMIN,
+                        Set.of(),
                         false));
         return session;
     }
@@ -75,8 +80,8 @@ class RevisaoSegurancaIntegrationTest {
                                         "/clientes",
                                         session,
                                         """
-                                        {"nome":"Pessoa","cpf":"12345678900","telefone":"45999990000"}
-                                        """)
+{"nome":"Pessoa","cpf":"12345678900","telefone":"45999990000"}
+""")
                                 .andExpect(status().isCreated()));
         long veiculo =
                 id(
@@ -93,8 +98,8 @@ class RevisaoSegurancaIntegrationTest {
                         "/ordens",
                         session,
                         """
-                        {"clienteId":%d,"veiculoId":%d,"descricao":"Revisão","quilometragemAtual":20}
-                        """
+{"clienteId":%d,"veiculoId":%d,"descricao":"Revisão","quilometragemAtual":20}
+"""
                                 .formatted(cliente, veiculo))
                 .andExpect(status().isBadRequest())
                 .andExpect(

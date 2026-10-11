@@ -2,8 +2,8 @@ package br.edu.fag.sputnik.controller.api;
 
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.usuarioSistemaDto;
 
-import br.edu.fag.sputnik.auth.UsuarioService;
 import br.edu.fag.sputnik.auth.SessaoAutenticacao;
+import br.edu.fag.sputnik.auth.UsuarioService;
 import br.edu.fag.sputnik.controller.api.mapper.ApiMapper;
 import br.edu.fag.sputnik.service.AutorizacaoService;
 import br.edu.fag.sputnik.web.UsuarioCadastroForm;
@@ -39,7 +39,9 @@ public class UsuariosApiController extends ApiSupport {
     public ResponseEntity<?> usuarios(HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         return ResponseEntity.ok(
-                usuarios.listar(empresaId(session)).stream().map(ApiMapper::usuarioSistemaDto).toList());
+                usuarios.listar(empresaId(session)).stream()
+                        .map(ApiMapper::usuarioSistemaDto)
+                        .toList());
     }
 
     @PostMapping("/admin/usuarios")
@@ -70,7 +72,10 @@ public class UsuariosApiController extends ApiSupport {
     public ResponseEntity<?> resetarSenha(@PathVariable Long id, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         try {
-            return ResponseEntity.ok(Map.of("senhaTemporaria", usuarios.resetarSenhaBalconista(id, empresaId(session))));
+            return ResponseEntity.ok(
+                    Map.of(
+                            "senhaTemporaria",
+                            usuarios.resetarSenhaBalconista(id, empresaId(session))));
         } catch (IllegalArgumentException exception) {
             return invalido(exception);
         }

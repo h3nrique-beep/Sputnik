@@ -11,6 +11,8 @@ import br.edu.fag.sputnik.repository.PecaRepository;
 import br.edu.fag.sputnik.tenant.EmpresaContext;
 import br.edu.fag.sputnik.web.MovimentacaoForm;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -29,12 +31,13 @@ public class PecasService {
     private final PecaRepository pecas;
     private final MovimentacaoRepository movimentacoes;
     private final ItemOrdemServicoRepository itensOrdem;
-    private final jakarta.persistence.EntityManager entityManager;
+    private final EntityManager entityManager;
 
     public PecasService(
             PecaRepository pecas,
             MovimentacaoRepository movimentacoes,
-            ItemOrdemServicoRepository itensOrdem, jakarta.persistence.EntityManager entityManager) {
+            ItemOrdemServicoRepository itensOrdem,
+            EntityManager entityManager) {
         this.pecas = pecas;
         this.movimentacoes = movimentacoes;
         this.itensOrdem = itensOrdem;
@@ -61,7 +64,8 @@ public class PecasService {
             peca.setEstoqueDisponivel(peca.getSaldo());
         }
         if (peca.getEstoqueDisponivel() > peca.getSaldo()) {
-            throw new IllegalArgumentException("O estoque disponível não pode superar o saldo total.");
+            throw new IllegalArgumentException(
+                    "O estoque disponível não pode superar o saldo total.");
         }
         return pecas.save(peca);
     }
@@ -72,7 +76,8 @@ public class PecasService {
         validarSaldoParaSaida(formulario, peca);
 
         int saldoAtualizado = calcularSaldoAtualizado(formulario, peca);
-        int disponivelAtualizado = peca.getEstoqueDisponivel() + (saldoAtualizado - peca.getSaldo());
+        int disponivelAtualizado =
+                peca.getEstoqueDisponivel() + (saldoAtualizado - peca.getSaldo());
         peca.setSaldo(saldoAtualizado);
         peca.setEstoqueDisponivel(disponivelAtualizado);
 
@@ -107,12 +112,17 @@ public class PecasService {
     public List<Peca> criticas() {
         return pecas.findAll().stream()
                 .filter(Peca::estaAbaixoDoMinimo)
-                .sorted(Comparator.comparingInt(peca -> peca.getEstoqueDisponivel() - peca.getEstoqueMinimo()))
+                .sorted(
+                        Comparator.comparingInt(
+                                peca -> peca.getEstoqueDisponivel() - peca.getEstoqueMinimo()))
                 .toList();
     }
 
     public int sugestao(Peca peca) {
-        return (int) Math.min(Integer.MAX_VALUE, Math.max((peca.getEstoqueMinimo() * 2L) - peca.getEstoqueDisponivel(), 1L));
+        return (int)
+                Math.min(
+                        Integer.MAX_VALUE,
+                        Math.max((peca.getEstoqueMinimo() * 2L) - peca.getEstoqueDisponivel(), 1L));
     }
 
     public BigDecimal custoReposicao() {
@@ -147,12 +157,16 @@ public class PecasService {
 
     public List<Peca> pecasMaisUsadas() {
         Long empresaId = EmpresaContext.empresaId();
-        var itens = empresaId == null ? itensOrdem.findAll() : itensOrdem.findByOrdemServicoEmpresaId(empresaId);
+        var itens =
+                empresaId == null
+                        ? itensOrdem.findAll()
+                        : itensOrdem.findByOrdemServicoEmpresaId(empresaId);
         return itens.stream()
                 .filter(
                         item ->
                                 item.getTipo() == TipoItemOrdemServico.PECA
-                                        && item.getPeca() != null && item.isEstoqueBaixado())
+                                        && item.getPeca() != null
+                                        && item.isEstoqueBaixado())
                 .collect(
                         Collectors.groupingBy(
                                 ItemOrdemServico::getPeca,
@@ -166,11 +180,13 @@ public class PecasService {
     }
 
     private Peca buscarPeca(Long id) {
-        Peca peca = EmpresaContext.exigirPertencimento(
-                pecas.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Peça não encontrada.")),
-                "Peça não encontrada.");
-        entityManager.refresh(peca, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        Peca peca =
+                EmpresaContext.exigirPertencimento(
+                        pecas.findById(id)
+                                .orElseThrow(
+                                        () -> new IllegalArgumentException("Peça não encontrada.")),
+                        "Peça não encontrada.");
+        entityManager.refresh(peca, LockModeType.PESSIMISTIC_WRITE);
         return peca;
     }
 
@@ -178,7 +194,7 @@ public class PecasService {
         boolean saldoInsuficiente =
                 formulario.getTipo() == TipoMovimentacao.SAIDA
                         && (formulario.getQuantidade() > peca.getSaldo()
-                            || formulario.getQuantidade() > peca.getEstoqueDisponivel());
+                                || formulario.getQuantidade() > peca.getEstoqueDisponivel());
         if (saldoInsuficiente) {
             throw new IllegalArgumentException("Saída bloqueada: saldo insuficiente (RN03/RN05).");
         }
@@ -186,8 +202,9 @@ public class PecasService {
 
     private int calcularSaldoAtualizado(MovimentacaoForm formulario, Peca peca) {
         if (formulario.getTipo() == TipoMovimentacao.ENTRADA) {
-            try { return Math.addExact(peca.getSaldo(), formulario.getQuantidade()); }
-            catch (ArithmeticException exception) {
+            try {
+                return Math.addExact(peca.getSaldo(), formulario.getQuantidade());
+            } catch (ArithmeticException exception) {
                 throw new IllegalArgumentException("A quantidade excede o limite de estoque.");
             }
         }
@@ -198,7 +215,9 @@ public class PecasService {
         if (valor == null) return "\"\"";
         String inicio = valor.stripLeading();
         if (!inicio.isEmpty() && "=+-@".indexOf(inicio.charAt(0)) >= 0
-                || valor.startsWith("\t") || valor.startsWith("\r") || valor.startsWith("\n")) {
+                || valor.startsWith("\t")
+                || valor.startsWith("\r")
+                || valor.startsWith("\n")) {
             valor = "'" + valor;
         }
         return "\"" + valor.replace("\"", "\"\"") + "\"";
