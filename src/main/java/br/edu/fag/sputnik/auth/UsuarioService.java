@@ -35,6 +35,7 @@ public class UsuarioService {
     private final UsuarioSistemaRepository usuarios;
     private final EmpresaRepository empresas;
     private final PasswordEncoder encoder;
+    private volatile String hashReferencia;
 
     public UsuarioService(UsuarioSistemaRepository usuarios, EmpresaRepository empresas, PasswordEncoder encoder) {
         this.usuarios = usuarios;
@@ -48,10 +49,26 @@ public class UsuarioService {
         }
 
         String loginNormalizado = normalizarLogin(identificador);
-        return usuarios.findByEmailIgnoreCase(loginNormalizado)
-                .or(() -> usuarios.findByUsuarioIgnoreCase(loginNormalizado))
-                .filter(usuario -> encoder.matches(senha, usuario.getSenhaHash()))
+        Optional<UsuarioSistema> usuario =
+                usuarios.findByEmailIgnoreCase(loginNormalizado)
+                        .or(() -> usuarios.findByUsuarioIgnoreCase(loginNormalizado));
+        if (usuario.isEmpty()) {
+            // Mesmo custo de BCrypt para contas inexistentes: o tempo de resposta
+            // não revela quais logins estão cadastrados.
+            encoder.matches(senha, hashReferencia());
+            return Optional.empty();
+        }
+        return usuario.filter(conta -> encoder.matches(senha, conta.getSenhaHash()))
                 .map(this::paraSessao);
+    }
+
+    private String hashReferencia() {
+        String hash = hashReferencia;
+        if (hash == null) {
+            hash = encoder.encode(gerarSenhaTemporaria());
+            hashReferencia = hash;
+        }
+        return hash;
     }
 
     /** Provisiona uma nova empresa em teste com o seu administrador inicial. */

@@ -125,8 +125,12 @@ public class OrdemServicoController {
                 resultado.reject("ordem", exception.getMessage());
             }
         }
+        try {
+            model.addAttribute("ordem", estoque.buscarOrdem(id));
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/ordens?erro=ordem";
+        }
         pagina.preparar(model, session, "ordens");
-        model.addAttribute("ordem", estoque.buscarOrdem(id));
         model.addAttribute("statusDisponiveis", StatusOrdemServico.values());
         return "ordem-editar";
     }

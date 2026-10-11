@@ -147,7 +147,8 @@ public class OrdensService {
         Cliente cliente = buscarCliente(clienteId);
         Veiculo veiculo = buscarVeiculo(veiculoId);
 
-        if (!veiculo.getCliente().getId().equals(cliente.getId())) {
+        // Veículos podem ser cadastrados sem proprietário; nesse caso não pertencem à pessoa.
+        if (veiculo.getCliente() == null || !veiculo.getCliente().getId().equals(cliente.getId())) {
             throw new IllegalArgumentException(
                     "O carro selecionado não pertence à pessoa cadastrada.");
         }

@@ -1,5 +1,12 @@
 let csrfToken: string | undefined;
 
+/** Rotas após as quais o servidor emite um novo token anti-CSRF para a sessão. */
+const ROTAS_QUE_RENOVAM_TOKEN = new Set([
+  "/auth/login",
+  "/auth/logout",
+  "/assinaturas/cadastro",
+]);
+
 async function obterTokenCsrf() {
   if (csrfToken) return csrfToken;
   const response = await fetch("/api/security/csrf", {
@@ -40,7 +47,7 @@ export async function api<T>(url: string, options: RequestInit = {}) {
     throw new Error(body?.mensagem || "Não foi possível concluir a operação.");
   }
 
-  if ((url === "/auth/login" || url === "/auth/logout") && response.ok) {
+  if (ROTAS_QUE_RENOVAM_TOKEN.has(url)) {
     csrfToken = undefined;
   }
 
@@ -63,5 +70,6 @@ export async function downloadApi(url: string, filename: string) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(link.href);
+  // Revogar no mesmo ciclo pode cancelar o download em alguns navegadores.
+  setTimeout(() => URL.revokeObjectURL(link.href), 0);
 }
