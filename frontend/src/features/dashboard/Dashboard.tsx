@@ -2,16 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Bell,
-  CheckCircle2,
   ClipboardList,
   Package,
   PackagePlus,
+  PackageSearch,
   RefreshCw,
   Search,
   TriangleAlert,
   Warehouse,
 } from "lucide-react";
 import { api } from "../../lib/api";
+import { label } from "../../lib/format";
 import { type Order, type Piece } from "../../types/domain";
 
 type DashboardData = {
@@ -24,9 +25,6 @@ type DashboardData = {
   retornos: Order[];
   pecasMaisUsadas: Piece[];
 };
-
-const statusName = (status: string) =>
-  status.replaceAll("_", " ").toLocaleLowerCase("pt-BR");
 
 export function Dashboard({
   go,
@@ -101,6 +99,52 @@ export function Dashboard({
       icon: Warehouse,
     },
   ].filter((action) => action !== false);
+  const verEstoque =
+    can("PECAS") || can("REPOSICAO") || can("RELATORIO_MENSAL");
+  const attention = [
+    verEstoque && {
+      label: "Estoque crítico",
+      value: data.criticas,
+      detail: data.criticas
+        ? "Peças abaixo do mínimo"
+        : "Nenhuma peça abaixo do mínimo",
+      icon: TriangleAlert,
+      tone: "amber",
+      view: can("REPOSICAO") ? "reposition" : can("PECAS") ? "pieces" : null,
+      cta: can("REPOSICAO") ? "Ver reposição" : "Ver estoque",
+    },
+    can("ORDENS") && {
+      label: "Aguardando peça",
+      value: data.aguardandoPeca.length,
+      detail: data.aguardandoPeca.length
+        ? "Ordens paradas por falta de peça"
+        : "Nenhuma ordem parada",
+      icon: PackageSearch,
+      tone: "amber",
+      view: "orders",
+      cta: "Ver ordens",
+    },
+    can("ORDENS") && {
+      label: "Retornos a contatar",
+      value: data.retornos.length,
+      detail: data.retornos.length
+        ? "Clientes com retorno preventivo"
+        : "Nenhum retorno pendente",
+      icon: RefreshCw,
+      tone: "violet",
+      view: "orders",
+      cta: "Ver ordens",
+    },
+    can("ORDENS") && {
+      label: "Ordens em aberto",
+      value: data.ordensAbertas,
+      detail: `${data.ordensConcluidasMes.toLocaleString("pt-BR")} concluídas no mês`,
+      icon: ClipboardList,
+      tone: "blue",
+      view: "orders",
+      cta: "Ver ordens",
+    },
+  ].filter((item) => item !== false);
 
   return (
     <div className="dashboard">
@@ -147,46 +191,51 @@ export function Dashboard({
           {error}
         </p>
       )}
+      {actions.length > 0 && (
+        <nav className="dashboard-quick" aria-label="Ações rápidas">
+          {actions.map(({ label, view, icon: Icon }) => (
+            <button key={view} type="button" onClick={() => go(view)}>
+              <Icon size={17} aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </nav>
+      )}
       <div className="dashboard-metrics">
-        {[
-          {
-            label: "Peças no catálogo",
-            value: data.pecas,
-            detail: "Itens de estoque automotivo",
-            icon: Package,
-            tone: "blue",
+        {attention.map(
+          ({ label, value, detail, icon: Icon, tone, view, cta }) => {
+            const content = (
+              <>
+                <span className="dashboard-metric-icon">
+                  <Icon size={19} aria-hidden="true" />
+                </span>
+                <span className="dashboard-metric-label">{label}</span>
+                <strong>{value.toLocaleString("pt-BR")}</strong>
+                <small>{detail}</small>
+                {view && value > 0 && (
+                  <span className="dashboard-metric-cta">
+                    {cta} <ArrowRight size={14} aria-hidden="true" />
+                  </span>
+                )}
+              </>
+            );
+            const className = `dashboard-metric tone-${value > 0 ? tone : "clear"}`;
+            return view ? (
+              <button
+                type="button"
+                className={className}
+                key={label}
+                onClick={() => go(view)}
+              >
+                {content}
+              </button>
+            ) : (
+              <article className={className} key={label}>
+                {content}
+              </article>
+            );
           },
-          {
-            label: "Ordens em aberto",
-            value: data.ordensAbertas,
-            detail: "Na fila de atendimento",
-            icon: ClipboardList,
-            tone: "blue",
-          },
-          {
-            label: "Concluídas no mês",
-            value: data.ordensConcluidasMes,
-            detail: "Atendimentos finalizados",
-            icon: CheckCircle2,
-            tone: "green",
-          },
-          {
-            label: "Estoque crítico",
-            value: data.criticas,
-            detail: "Itens abaixo do mínimo",
-            icon: TriangleAlert,
-            tone: "amber",
-          },
-        ].map(({ label, value, detail, icon: Icon, tone }) => (
-          <article className={`dashboard-metric tone-${tone}`} key={label}>
-            <span className="dashboard-metric-icon">
-              <Icon size={19} aria-hidden="true" />
-            </span>
-            <span className="dashboard-metric-label">{label}</span>
-            <strong>{value.toLocaleString("pt-BR")}</strong>
-            <small>{detail}</small>
-          </article>
-        ))}
+        )}
       </div>
       <div className="dashboard-grid">
         <section
@@ -212,7 +261,7 @@ export function Dashboard({
               {statusEntries.map(([status, count]) => (
                 <div className="dashboard-status-row" key={status}>
                   <div>
-                    <span>{statusName(status)}</span>
+                    <span>{label(status)}</span>
                     <strong>{count}</strong>
                   </div>
                   <div className="dashboard-status-track">
@@ -326,7 +375,7 @@ export function Dashboard({
           )}
         </section>
       </div>
-      <div className="dashboard-grid dashboard-bottom">
+      <div className="dashboard-bottom">
         <section
           className="dashboard-panel"
           aria-labelledby="dashboard-pieces-title"
@@ -349,7 +398,10 @@ export function Dashboard({
             <div className="dashboard-piece-list">
               {data.pecasMaisUsadas.slice(0, 5).map((piece) => (
                 <div key={piece.id}>
-                  <span>{piece.nome}</span>
+                  <span>
+                    <code className="dashboard-code">{piece.codigo}</code>{" "}
+                    {piece.nome}
+                  </span>
                   <strong>{piece.disponivel} disponíveis</strong>
                 </div>
               ))}
@@ -359,32 +411,6 @@ export function Dashboard({
               O uso de peças aparecerá aqui após os primeiros atendimentos.
             </p>
           )}
-        </section>
-        <section
-          className="dashboard-panel"
-          aria-labelledby="dashboard-actions-title"
-        >
-          <div className="dashboard-panel-heading">
-            <div>
-              <h3 id="dashboard-actions-title">Ações rápidas</h3>
-              <p>Acesse as rotinas mais frequentes</p>
-            </div>
-          </div>
-          <div className="dashboard-action-list">
-            {actions.length ? (
-              actions.map(({ label, view, icon: Icon }) => (
-                <button key={view} onClick={() => go(view)}>
-                  <Icon size={18} aria-hidden="true" />
-                  <span>{label}</span>
-                  <ArrowRight size={16} aria-hidden="true" />
-                </button>
-              ))
-            ) : (
-              <p className="dashboard-empty">
-                Use o menu para acessar seus módulos.
-              </p>
-            )}
-          </div>
         </section>
       </div>
     </div>
