@@ -100,3 +100,22 @@ export const subtitle = (v: string) =>
                     : v === "developer"
                       ? "Monitoramento, manutenção e cópias seguras do sistema"
                       : "Gestão simples, segura e organizada";
+
+// Placa antiga (ABC-1234) ou Mercosul (ABC1D23).
+const PLACA = /^[A-Z]{3}-?\d[A-Z0-9]\d{2}$/i;
+
+/** Decide para onde a busca do topo leva: nº da OS, placa ou peça. */
+export const destinoDaBusca = (
+  termo: string,
+  allowed: (permission: string) => boolean,
+): { view: string; busca: string } | null => {
+  const texto = termo.trim();
+  if (!texto) return null;
+  if (/^#?\d+$/.test(texto) && allowed("ORDENS"))
+    return { view: `order-${texto.replace("#", "")}`, busca: "" };
+  if (PLACA.test(texto) && allowed("ORDENS"))
+    return { view: "vehicles", busca: texto.toUpperCase() };
+  if (allowed("PECAS")) return { view: "pieces", busca: texto };
+  if (allowed("ORDENS")) return { view: "vehicles", busca: texto };
+  return null;
+};

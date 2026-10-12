@@ -7,3 +7,4 @@ export { Toast } from "./Toast";
 export { Badge } from "./Badge";
 export { Table } from "./Table";
 export { Button } from "../shadcn/button";
+export { SearchSelect } from "./SearchSelect";

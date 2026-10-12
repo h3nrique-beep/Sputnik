@@ -933,3 +933,71 @@ body:has(.login) {
     font-size: 16px;
   }
 }
+
+/* Grupos do menu lateral; somem quando o menu está recolhido. */
+.shell nav .nav-group {
+  margin: 14px 10px 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.shell nav .nav-group:first-child {
+  margin-top: 0;
+}
+.menu-recolhido nav .nav-group {
+  display: none;
+}
+
+/* Busca acima da lista: um campo para filtrar, a lista nativa para escolher. */
+.search-select {
+  display: grid;
+  gap: 6px;
+}
+.search-select select {
+  margin-top: 0;
+}
+.search-select-count {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Busca global no topo: peça, placa ou nº da OS a partir de qualquer tela. */
+.global-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 260px;
+  max-width: 380px;
+  min-height: 44px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--muted);
+}
+.global-search:focus-within {
+  border-color: var(--blue);
+}
+.global-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.global-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+@media (max-width: 760px) {
+  .global-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+}

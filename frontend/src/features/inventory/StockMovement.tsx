@@ -1,10 +1,17 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { SearchSelect } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Piece } from "../../types/domain";
 
-export function StockMovement({ done }: { done: () => void }) {
+export function StockMovement({
+  done,
+  initialPieceId = "",
+}: {
+  done: () => void;
+  initialPieceId?: string;
+}) {
   const [pieces, setPieces] = useState<Piece[]>([]),
-    [pieceId, setPieceId] = useState(""),
+    [pieceId, setPieceId] = useState(initialPieceId),
     [tipo, setTipo] = useState("ENTRADA"),
     [quantidade, setQuantidade] = useState("1"),
     [observacao, setObservacao] = useState(""),
@@ -63,21 +70,17 @@ export function StockMovement({ done }: { done: () => void }) {
           {aviso}
         </div>
       )}
-      <label>
-        Peça
-        <select
-          required
-          value={pieceId}
-          onChange={(e) => setPieceId(e.target.value)}
-        >
-          <option value="">Selecione</option>
-          {pieces.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.codigo} · {p.nome} ({p.disponivel} disponível)
-            </option>
-          ))}
-        </select>
-      </label>
+      <SearchSelect
+        label="Peça"
+        required
+        value={pieceId}
+        onChange={setPieceId}
+        searchPlaceholder="Código ou nome da peça"
+        options={pieces.map((p) => ({
+          value: String(p.id),
+          label: `${p.codigo} · ${p.nome} · ${p.disponivel} disponível`,
+        }))}
+      />
       <label>
         Tipo
         <select value={tipo} onChange={(e) => setTipo(e.target.value)}>

@@ -1,14 +1,29 @@
 import { useState } from "react";
-import { PackagePlus, TriangleAlert, CircleCheck } from "lucide-react";
+import {
+  ArrowLeftRight,
+  CircleCheck,
+  PackagePlus,
+  TriangleAlert,
+} from "lucide-react";
 import { Button, Loading, Table } from "../../components/ui";
 import { useSearchList } from "../../hooks/useSearchList";
 import { money } from "../../lib/format";
 import { type Piece } from "../../types/domain";
 
-export function Pieces({ go }: { go: (v: string) => void }) {
+export function Pieces({
+  go,
+  move,
+  initialQuery = "",
+}: {
+  go: (v: string) => void;
+  move?: (pieceId: number) => void;
+  initialQuery?: string;
+}) {
   const [onlyCritical, setOnlyCritical] = useState(false);
-  const { items, query, setQuery, error, loading } =
-    useSearchList<Piece>("/pecas");
+  const { items, query, setQuery, error, loading } = useSearchList<Piece>(
+    "/pecas",
+    initialQuery,
+  );
   const critical = items.filter((piece) => piece.disponivel < piece.minimo);
   const visible = onlyCritical ? critical : items;
   return (
@@ -62,6 +77,7 @@ export function Pieces({ go }: { go: (v: string) => void }) {
               "Situação",
               "Preço",
               "Locação",
+              ...(move ? ["Ações"] : []),
             ]}
             emptyText={
               onlyCritical
@@ -90,6 +106,19 @@ export function Pieces({ go }: { go: (v: string) => void }) {
               </span>,
               money(p.preco),
               p.locacao,
+              ...(move
+                ? [
+                    <Button
+                      key="mov"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => move(p.id)}
+                      aria-label={`Movimentar estoque de ${p.codigo} ${p.nome}`}
+                    >
+                      <ArrowLeftRight size={15} aria-hidden="true" /> Movimentar
+                    </Button>,
+                  ]
+                : []),
             ])}
           />
         )

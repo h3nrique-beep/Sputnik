@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { SearchSelect } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Piece } from "../../types/domain";
 
@@ -56,21 +57,18 @@ export function OrderItems({
     <div className="card compact-form">
       <h2>Lançar itens</h2>
       <form onSubmit={addPiece}>
-        <label>
-          Peça
-          <select
-            required
-            value={pieceId}
-            onChange={(e) => setPieceId(e.target.value)}
-          >
-            <option value="">Selecione uma peça</option>
-            {pieces.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nome} · {p.disponivel} disponível
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchSelect
+          label="Peça"
+          required
+          value={pieceId}
+          onChange={setPieceId}
+          placeholder="Selecione uma peça"
+          searchPlaceholder="Código ou nome da peça"
+          options={pieces.map((p) => ({
+            value: String(p.id),
+            label: `${p.codigo} · ${p.nome} · ${p.disponivel} disponível`,
+          }))}
+        />
         <label>
           Quantidade
           <input

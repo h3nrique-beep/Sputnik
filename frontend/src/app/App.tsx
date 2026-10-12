@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useState } from "react";
 import {
   BarChart3,
   CalendarDays,
@@ -12,6 +12,7 @@ import {
   Menu,
   Package,
   PackageSearch,
+  Search,
   RefreshCw,
   Settings,
   Sun,
@@ -42,10 +43,18 @@ import { VehicleCreate } from "../features/vehicles/VehicleCreate";
 import { Vehicles } from "../features/vehicles/Vehicles";
 import { api } from "../lib/api";
 import { type User } from "../types/domain";
-import { pathForView, subtitle, title, viewFromPath } from "./navigation";
+import {
+  destinoDaBusca,
+  pathForView,
+  subtitle,
+  title,
+  viewFromPath,
+} from "./navigation";
 
 const MENU_RECOLHIDO_STORAGE_KEY = "sputnik.menu-recolhido";
 const TEMA_STORAGE_KEY = "sputnik.tema-escuro";
+
+const GRUPOS_MENU = ["Operação", "Estoque", "Cadastros", "Gestão"];
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -59,6 +68,9 @@ export function App() {
     () => window.localStorage.getItem(TEMA_STORAGE_KEY) !== "light",
   );
   const [notice, setNotice] = useState("");
+  const [busca, setBusca] = useState("");
+  const [buscaGlobal, setBuscaGlobal] = useState("");
+  const [pecaMovimento, setPecaMovimento] = useState("");
   const [mobileMenu, setMobileMenu] = useState(false);
   useEffect(() => {
     if (!mobileMenu) return;
@@ -160,18 +172,21 @@ export function App() {
   const menuItems = [
     dashboardAllowed && {
       label: "Visão geral",
+      group: "Operação",
       icon: <LayoutDashboard size={18} />,
       active: view === "dashboard",
       view: "dashboard",
     },
     allowed("PECAS") && {
       label: "Estoque de peças",
+      group: "Estoque",
       icon: <Package size={18} />,
       active: view.startsWith("pieces"),
       view: "pieces",
     },
     (allowed("PECAS") || allowed("ORDENS")) && {
       label: "Central de cadastros",
+      group: "Cadastros",
       icon: <PackageSearch size={18} />,
       active:
         view === "cadastros" ||
@@ -181,59 +196,73 @@ export function App() {
     },
     allowed("PECAS") && {
       label: "Movimentar estoque",
+      group: "Estoque",
       icon: <RefreshCw size={18} />,
       active: view === "movement",
       view: "movement",
     },
     allowed("ORDENS") && {
       label: "Ordens de serviço",
+      group: "Operação",
       icon: <ClipboardList size={18} />,
       active: view.startsWith("orders") || view.startsWith("order-"),
       view: "orders",
     },
     allowed("ORDENS") && {
       label: "Agenda",
+      group: "Operação",
       icon: <CalendarDays size={18} />,
       active: view === "schedule",
       view: "schedule",
     },
     allowed("RELATORIO_MENSAL") && {
       label: "Relatório mensal",
+      group: "Gestão",
       icon: <BarChart3 size={18} />,
       active: view === "report",
       view: "report",
     },
     allowed("FINANCEIRO") && {
       label: "Financeiro",
+      group: "Gestão",
       icon: <CircleDollarSign size={18} />,
       active: view === "finance",
       view: "finance",
     },
     allowed("REPOSICAO") && {
       label: "Reposição",
+      group: "Estoque",
       icon: <Wrench size={18} />,
       active: view === "reposition",
       view: "reposition",
     },
     user.perfil === "ADMIN" && {
       label: "Usuários",
+      group: "Gestão",
       icon: <UsersRound size={18} />,
       active: view === "users",
       view: "users",
     },
     user.perfil === "ADMIN" && {
       label: "Assinatura",
+      group: "Gestão",
       icon: <Settings size={18} />,
       active: view === "subscription",
       view: "subscription",
     },
     user.perfil === "ADMIN" && {
       label: "Desenvolvedor",
+      group: "Gestão",
       icon: <Cog size={18} />,
       active: view === "developer",
       view: "developer",
     },
-  ].filter((item) => item !== false);
+  ]
+    .filter((item) => item !== false)
+    // Ordem estável por grupo; dentro do grupo mantém a ordem declarada.
+    .sort(
+      (a, b) => GRUPOS_MENU.indexOf(a.group) - GRUPOS_MENU.indexOf(b.group),
+    );
   return (
     <div
       className={`shell${menuRecolhido ? " menu-recolhido" : ""}${mobileMenu ? " mobile-menu-open" : ""}`}
@@ -273,14 +302,22 @@ export function App() {
           <X size={20} />
         </button>
         <nav>
-          {menuItems.map((item) => (
-            <Nav
-              key={item.view}
-              label={item.label}
-              icon={item.icon}
-              active={item.active}
-              onClick={() => change(item.view)}
-            />
+          {menuItems.map((item, index) => (
+            <Fragment key={item.view}>
+              {item.group !== menuItems[index - 1]?.group && (
+                <p className="nav-group">{item.group}</p>
+              )}
+              <Nav
+                label={item.label}
+                icon={item.icon}
+                active={item.active}
+                onClick={() => {
+                  setBusca("");
+                  setPecaMovimento("");
+                  change(item.view);
+                }}
+              />
+            </Fragment>
           ))}
         </nav>
         <div className="profile">
@@ -319,6 +356,31 @@ export function App() {
             <h1>{title(view)}</h1>
             <p>{subtitle(view)}</p>
           </div>
+          {(allowed("PECAS") || allowed("ORDENS")) && (
+            <form
+              className="global-search"
+              role="search"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const termo = buscaGlobal.trim();
+                if (!termo) return;
+                const destino = destinoDaBusca(termo, allowed);
+                if (!destino) return;
+                setBusca(destino.busca);
+                change(destino.view);
+                setBuscaGlobal("");
+              }}
+            >
+              <Search size={16} aria-hidden="true" />
+              <input
+                type="search"
+                value={buscaGlobal}
+                onChange={(event) => setBuscaGlobal(event.target.value)}
+                placeholder="Código da peça, placa ou nº da OS"
+                aria-label="Buscar peça, veículo ou ordem de serviço"
+              />
+            </form>
+          )}
           <div className="header-actions">
             <button
               type="button"
@@ -348,7 +410,17 @@ export function App() {
               allowPieces={allowed("PECAS")}
             />
           )}{" "}
-          {view === "pieces" && <Pieces go={change} />}{" "}
+          {view === "pieces" && (
+            <Pieces
+              key={busca}
+              go={change}
+              initialQuery={busca}
+              move={(pieceId) => {
+                setPecaMovimento(String(pieceId));
+                change("movement");
+              }}
+            />
+          )}{" "}
           {view === "pieces-new" && (
             <PieceCreate
               done={() => {
@@ -366,7 +438,9 @@ export function App() {
               }}
             />
           )}{" "}
-          {view === "vehicles" && <Vehicles go={change} />}{" "}
+          {view === "vehicles" && (
+            <Vehicles key={busca} go={change} initialQuery={busca} />
+          )}{" "}
           {view === "vehicles-new" && (
             <VehicleCreate
               done={() => {
@@ -405,6 +479,8 @@ export function App() {
           )}{" "}
           {view === "movement" && (
             <StockMovement
+              key={pecaMovimento}
+              initialPieceId={pecaMovimento}
               done={() => setNotice("Movimentação registrada com sucesso.")}
             />
           )}{" "}

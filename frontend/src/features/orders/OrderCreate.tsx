@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { SearchSelect } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Client, type Vehicle } from "../../types/domain";
 import { type OrderDocumentData } from "../../types/order-document";
@@ -67,40 +68,33 @@ export function OrderCreate({
           {erro}
         </div>
       )}
-      <label>
-        Cliente
-        <select
-          required
-          value={client || ""}
-          onChange={(e) => {
-            setClient(Number(e.target.value));
-            setVehicle(undefined);
-          }}
-        >
-          <option value="">Selecione</option>
-          {clients.map((c) => (
-            <option value={c.id} key={c.id}>
-              {c.nome} · {c.telefone}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Veículo vinculado
-        <select
-          required
-          disabled={!client}
-          value={vehicle || ""}
-          onChange={(e) => setVehicle(Number(e.target.value))}
-        >
-          <option value="">Selecione</option>
-          {filtered.map((v) => (
-            <option value={v.id} key={v.id}>
-              {v.placa} · {v.marcaModelo}
-            </option>
-          ))}
-        </select>
-      </label>
+      <SearchSelect
+        label="Cliente"
+        required
+        value={client ? String(client) : ""}
+        onChange={(value) => {
+          setClient(value ? Number(value) : undefined);
+          setVehicle(undefined);
+        }}
+        searchPlaceholder="Nome, telefone ou CPF"
+        options={clients.map((c) => ({
+          value: String(c.id),
+          label: `${c.nome} · ${c.telefone} · ${c.cpf}`,
+        }))}
+      />
+      <SearchSelect
+        label="Veículo vinculado"
+        required
+        disabled={!client}
+        value={vehicle ? String(vehicle) : ""}
+        onChange={(value) => setVehicle(value ? Number(value) : undefined)}
+        placeholder={client ? "Selecione" : "Escolha o cliente primeiro"}
+        searchPlaceholder="Placa ou modelo"
+        options={filtered.map((v) => ({
+          value: String(v.id),
+          label: `${v.placa} · ${v.marcaModelo}`,
+        }))}
+      />
       <label>
         Quilometragem atual
         <input

@@ -3,9 +3,17 @@ import { Button, Loading, Table } from "../../components/ui";
 import { useSearchList } from "../../hooks/useSearchList";
 import { type Vehicle } from "../../types/domain";
 
-export function Vehicles({ go }: { go: (v: string) => void }) {
-  const { items, query, setQuery, error, loading } =
-    useSearchList<Vehicle>("/veiculos");
+export function Vehicles({
+  go,
+  initialQuery = "",
+}: {
+  go: (v: string) => void;
+  initialQuery?: string;
+}) {
+  const { items, query, setQuery, error, loading } = useSearchList<Vehicle>(
+    "/veiculos",
+    initialQuery,
+  );
   return (
     <div className="module-shell space-y-5">
       <div className="toolbar">
