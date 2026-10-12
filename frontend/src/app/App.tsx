@@ -64,9 +64,13 @@ export function App() {
   const [menuRecolhido, setMenuRecolhido] = useState(
     () => window.localStorage.getItem(MENU_RECOLHIDO_STORAGE_KEY) === "true",
   );
-  const [dark, setDark] = useState(
-    () => window.localStorage.getItem(TEMA_STORAGE_KEY) !== "light",
-  );
+  const [dark, setDark] = useState(() => {
+    // Sem escolha salva, segue o tema do sistema operacional.
+    const salvo = window.localStorage.getItem(TEMA_STORAGE_KEY);
+    return salvo
+      ? salvo !== "light"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
   const [notice, setNotice] = useState("");
   const [busca, setBusca] = useState("");
   const [buscaGlobal, setBuscaGlobal] = useState("");

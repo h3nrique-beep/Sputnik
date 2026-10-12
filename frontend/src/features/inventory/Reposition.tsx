@@ -34,6 +34,7 @@ export function Reposition() {
           "Sugestão",
           "Custo estimado",
         ]}
+        emptyText="Nenhuma peça abaixo do mínimo. O estoque está em dia."
         rows={data.pecas.map((r: any) => [
           r.peca.codigo,
           r.peca.nome,
