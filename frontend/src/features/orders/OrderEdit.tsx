@@ -23,6 +23,15 @@ export function OrderEdit({
     [saving, setSaving] = useState(false);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    const encerrando =
+      status !== order.status && ["CONCLUIDA", "CANCELADA"].includes(status);
+    if (
+      encerrando &&
+      !confirm(
+        `Marcar a OS #${order.id} como ${label(status).toLowerCase()}? Depois disso ela não aceita novos itens.`,
+      )
+    )
+      return;
     setSaving(true);
     try {
       await api("/ordens/" + order.id, {

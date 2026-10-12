@@ -18,6 +18,12 @@ export function StockMovement({
     [erro, setErro] = useState(""),
     [aviso, setAviso] = useState("");
   const [saving, setSaving] = useState(false);
+  const peca = pieces.find((p) => String(p.id) === pieceId);
+  const qtd = Number(quantidade) || 0;
+  const saidaInvalida = tipo === "SAIDA" && !!peca && qtd > peca.disponivel;
+  const saldoApos = peca
+    ? peca.disponivel + (tipo === "SAIDA" ? -qtd : qtd)
+    : null;
   useEffect(() => {
     api<Piece[]>("/pecas")
       .then(setPieces)
@@ -107,7 +113,17 @@ export function StockMovement({
           placeholder="Motivo da movimentação"
         />
       </label>
-      <button className="primary" disabled={saving}>
+      {peca && (
+        <p
+          className={`form-feedback ${saidaInvalida ? "warning" : ""}`}
+          role="status"
+        >
+          {saidaInvalida
+            ? `Saída bloqueada: só há ${peca.disponivel} disponível de ${peca.codigo}.`
+            : `Disponível agora: ${peca.disponivel}. Depois desta movimentação: ${saldoApos}.`}
+        </p>
+      )}
+      <button className="primary" disabled={saving || saidaInvalida}>
         {saving ? "Registrando…" : "Registrar movimentação"}
       </button>
     </form>

@@ -1061,3 +1061,39 @@ body:has(.login) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Retorno junto do formulário e confirmação da aprovação de orçamento. */
+.form-feedback {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.form-feedback.success {
+  color: var(--green);
+}
+.form-feedback.warning {
+  color: var(--warning);
+}
+.approve-panel {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--line));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--warning-bg) 60%, var(--card));
+}
+.approve-panel h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.approve-panel p,
+.approve-panel ul {
+  margin: 0;
+}
+.approve-panel ul {
+  padding-left: 20px;
+  display: grid;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}

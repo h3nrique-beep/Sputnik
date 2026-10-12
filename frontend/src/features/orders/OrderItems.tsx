@@ -16,7 +16,11 @@ export function OrderItems({
     [pieceId, setPieceId] = useState(""),
     [quantidade, setQuantidade] = useState("1"),
     [descricao, setDescricao] = useState(""),
-    [valor, setValor] = useState("");
+    [valor, setValor] = useState(""),
+    [enviando, setEnviando] = useState(false),
+    [ok, setOk] = useState("");
+  const peca = pieces.find((p) => String(p.id) === pieceId);
+  const acimaDoDisponivel = peca && Number(quantidade) > peca.disponivel;
   useEffect(() => {
     api<Piece[]>("/pecas")
       .then(setPieces)
@@ -24,6 +28,9 @@ export function OrderItems({
   }, []);
   const addPiece = async (e: FormEvent) => {
     e.preventDefault();
+    if (enviando) return;
+    setEnviando(true);
+    setOk("");
     try {
       await api("/ordens/" + orderId + "/itens/peca", {
         method: "POST",
@@ -32,30 +39,44 @@ export function OrderItems({
           quantidade: Number(quantidade),
         }),
       });
+      setOk(`${quantidade}× ${peca?.nome ?? "peça"} adicionada.`);
       setPieceId("");
       setQuantidade("1");
       saved();
     } catch (e) {
       failed((e as Error).message);
+    } finally {
+      setEnviando(false);
     }
   };
   const addService = async (e: FormEvent) => {
     e.preventDefault();
+    if (enviando) return;
+    setEnviando(true);
+    setOk("");
     try {
       await api("/ordens/" + orderId + "/itens/servico", {
         method: "POST",
         body: JSON.stringify({ descricao, valor: Number(valor) }),
       });
+      setOk(`Serviço “${descricao.trim()}” adicionado.`);
       setDescricao("");
       setValor("");
       saved();
     } catch (e) {
       failed((e as Error).message);
+    } finally {
+      setEnviando(false);
     }
   };
   return (
     <div className="card compact-form">
       <h2>Lançar itens</h2>
+      {ok && (
+        <p className="form-feedback success" role="status">
+          {ok}
+        </p>
+      )}
       <form onSubmit={addPiece}>
         <SearchSelect
           label="Peça"
@@ -79,7 +100,15 @@ export function OrderItems({
             onChange={(e) => setQuantidade(e.target.value)}
           />
         </label>
-        <button className="secondary">Adicionar peça</button>
+        {acimaDoDisponivel && (
+          <p className="form-feedback warning" role="status">
+            Só há {peca.disponivel} disponível. Em orçamento o item entra; numa
+            OS aberta a baixa é recusada.
+          </p>
+        )}
+        <button className="secondary" disabled={enviando}>
+          Adicionar peça
+        </button>
       </form>
       <hr />
       <form onSubmit={addService}>
@@ -102,7 +131,9 @@ export function OrderItems({
             onChange={(e) => setValor(e.target.value)}
           />
         </label>
-        <button className="secondary">Adicionar serviço</button>
+        <button className="secondary" disabled={enviando}>
+          Adicionar serviço
+        </button>
       </form>
     </div>
   );

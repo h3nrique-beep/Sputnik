@@ -16,7 +16,10 @@ import { OrderItems } from "./OrderItems";
 export function OrderDetail({ id, back }: { id: number; back: () => void }) {
   const [data, setData] = useState<any>(),
     [erro, setErro] = useState(""),
-    [baixandoPdf, setBaixandoPdf] = useState(false);
+    [baixandoPdf, setBaixandoPdf] = useState(false),
+    [confirmando, setConfirmando] = useState(false),
+    [aprovando, setAprovando] = useState(false),
+    [aviso, setAviso] = useState("");
   const reload = () => {
     void api<any>("/ordens/" + id)
       .then((result) => {
@@ -67,15 +70,26 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
       setBaixandoPdf(false);
     }
   };
+  const unidades = pecas.reduce(
+    (sum: number, item: any) => sum + item.quantidade,
+    0,
+  );
   const aprovar = async () => {
-    if (!window.confirm("Aprovar este orçamento e baixar as peças do estoque?"))
-      return;
     setErro("");
+    setAprovando(true);
     try {
       await api(`/ordens/${id}/aprovar`, { method: "POST" });
+      setConfirmando(false);
+      setAviso(
+        unidades
+          ? `Orçamento aprovado. OS #${id} aberta e ${unidades} ${unidades === 1 ? "unidade baixada" : "unidades baixadas"} do estoque.`
+          : `Orçamento aprovado. OS #${id} aberta.`,
+      );
       reload();
     } catch (e) {
       setErro((e as Error).message);
+    } finally {
+      setAprovando(false);
     }
   };
   return (
@@ -101,9 +115,48 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
           >
             {baixandoPdf ? "Gerando PDF..." : "Baixar PDF"}
           </Button>
-          {eOrcamento && <Button onClick={aprovar}>Aprovar e abrir OS</Button>}
+          {eOrcamento && (
+            <Button onClick={() => setConfirmando(true)}>
+              Aprovar e abrir OS
+            </Button>
+          )}
         </span>
       </div>
+      {eOrcamento && confirmando && (
+        <section className="approve-panel" aria-labelledby="aprovar-titulo">
+          <h3 id="aprovar-titulo">Aprovar o orçamento #{o.id}?</h3>
+          {pecas.length ? (
+            <>
+              <p>Estas peças saem do estoque assim que você confirmar:</p>
+              <ul>
+                {pecas.map((item: any) => (
+                  <li key={item.id}>
+                    <b>{item.quantidade}×</b> {item.descricao}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p>Este orçamento não tem peças: nada sai do estoque.</p>
+          )}
+          <p className="muted">
+            Se faltar saldo de alguma peça, a aprovação é recusada e nada é
+            baixado.
+          </p>
+          <span className="row-actions">
+            <Button onClick={aprovar} disabled={aprovando}>
+              {aprovando ? "Aprovando..." : "Confirmar aprovação"}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setConfirmando(false)}
+              disabled={aprovando}
+            >
+              Cancelar
+            </Button>
+          </span>
+        </section>
+      )}
       <section
         className="sputnik-os-print"
         aria-label="Ordem de serviço para impressão"
@@ -316,6 +369,11 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
       {erro && (
         <div className="alert error" role="alert">
           {erro}
+        </div>
+      )}
+      {aviso && (
+        <div className="alert success" role="status">
+          {aviso}
         </div>
       )}
       <div className="order-workspace">
