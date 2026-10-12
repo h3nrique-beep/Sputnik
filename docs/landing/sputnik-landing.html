@@ -1,0 +1,721 @@
+<title>Sputnik para Oficinas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: faixa grafite do produto no topo, módulos em grade de oficina, uma folha de OS como peça central. */
+:root {
+  --bg: #f2f4f5;
+  --surface: #ffffff;
+  --surface-soft: #f7f8f9;
+  --ink: #22282e;
+  --muted: #5d6873;
+  --line: #dce1e5;
+  --graphite: #20252b;
+  --graphite-ink: #edf0f3;
+  --graphite-muted: #a7b0b9;
+  --graphite-line: #3a424b;
+  --amber: #efb23d;
+  --amber-ink: #262017;
+  --amber-text: #855600;
+  --amber-soft: #fff4dc;
+  --ok: #177249;
+  --ok-bg: #eaf6ef;
+  --alert: #ad3038;
+  --alert-bg: #fff0f0;
+  --s1: #c47f00;
+  --s2: #1f6fb2;
+  --grid: #e6e9ec;
+  --font-display: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c2127; --surface: #252c34; --surface-soft: #20262d; --ink: #edf0f3; --muted: #aab3bd;
+    --line: #414952; --graphite: #14181c; --graphite-line: #333b44; --amber-text: #f0bf61;
+    --amber-soft: #3b3020; --ok: #89d4ac; --ok-bg: #233b30; --alert: #ffb5b8; --alert-bg: #40292e;
+    --s1: #b8820f; --s2: #5b9bd0; --grid: #353d46;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c2127; --surface: #252c34; --surface-soft: #20262d; --ink: #edf0f3; --muted: #aab3bd;
+  --line: #414952; --graphite: #14181c; --graphite-line: #333b44; --amber-text: #f0bf61;
+  --amber-soft: #3b3020; --ok: #89d4ac; --ok-bg: #233b30; --alert: #ffb5b8; --alert-bg: #40292e;
+  --s1: #b8820f; --s2: #5b9bd0; --grid: #353d46;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before { animation: none !important; transition: none !important; } }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; text-wrap: balance; margin: 0; letter-spacing: -0.02em; }
+p { margin: 0; }
+a { color: inherit; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; border-radius: 6px; }
+.wrap { width: 100%; max-width: 1160px; margin-inline: auto; padding-inline: 20px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber-text); font-weight: 600; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Topo grafite */
+.top { background: var(--graphite); color: var(--graphite-ink); }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
+.brand svg { width: 34px; height: 34px; color: var(--amber); }
+.nav-links { display: flex; gap: 22px; flex-wrap: wrap; font-size: 15px; }
+.nav-links a { color: var(--graphite-muted); text-decoration: none; }
+.nav-links a:hover { color: var(--graphite-ink); }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: center; padding-block: 56px 72px; }
+.hero h1 { font-size: clamp(36px, 5.4vw, 62px); font-weight: 800; }
+.hero h1 em { font-style: normal; color: var(--amber); }
+.hero .lede { color: var(--graphite-muted); font-size: 18px; max-width: 34em; margin-top: 20px; }
+.hero .eyebrow { color: var(--amber); }
+.hero-copy { display: grid; gap: 4px; min-width: 0; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 15px; border: 1px solid transparent; transition: background-color .15s, border-color .15s; }
+.btn-primary { background: var(--amber); color: var(--amber-ink); }
+.btn-primary:hover { background: #ffc961; }
+.btn-ghost { border-color: var(--graphite-line); color: var(--graphite-ink); }
+.btn-ghost:hover { border-color: var(--graphite-muted); }
+.hero-facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 28px; color: var(--graphite-muted); font-size: 14px; }
+.hero-facts span::before { content: "✓ "; color: var(--amber); font-weight: 700; }
+
+/* Painel de exemplo no hero */
+.panel { background: var(--surface); color: var(--ink); border-radius: 14px; box-shadow: 0 30px 60px -20px rgba(0,0,0,.55); overflow: hidden; min-width: 0; }
+.panel-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--surface-soft); }
+.panel-bar strong { font-family: var(--font-display); font-size: 15px; }
+.tag-example { font-size: 11px; font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); padding: 2px 8px; border-radius: 99px; }
+.stock { overflow-x: auto; }
+.stock table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 420px; }
+.stock th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; padding: 10px 18px; }
+.stock td { padding: 11px 18px; border-top: 1px solid var(--line); }
+.stock td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.stock th.num { text-align: right; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.low { background: var(--amber-soft); color: var(--amber-text); }
+.pill.zero { background: var(--alert-bg); color: var(--alert); }
+.panel-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.panel-foot b { color: var(--ink); }
+
+/* Seções */
+section { padding-block: 80px; }
+.section-head { display: grid; gap: 12px; max-width: 640px; margin-bottom: 44px; }
+.section-head h2 { font-size: clamp(28px, 3.6vw, 40px); font-weight: 800; }
+.section-head p { color: var(--muted); font-size: 17px; }
+
+.modules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.module { background: var(--surface); padding: 28px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.module .code { font-family: var(--font-mono); font-size: 12px; color: var(--amber-text); font-weight: 600; letter-spacing: .06em; }
+.module h3 { font-size: 20px; font-weight: 700; }
+.module p { color: var(--muted); font-size: 15px; }
+.module ul { margin: 4px 0 0; padding-left: 18px; color: var(--ink); font-size: 14.5px; display: grid; gap: 4px; }
+
+/* Dashboards */
+.dash-section { padding-top: 0; }
+.dash { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.dash-top { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--surface-soft); }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; background: var(--bg); padding: 4px; border-radius: 10px; border: 1px solid var(--line); }
+.tab { font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); background: transparent; border: 0; padding: 8px 14px; border-radius: 7px; cursor: pointer; transition: background-color .2s, color .2s; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(20,24,28,.12); }
+.dash-meta { display: flex; gap: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+.live { display: inline-flex; align-items: center; gap: 6px; }
+.live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent); } 50% { box-shadow: 0 0 0 6px transparent; } }
+.dash-body { padding: 20px; display: grid; gap: 20px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+.kpi { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 4px; min-width: 0; }
+.kpi small { font-size: 13px; color: var(--muted); }
+.kpi strong { font-family: var(--font-display); font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kpi .delta { font-size: 12.5px; font-weight: 600; }
+.kpi .delta.up { color: var(--ok); }
+.kpi .delta.warn { color: var(--amber-text); }
+.kpi .delta.bad { color: var(--alert); }
+.charts { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; }
+.chart { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 16px 10px; min-width: 0; position: relative; }
+.chart h3 { font-size: 15px; font-weight: 700; font-family: var(--font-display); }
+.chart .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.chart svg { display: block; width: 100%; height: auto; margin-top: 10px; overflow: visible; }
+.chart text { fill: var(--muted); font-family: var(--font-body); font-size: 12px; }
+.chart text.val { fill: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chart .gridline { stroke: var(--grid); stroke-width: 1; }
+.chart .baseline { stroke: var(--line); stroke-width: 1; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.tip { position: absolute; pointer-events: none; background: var(--graphite); color: var(--graphite-ink); font-size: 12.5px; padding: 7px 10px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); z-index: 2; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+.tip b { font-variant-numeric: tabular-nums; }
+.hit { fill: transparent; cursor: default; }
+.dash-note { font-size: 13px; color: var(--muted); padding: 0 20px 18px; }
+
+/* Animações: estado final é o repouso; .play reinicia a entrada. */
+.bar-h { transform-box: fill-box; transform-origin: left center; }
+.bar-v { transform-box: fill-box; transform-origin: center bottom; }
+.play .bar-h { animation: growX .9s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 80ms); }
+.play .bar-v { animation: growY .9s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+.play .draw { stroke-dasharray: var(--len); animation: draw 1.4s cubic-bezier(.4,0,.2,1) both; }
+.play .fade { animation: fadeIn .6s ease both; animation-delay: var(--d, .9s); }
+.play .kpi { animation: rise .55s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+@keyframes growX { from { transform: scaleX(0); } }
+@keyframes growY { from { transform: scaleY(0); } }
+@keyframes draw { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+@keyframes fadeIn { from { opacity: 0; } }
+
+/* Ciclo da OS */
+.flow-section { background: var(--surface); border-block: 1px solid var(--line); }
+.os-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 56px; align-items: start; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 16px; padding-bottom: 22px; position: relative; }
+.steps li::before { counter-increment: s; content: counter(s); width: 34px; height: 34px; border-radius: 50%; background: var(--amber); color: var(--amber-ink); display: grid; place-items: center; font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
+.steps li:not(:last-child)::after { content: ""; position: absolute; left: 16px; top: 38px; bottom: 4px; width: 2px; background: var(--line); }
+.steps strong { display: block; font-family: var(--font-display); font-size: 17px; }
+.steps span { color: var(--muted); font-size: 15px; }
+
+.sheet { background: #fdfdfc; color: #1d2226; border: 1px solid #d5d9dc; border-radius: 4px; padding: 26px; font-size: 13px; box-shadow: 0 20px 40px -24px rgba(20,24,28,.45); min-width: 0; }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 2px solid #1d2226; padding-bottom: 12px; flex-wrap: wrap; }
+.sheet-head .brand { color: #1d2226; font-size: 17px; }
+.sheet-head .brand svg { width: 26px; height: 26px; color: #1d2226; }
+.sheet-no { font-family: var(--font-mono); text-align: right; font-size: 12px; }
+.sheet-no b { display: block; font-size: 18px; }
+.sheet-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0; border: 1px solid #1d2226; margin-top: 14px; }
+.sheet-grid div { padding: 7px 9px; border-right: 1px solid #1d2226; min-width: 0; }
+.sheet-grid div:last-child { border-right: 0; }
+.sheet-grid small { display: block; font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: #5b636b; }
+.sheet-grid span { font-family: var(--font-mono); font-weight: 600; overflow-wrap: anywhere; }
+.sheet-items { overflow-x: auto; margin-top: 14px; }
+.sheet table { width: 100%; border-collapse: collapse; min-width: 360px; }
+.sheet th, .sheet td { border: 1px solid #1d2226; padding: 6px 8px; text-align: left; }
+.sheet th { font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; background: #eef0f1; }
+.sheet td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.sheet tfoot td { font-weight: 700; }
+.sheet-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 30px; font-size: 11px; color: #5b636b; text-align: center; }
+.sheet-sign div { border-top: 1px solid #1d2226; padding-top: 6px; }
+.sheet-caption { margin-top: 12px; font-size: 13px; color: var(--muted); }
+
+/* Segurança */
+.security { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 24px; }
+.sec-item { display: grid; gap: 8px; align-content: start; border-top: 2px solid var(--ink); padding-top: 16px; min-width: 0; }
+.sec-item h3 { font-size: 17px; font-weight: 700; }
+.sec-item p { color: var(--muted); font-size: 15px; }
+
+/* Planos */
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; }
+.plan { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.plan.featured { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+.plan h3 { font-size: 22px; font-weight: 800; }
+.plan .seats { font-family: var(--font-display); font-size: 44px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+.plan .seats small { font-family: var(--font-body); font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-left: 6px; }
+.plan p { color: var(--muted); font-size: 15px; }
+.plan .badge { justify-self: start; font-size: 12px; font-weight: 700; background: var(--amber); color: var(--amber-ink); padding: 3px 10px; border-radius: 99px; }
+.plans-note { margin-top: 18px; color: var(--muted); font-size: 15px; }
+
+/* Contato */
+.cta { background: var(--graphite); color: var(--graphite-ink); border-radius: 16px; padding: 56px 48px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+.cta h2 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 800; }
+.cta p { color: var(--graphite-muted); margin-top: 14px; font-size: 17px; max-width: 36em; }
+.cta .actions { margin-top: 0; justify-content: flex-end; }
+.stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.stack span { font-family: var(--font-mono); font-size: 12px; border: 1px solid var(--graphite-line); color: var(--graphite-muted); padding: 4px 10px; border-radius: 6px; }
+
+footer { padding-block: 40px 56px; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
+footer .brand { font-size: 16px; color: var(--ink); }
+footer .brand svg { width: 24px; height: 24px; color: var(--ink); }
+
+@keyframes rise { from { transform: translateY(14px); opacity: .001; } to { transform: none; opacity: 1; } }
+.panel { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+
+@media (max-width: 960px) {
+  .hero, .os-layout, .cta { grid-template-columns: minmax(0, 1fr); }
+  .modules, .plans, .charts { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .security { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .cta { padding: 40px 28px; }
+  .cta .actions { justify-content: flex-start; }
+}
+@media (max-width: 560px) {
+  section { padding-block: 56px; }
+  .security { grid-template-columns: minmax(0,1fr); }
+  .nav-links { display: none; }
+  .sheet { padding: 16px; }
+  .sheet-grid { grid-template-columns: minmax(0,1fr); }
+  .sheet-grid div { border-right: 0; border-bottom: 1px solid #1d2226; }
+  .sheet-grid div:last-child { border-bottom: 0; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="340 290 920 980">
+    <circle cx="1005" cy="545" r="237" fill="currentColor"/>
+    <g stroke="currentColor" stroke-width="28" stroke-linecap="butt" fill="none">
+      <path d="M379 847 L828 398"/>
+      <path d="M381 973 L748 606"/>
+      <path d="M384 1098 L786 696"/>
+      <path d="M370 1242 L848 764"/>
+      <path d="M514 1227 L935 806"/>
+      <path d="M639 1228 L1168 699"/>
+    </g>
+  </symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <nav class="nav" aria-label="Principal">
+      <a class="brand" href="#inicio"><svg aria-hidden="true"><use href="#logo"/></svg>Sputnik</a>
+      <div class="nav-links">
+        <a href="#modulos">Módulos</a>
+        <a href="#dashboards">Dashboards</a>
+        <a href="#ordens">Ordem de serviço</a>
+        <a href="#seguranca">Segurança</a>
+        <a href="#planos">Planos</a>
+      </div>
+      <a class="btn btn-primary" href="#contato">Agendar demonstração</a>
+    </nav>
+
+    <div class="hero" id="inicio">
+      <div class="hero-copy">
+        <p class="eyebrow">Gestão para oficinas automotivas</p>
+        <h1>Do balcão ao caixa, sua oficina em <em>um só sistema</em>.</h1>
+        <p class="lede">Estoque de peças, clientes e veículos, ordens de serviço, agenda e financeiro conectados. A peça sai do estoque quando o orçamento é aprovado e a OS sai pronta para imprimir em A4.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#contato">Agendar demonstração</a>
+          <a class="btn btn-ghost" href="#modulos">Ver os módulos</a>
+        </div>
+        <div class="hero-facts">
+          <span>14 dias de teste</span>
+          <span>Permissões por módulo</span>
+          <span>Tema claro e escuro</span>
+        </div>
+      </div>
+
+      <div class="panel" role="figure" aria-label="Exemplo da tela de estoque do Sputnik">
+        <div class="panel-bar">
+          <strong>Peças críticas</strong>
+          <span class="tag-example">Exemplo</span>
+        </div>
+        <div class="stock">
+          <table>
+            <thead><tr><th>Código</th><th>Peça</th><th class="num">Disponível</th><th class="num">Mínimo</th><th>Situação</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">CD-310</td><td>Correia Dentada</td><td class="num">0</td><td class="num">5</td><td><span class="pill zero">Zerada</span></td></tr>
+              <tr><td class="mono">VI-118</td><td>Vela de Ignição</td><td class="num">2</td><td class="num">8</td><td><span class="pill low">Repor</span></td></tr>
+              <tr><td class="mono">FA-090</td><td>Filtro de Ar</td><td class="num">3</td><td class="num">10</td><td><span class="pill low">Repor</span></td></tr>
+              <tr><td class="mono">FO-102</td><td>Filtro de Óleo</td><td class="num">5</td><td class="num">8</td><td><span class="pill low">Repor</span></td></tr>
+              <tr><td class="mono">PF-220</td><td>Pastilha de Freio</td><td class="num">12</td><td class="num">6</td><td><span class="pill ok">Em estoque</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel-foot">
+          <span>Sugestão de compra calculada pelo mínimo</span>
+          <span>Exportar <b>CSV de reposição</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="modulos">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Módulos</p>
+        <h2>Tudo o que a oficina usa no dia a dia, no mesmo cadastro</h2>
+        <p>Cada módulo pode ser liberado ou bloqueado por usuário. O balconista vê o que precisa, o financeiro vê só os lançamentos.</p>
+      </div>
+      <div class="modules">
+        <article class="module">
+          <span class="code">PEÇAS</span>
+          <h3>Estoque e movimentações</h3>
+          <p>Entradas e saídas com operador, data e saldo resultante.</p>
+          <ul><li>Saldo total e disponível separados</li><li>Saída bloqueada com saldo insuficiente</li><li>Busca por nome, código ou fabricante</li></ul>
+        </article>
+        <article class="module">
+          <span class="code">ORDENS DE SERVIÇO</span>
+          <h3>Orçamentos e OS</h3>
+          <p>Cliente, veículo, quilometragem, peças e mão de obra com totais automáticos.</p>
+          <ul><li>Histórico de cada alteração</li><li>Agenda, retorno preventivo e garantia</li><li>Documento A4 para imprimir ou baixar em PDF</li></ul>
+        </article>
+        <article class="module">
+          <span class="code">FINANCEIRO</span>
+          <h3>Contas e rentabilidade</h3>
+          <p>Receitas e despesas com vencimento, vínculo opcional à OS e baixa de pagamento.</p>
+          <ul><li>A receber, a pagar e recebido</li><li>Filtro por mês, próximos 30 dias ou histórico</li><li>Rentabilidade por ordem de serviço</li></ul>
+        </article>
+        <article class="module">
+          <span class="code">CADASTROS</span>
+          <h3>Clientes e veículos</h3>
+          <p>Encontre o cliente pelo nome, CPF ou telefone e o carro pela placa ou chassi.</p>
+          <ul><li>Veículos vinculados ao proprietário</li><li>Quilometragem atualizada a cada OS</li></ul>
+        </article>
+        <article class="module">
+          <span class="code">REPOSIÇÃO</span>
+          <h3>Compras sem achismo</h3>
+          <p>Lista de peças abaixo do mínimo, quantidade sugerida e custo estimado da reposição.</p>
+          <ul><li>Peças zeradas em destaque</li><li>Exportação CSV para o fornecedor</li></ul>
+        </article>
+        <article class="module">
+          <span class="code">RELATÓRIO MENSAL</span>
+          <h3>Painel da operação</h3>
+          <p>OS abertas e concluídas no mês, carros aguardando peça, retornos e peças mais usadas.</p>
+          <ul><li>Movimentações do mês</li><li>Valor do estoque para o administrador</li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="dash-section" id="dashboards">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Dashboards</p>
+        <h2>Um painel para cada função da oficina</h2>
+        <p>O administrador acompanha a operação inteira, o estoque cuida da reposição e o financeiro vê só as contas. Cada pessoa abre o Sputnik no painel que interessa a ela.</p>
+      </div>
+      <div class="dash" id="dash">
+        <div class="dash-top">
+          <div class="tabs" role="tablist" aria-label="Painéis por função"></div>
+          <div class="dash-meta"><span class="live">Visão do dia</span><span class="tag-example">Dados de exemplo</span></div>
+        </div>
+        <div id="dash-panels"></div>
+        <p class="dash-note">Valores ilustrativos. No sistema, cada painel usa os dados da sua oficina e respeita as permissões de cada usuário.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="flow-section" id="ordens">
+    <div class="wrap os-layout">
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">Ordem de serviço</p>
+          <h2>O orçamento vira OS sem retrabalho</h2>
+          <p>O estoque só é baixado quando o cliente aprova. Até lá, as peças continuam disponíveis para outros atendimentos.</p>
+        </div>
+        <ol class="steps">
+          <li><div><strong>Orçamento</strong><span>Peças e serviços lançados, total calculado, nada sai do estoque.</span></div></li>
+          <li><div><strong>Aprovação</strong><span>Com um clique o orçamento vira OS aberta e as peças são baixadas.</span></div></li>
+          <li><div><strong>Em andamento ou aguardando peça</strong><span>O status mostra onde cada carro está, e o painel lista quem espera peça.</span></div></li>
+          <li><div><strong>Concluída</strong><span>OS impressa em A4 com assinatura do cliente e comprovante de retirada.</span></div></li>
+        </ol>
+      </div>
+
+      <figure style="margin:0">
+        <div class="sheet" aria-label="Exemplo de ordem de serviço impressa">
+          <div class="sheet-head">
+            <span class="brand"><svg aria-hidden="true"><use href="#logo"/></svg>Sputnik</span>
+            <div class="sheet-no">ORDEM DE SERVIÇO<b>Nº 0148</b></div>
+          </div>
+          <div class="sheet-grid">
+            <div><small>Placa</small><span>BRA2E19</span></div>
+            <div><small>Veículo</small><span>Onix 1.0 2021</span></div>
+            <div><small>Km na entrada</small><span>48.210</span></div>
+          </div>
+          <div class="sheet-items">
+            <table>
+              <thead><tr><th>Item</th><th>Qtd</th><th>Unit.</th><th>Total</th></tr></thead>
+              <tbody>
+                <tr><td>Filtro de Óleo FO-102</td><td class="num">1</td><td class="num">38,90</td><td class="num">38,90</td></tr>
+                <tr><td>Vela de Ignição VI-118</td><td class="num">4</td><td class="num">32,50</td><td class="num">130,00</td></tr>
+                <tr><td>Mão de obra: revisão 50 mil km</td><td class="num">1</td><td class="num">180,00</td><td class="num">180,00</td></tr>
+              </tbody>
+              <tfoot><tr><td colspan="3">Total</td><td class="num">R$ 348,90</td></tr></tfoot>
+            </table>
+          </div>
+          <div class="sheet-sign"><div>Assinatura do cliente</div><div>Retirada do veículo</div></div>
+        </div>
+        <figcaption class="sheet-caption">Exemplo ilustrativo do documento A4 gerado pelo sistema.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="seguranca">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Segurança</p>
+        <h2>Os dados da sua oficina ficam só com a sua oficina</h2>
+        <p>O sistema passou por auditoria de código e segurança, com testes automatizados cobrindo os fluxos críticos.</p>
+      </div>
+      <div class="security">
+        <div class="sec-item"><h3>Acesso protegido</h3><p>Senhas com BCrypt, troca obrigatória no primeiro acesso e bloqueio após tentativas repetidas.</p></div>
+        <div class="sec-item"><h3>Permissão por módulo</h3><p>Peças, ordens, financeiro, relatório mensal e reposição liberados individualmente para cada usuário.</p></div>
+        <div class="sec-item"><h3>Separação por empresa</h3><p>Clientes, veículos, peças, OS e lançamentos isolados por empresa.</p></div>
+        <div class="sec-item"><h3>Backups</h3><p>Cópias do banco geradas pelo console administrativo, com diagnóstico do ambiente.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="planos" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Planos</p>
+        <h2>Escolha pelo tamanho da equipe</h2>
+        <p>Todos os planos incluem todos os módulos. O que muda é quantas pessoas usam o sistema.</p>
+      </div>
+      <div class="plans">
+        <article class="plan">
+          <h3>Starter</h3>
+          <div class="seats">3<small>usuários</small></div>
+          <p>Para a oficina enxuta: dono, balcão e mecânico-chefe.</p>
+        </article>
+        <article class="plan featured">
+          <span class="badge">Mais indicado</span>
+          <h3>Profissional</h3>
+          <div class="seats">10<small>usuários</small></div>
+          <p>Para equipes com balcão, estoque e financeiro separados.</p>
+        </article>
+        <article class="plan">
+          <h3>Premium</h3>
+          <div class="seats">50<small>usuários</small></div>
+          <p>Para redes e centros automotivos com várias funções.</p>
+        </article>
+      </div>
+      <p class="plans-note">Todos começam com 14 dias de teste. Valores sob consulta na demonstração.</p>
+    </div>
+  </section>
+
+  <section id="contato" style="padding-top:0">
+    <div class="wrap">
+      <div class="cta">
+        <div>
+          <h2>Veja o Sputnik funcionando na rotina da sua oficina</h2>
+          <p>Na demonstração mostramos o cadastro de peças, a abertura de um orçamento, a aprovação e a impressão da OS.</p>
+          <div class="stack" aria-label="Tecnologias">
+            <span>Java 17</span><span>Spring Boot</span><span>React</span><span>TypeScript</span>
+          </div>
+        </div>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://github.com/h3nrique-beep/Sputnik" target="_blank" rel="noopener">Conhecer o projeto</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="brand"><svg aria-hidden="true"><use href="#logo"/></svg>Sputnik</span>
+    <span>Gestão operacional para oficinas automotivas.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const DATA = [
+    { id: "oficina", label: "Oficina",
+      kpis: [
+        { t: "OS em aberto", v: 18, f: "int", d: "+3 desde segunda", c: "warn" },
+        { t: "Concluídas no mês", v: 64, f: "int", d: "+12% sobre setembro", c: "up" },
+        { t: "Aguardando peça", v: 4, f: "int", d: "2 há mais de 3 dias", c: "bad" },
+        { t: "Ticket médio", v: 412, f: "brl", d: "+R$ 28 no mês", c: "up" } ],
+      charts: [
+        { type: "line", title: "OS concluídas por semana", sub: "Últimas 8 semanas", f: "int",
+          labels: ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"],
+          series: [{ name: "Concluídas", values: [11, 13, 12, 15, 14, 17, 16, 19] }] },
+        { type: "hbar", title: "OS em aberto por status", sub: "Situação atual", f: "int",
+          rows: [["Orçamento", 6], ["Aberta", 5], ["Em andamento", 9], ["Aguardando peça", 4]] } ] },
+    { id: "estoque", label: "Estoque",
+      kpis: [
+        { t: "Peças cadastradas", v: 412, f: "int", d: "18 novas no mês", c: "up" },
+        { t: "Abaixo do mínimo", v: 23, f: "int", d: "Lista de reposição pronta", c: "warn" },
+        { t: "Zeradas", v: 5, f: "int", d: "Saída bloqueada", c: "bad" },
+        { t: "Custo de reposição", v: 6840, f: "brl", d: "Sugestão pelo estoque mínimo", c: "warn" } ],
+      charts: [
+        { type: "col", title: "Saídas de estoque por dia", sub: "Unidades, últimos 10 dias úteis", f: "int",
+          labels: ["29/9", "30/9", "1/10", "2/10", "3/10", "6/10", "7/10", "8/10", "9/10", "10/10"],
+          series: [{ name: "Saídas", values: [14, 19, 11, 22, 17, 24, 16, 21, 18, 26] }] },
+        { type: "hbar", title: "Peças mais usadas no mês", sub: "Unidades baixadas em OS", f: "int",
+          rows: [["Filtro de Óleo", 46], ["Pastilha de Freio", 38], ["Vela de Ignição", 32], ["Filtro de Ar", 27], ["Amortecedor", 14]] } ] },
+    { id: "financeiro", label: "Financeiro",
+      kpis: [
+        { t: "A receber", v: 18450, f: "brl", d: "R$ 2.100 vencidos", c: "bad" },
+        { t: "A pagar", v: 7920, f: "brl", d: "Próximo: dia 15", c: "warn" },
+        { t: "Recebido no mês", v: 32600, f: "brl", d: "+4,5% sobre setembro", c: "up" },
+        { t: "Margem média por OS", v: 38, f: "pct", d: "Peças e mão de obra", c: "up" } ],
+      charts: [
+        { type: "col", title: "Receitas e despesas", sub: "R$ mil por mês", f: "mil",
+          labels: ["Mai", "Jun", "Jul", "Ago", "Set", "Out"],
+          series: [{ name: "Receitas", values: [24.1, 26.8, 25.3, 29.4, 31.2, 32.6] },
+                   { name: "Despesas", values: [15.2, 16.1, 15.8, 17.4, 18.0, 17.9] }] },
+        { type: "hbar", title: "A receber por vencimento", sub: "Em reais", f: "brl",
+          rows: [["Vencido", 2100], ["Até 7 dias", 6400], ["8 a 15 dias", 5200], ["16 a 30 dias", 4750]] } ] }
+  ];
+  const COLORS = ["var(--s1)", "var(--s2)"];
+  const NS = "http://www.w3.org/2000/svg";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fmt = (v, f) => {
+    if (f === "brl") return "R$ " + Math.round(v).toLocaleString("pt-BR");
+    if (f === "mil") return "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " mil";
+    if (f === "pct") return Math.round(v) + "%";
+    return Math.round(v).toLocaleString("pt-BR");
+  };
+  const node = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  const html = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const nice = (max) => {
+    const raw = max / 4, p = 10 ** Math.floor(Math.log10(raw));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((s) => s >= raw);
+    return { step, top: Math.ceil(max / step) * step };
+  };
+  // Barra com só a ponta de dados arredondada; a base fica reta sobre o eixo.
+  const barRight = (x, y, w, h, r) => { r = Math.min(r, w, h / 2); return `M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z`; };
+  const barUp = (x, y0, w, h, r) => { const y = y0 - h; r = Math.min(r, h, w / 2); return `M${x},${y0}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y0}Z`; };
+
+  function tooltip(box) {
+    const tip = html("div", "tip"); tip.hidden = true; box.appendChild(tip);
+    return {
+      show(svg, sx, sy, text) {
+        const r = svg.getBoundingClientRect(), b = box.getBoundingClientRect(), k = r.width / svg.viewBox.baseVal.width;
+        tip.innerHTML = text; tip.hidden = false;
+        tip.style.left = (r.left - b.left + sx * k) + "px"; tip.style.top = (r.top - b.top + sy * k) + "px";
+      },
+      hide() { tip.hidden = true; }
+    };
+  }
+
+  function hbar(box, c) {
+    const W = 460, rowH = 42, L = 120, R = 74, H = c.rows.length * rowH;
+    const max = Math.max(...c.rows.map((r) => r[1])), sx = (v) => (v / max) * (W - L - R);
+    const svg = node("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": c.title + ": " + c.rows.map((r) => r[0] + " " + fmt(r[1], c.f)).join(", ") }, box);
+    const tip = tooltip(box);
+    node("line", { x1: L, x2: L, y1: 4, y2: H - 4, class: "baseline" }, svg);
+    c.rows.forEach(([label, v], i) => {
+      const y = i * rowH, w = sx(v);
+      node("text", { x: L - 12, y: y + rowH / 2 + 4, "text-anchor": "end" }, svg).textContent = label;
+      node("path", { d: barRight(L, y + 11, w, 20, 4), class: "bar-h", style: `fill:${COLORS[0]};--i:${i}` }, svg);
+      node("text", { x: L + w + 8, y: y + rowH / 2 + 4, class: "val fade", style: `--d:${0.5 + i * 0.08}s` }, svg).textContent = fmt(v, c.f);
+      const hit = node("rect", { x: 0, y, width: W, height: rowH, class: "hit" }, svg);
+      hit.addEventListener("mousemove", () => tip.show(svg, L + w / 2, y + 11, `${label}: <b>${fmt(v, c.f)}</b>`));
+      hit.addEventListener("mouseleave", tip.hide);
+    });
+  }
+
+  function axes(svg, top, step, W, H, p, f) {
+    for (let t = 0; t <= top + 1e-9; t += step) {
+      const y = H - p.b - (t / top) * (H - p.b - p.t);
+      node("line", { x1: p.l, x2: W - p.r, y1: y, y2: y, class: t === 0 ? "baseline" : "gridline" }, svg);
+      node("text", { x: p.l - 8, y: y + 4, "text-anchor": "end" }, svg).textContent = f === "mil" ? t.toLocaleString("pt-BR") : fmt(t, f);
+    }
+  }
+
+  function line(box, c) {
+    const W = 520, H = 230, p = { l: 34, r: 30, t: 16, b: 28 }, vals = c.series[0].values, n = vals.length;
+    const { step, top } = nice(Math.max(...vals));
+    const x = (i) => p.l + (i / (n - 1)) * (W - p.l - p.r), y = (v) => H - p.b - (v / top) * (H - p.b - p.t);
+    const svg = node("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": c.title + ": " + c.labels.map((l, i) => l + " " + vals[i]).join(", ") }, box);
+    const tip = tooltip(box);
+    axes(svg, top, step, W, H, p, c.f);
+    c.labels.forEach((l, i) => { node("text", { x: x(i), y: H - 8, "text-anchor": "middle" }, svg).textContent = l; });
+    const pts = vals.map((v, i) => `${x(i)},${y(v)}`).join(" L");
+    node("path", { d: `M${pts} L${x(n - 1)},${H - p.b} L${x(0)},${H - p.b}Z`, class: "fade", style: `fill:${COLORS[0]};opacity:.12;--d:.7s` }, svg);
+    node("path", { d: `M${pts}`, class: "draw", fill: "none", style: `stroke:${COLORS[0]};stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round` }, svg);
+    node("circle", { cx: x(n - 1), cy: y(vals[n - 1]), r: 5.5, class: "fade", style: `fill:${COLORS[0]};stroke:var(--surface);stroke-width:2;--d:1.3s` }, svg);
+    node("text", { x: x(n - 1), y: y(vals[n - 1]) - 12, "text-anchor": "middle", class: "val fade", style: "--d:1.3s" }, svg).textContent = vals[n - 1];
+    const cross = node("line", { y1: p.t, y2: H - p.b, class: "gridline", visibility: "hidden", "stroke-dasharray": "3 3" }, svg);
+    const dot = node("circle", { r: 5, visibility: "hidden", style: `fill:${COLORS[0]};stroke:var(--surface);stroke-width:2` }, svg);
+    const hit = node("rect", { x: p.l, y: p.t, width: W - p.l - p.r, height: H - p.t - p.b, class: "hit" }, svg);
+    hit.addEventListener("mousemove", (e) => {
+      const r = svg.getBoundingClientRect(), sx = ((e.clientX - r.left) / r.width) * W;
+      const i = Math.max(0, Math.min(n - 1, Math.round(((sx - p.l) / (W - p.l - p.r)) * (n - 1))));
+      for (const el of [cross, dot]) el.setAttribute("visibility", "visible");
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
+      dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(vals[i]));
+      tip.show(svg, x(i), y(vals[i]), `${c.labels[i]} · ${c.series[0].name}: <b>${fmt(vals[i], c.f)}</b>`);
+    });
+    hit.addEventListener("mouseleave", () => { for (const el of [cross, dot]) el.setAttribute("visibility", "hidden"); tip.hide(); });
+  }
+
+  function col(box, c) {
+    const W = 520, H = 230, p = { l: 40, r: 8, t: 16, b: 28 }, n = c.labels.length, ns = c.series.length;
+    const { step, top } = nice(Math.max(...c.series.flatMap((s) => s.values)));
+    const gw = (W - p.l - p.r) / n, bw = Math.min(22, (gw * 0.72 - (ns - 1) * 2) / ns);
+    const y0 = H - p.b, h = (v) => (v / top) * (H - p.b - p.t);
+    const svg = node("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": c.title + ": " + c.labels.map((l, i) => l + " " + c.series.map((s) => s.name + " " + fmt(s.values[i], c.f)).join(" / ")).join(", ") }, box);
+    const tip = tooltip(box);
+    axes(svg, top, step, W, H, p, c.f);
+    c.labels.forEach((l, i) => {
+      const gx = p.l + i * gw, start = gx + (gw - (ns * bw + (ns - 1) * 2)) / 2;
+      node("text", { x: gx + gw / 2, y: H - 8, "text-anchor": "middle" }, svg).textContent = l;
+      c.series.forEach((s, j) => node("path", { d: barUp(start + j * (bw + 2), y0, bw, h(s.values[i]), 4), class: "bar-v", style: `fill:${COLORS[j]};--i:${i * ns + j}` }, svg));
+      const hit = node("rect", { x: gx, y: p.t, width: gw, height: H - p.t - p.b, class: "hit" }, svg);
+      hit.addEventListener("mousemove", () => tip.show(svg, gx + gw / 2, y0 - h(Math.max(...c.series.map((s) => s.values[i]))), `${l} · ` + c.series.map((s) => `${s.name}: <b>${fmt(s.values[i], c.f)}</b>`).join(" · ")));
+      hit.addEventListener("mouseleave", tip.hide);
+    });
+    if (ns > 1) {
+      const lg = html("div", "legend");
+      c.series.forEach((s, j) => { const it = html("span"); const sw = html("i"); sw.style.background = COLORS[j]; it.append(sw, s.name); lg.appendChild(it); });
+      box.appendChild(lg);
+    }
+  }
+
+  const tabs = document.querySelector("#dash .tabs"), host = document.getElementById("dash-panels");
+  const panels = DATA.map((d, idx) => {
+    const tab = html("button", "tab", d.label);
+    Object.assign(tab, { id: "tab-" + d.id, type: "button" });
+    tab.setAttribute("role", "tab"); tab.setAttribute("aria-controls", "painel-" + d.id); tab.setAttribute("aria-selected", String(idx === 0));
+    tab.tabIndex = idx === 0 ? 0 : -1;
+    tabs.appendChild(tab);
+    const panel = html("div", "dash-body"); panel.id = "painel-" + d.id; panel.hidden = idx !== 0;
+    panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", tab.id);
+    const kpis = html("div", "kpis");
+    d.kpis.forEach((k, i) => {
+      const card = html("div", "kpi"); card.style.setProperty("--i", i);
+      const val = html("strong", null, fmt(k.v, k.f)); val.dataset.v = k.v; val.dataset.f = k.f;
+      card.append(html("small", null, k.t), val, html("span", "delta " + k.c, k.d));
+      kpis.appendChild(card);
+    });
+    const charts = html("div", "charts");
+    d.charts.forEach((c) => {
+      const box = html("div", "chart");
+      box.append(html("h3", null, c.title), html("p", "sub", c.sub));
+      ({ line, hbar, col })[c.type](box, c);
+      charts.appendChild(box);
+    });
+    panel.append(kpis, charts); host.appendChild(panel);
+    return { tab, panel };
+  });
+
+  function countUp(panel) {
+    const els = [...panel.querySelectorAll(".kpi strong")], t0 = performance.now(), dur = 1100;
+    const tick = (now) => {
+      const e = 1 - Math.pow(1 - Math.min(1, (now - t0) / dur), 3);
+      els.forEach((el) => { el.textContent = fmt(+el.dataset.v * e, el.dataset.f); });
+      if (e < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  function play(panel) {
+    if (reduce) return;
+    panel.querySelectorAll(".draw").forEach((p) => p.style.setProperty("--len", Math.ceil(p.getTotalLength())));
+    panel.classList.remove("play"); void panel.offsetWidth; panel.classList.add("play");
+    countUp(panel);
+  }
+  function select(i, focus) {
+    panels.forEach(({ tab, panel }, j) => {
+      const on = i === j;
+      tab.setAttribute("aria-selected", String(on)); tab.tabIndex = on ? 0 : -1; panel.hidden = !on;
+    });
+    if (focus) panels[i].tab.focus();
+    play(panels[i].panel);
+  }
+  panels.forEach(({ tab }, i) => {
+    tab.addEventListener("click", () => select(i, false));
+    tab.addEventListener("keydown", (e) => {
+      const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (k) { e.preventDefault(); select((i + k + panels.length) % panels.length, true); }
+    });
+  });
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((en) => en.isIntersecting)) { io.disconnect(); play(panels.find((p) => !p.panel.hidden).panel); }
+    }, { threshold: 0.3 });
+    io.observe(document.getElementById("dash"));
+  }
+})();
+</script>
