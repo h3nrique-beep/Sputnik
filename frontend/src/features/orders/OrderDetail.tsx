@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Empty, Loading, Metric } from "../../components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  Empty,
+  Loading,
+  Metric,
+} from "../../components/ui";
 import { api, downloadApi } from "../../lib/api";
-import { dateTime, label, money } from "../../lib/format";
+import { date, dateTime, label, money } from "../../lib/format";
 import { type Order } from "../../types/domain";
 import { OrderEdit } from "./OrderEdit";
 import { OrderItems } from "./OrderItems";
@@ -78,25 +85,25 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
           <Button variant="link" size="sm" onClick={back}>
             ← Voltar
           </Button>
-          <h2>
-            {eOrcamento ? "Orçamento" : "OS"} #{o.id}
+          <h2 className="order-title">
+            {eOrcamento ? "Orçamento" : "OS"} #{o.id}{" "}
+            <Badge status={o.status} />
           </h2>
         </div>
         <span className="toolbar-actions">
           <Button variant="secondary" onClick={() => window.print()}>
             Imprimir
           </Button>
-          {eOrcamento && <Button onClick={aprovar}>Aprovar e abrir OS</Button>}
-          <Button onClick={baixarPdf} disabled={baixandoPdf}>
+          <Button
+            variant="secondary"
+            onClick={baixarPdf}
+            disabled={baixandoPdf}
+          >
             {baixandoPdf ? "Gerando PDF..." : "Baixar PDF"}
           </Button>
+          {eOrcamento && <Button onClick={aprovar}>Aprovar e abrir OS</Button>}
         </span>
       </div>
-      {erro && (
-        <div className="alert error" role="alert">
-          {erro}
-        </div>
-      )}
       <section
         className="sputnik-os-print"
         aria-label="Ordem de serviço para impressão"
@@ -293,74 +300,65 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
       </section>
       <div className="metrics">
         <Metric label="Cliente" value={o.cliente.nome as any} />
-        <Metric label="Veículo" value={`${o.veiculo.placa}` as any} />
+        <Metric label="Veículo" value={o.veiculo.placa as any} />
         <Metric label="KM" value={o.quilometragem} />
-        <Metric label="Status" value={label(o.status) as any} />
         {o.agendamento && (
           <Metric label="Agendamento" value={dateTime(o.agendamento) as any} />
         )}
         {o.retornoEm && (
-          <Metric
-            label="Retorno"
-            value={
-              new Date(o.retornoEm + "T12:00:00").toLocaleDateString(
-                "pt-BR",
-              ) as any
-            }
-          />
+          <Metric label="Retorno" value={date(o.retornoEm) as any} />
         )}
         {o.garantiaAte && (
-          <Metric
-            label="Garantia"
-            value={
-              new Date(o.garantiaAte + "T12:00:00").toLocaleDateString(
-                "pt-BR",
-              ) as any
-            }
-          />
+          <Metric label="Garantia" value={date(o.garantiaAte) as any} />
         )}
       </div>
-      <div className="cards">
-        <Card title="Itens e custos">
-          {data.itens.length ? (
-            data.itens.map((i: any) => (
-              <p key={i.id}>
-                <span>
-                  {i.quantidade}× {i.descricao}
-                </span>
-                <b>{money(i.total)}</b>
-              </p>
-            ))
-          ) : (
-            <Empty text="Nenhum item lançado." />
-          )}
-          <p>
-            <span>Total</span>
-            <b>
-              {money(data.itens.reduce((s: number, i: any) => s + i.total, 0))}
-            </b>
-          </p>
-        </Card>
-        <Card title="Histórico">
-          {data.historico.map((h: any, i: number) => (
-            <p key={i}>
-              <span>
-                {h.descricao}
-                <small>
-                  {dateTime(h.data)} · {h.responsavel}
-                </small>
-              </span>
+      <p className="order-description">{o.descricao}</p>
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
+      <div className="order-workspace">
+        <div className="order-workspace-main">
+          <Card title="Itens e custos">
+            {data.itens.length ? (
+              data.itens.map((i: any) => (
+                <p key={i.id}>
+                  <span>
+                    {i.quantidade}× {i.descricao}
+                  </span>
+                  <b>{money(i.total)}</b>
+                </p>
+              ))
+            ) : (
+              <Empty text="Nenhum item lançado. Use o formulário abaixo." />
+            )}
+            <p className="order-total">
+              <span>Total</span>
+              <b>{money(totalPecas + totalServicos)}</b>
             </p>
-          ))}
-        </Card>
+          </Card>
+          <OrderItems orderId={id} saved={reload} failed={setErro} />
+        </div>
+        <div className="order-workspace-side">
+          {!eOrcamento && (
+            <OrderEdit order={o} saved={reload} failed={setErro} />
+          )}
+          <details className="order-history">
+            <summary>Histórico ({data.historico.length})</summary>
+            {data.historico.map((h: any, i: number) => (
+              <p key={i}>
+                <span>
+                  {h.descricao}
+                  <small>
+                    {dateTime(h.data)} · {h.responsavel}
+                  </small>
+                </span>
+              </p>
+            ))}
+          </details>
+        </div>
       </div>
-      <div className="cards">
-        {!eOrcamento && <OrderEdit order={o} saved={reload} failed={setErro} />}
-        <OrderItems orderId={id} saved={reload} failed={setErro} />
-      </div>
-      <Card title="Descrição do serviço">
-        <p>{o.descricao}</p>
-      </Card>
     </>
   );
 }

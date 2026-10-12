@@ -6,6 +6,10 @@ export const money = (value: number) =>
 export const dateTime = (value: string) =>
   new Date(value).toLocaleString("pt-BR");
 
+/** Data sem hora (AAAA-MM-DD) no dia civil certo, sem deslocamento de fuso. */
+export const date = (value: string) =>
+  new Date(value + "T12:00:00").toLocaleDateString("pt-BR");
+
 /** Nomes exibidos para os códigos de status, perfil e plano vindos da API. */
 const ROTULOS: Record<string, string> = {
   ORCAMENTO: "Orçamento",
