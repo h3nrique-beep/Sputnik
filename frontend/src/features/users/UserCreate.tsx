@@ -31,7 +31,11 @@ export function UserCreate({ done }: { done: () => void }) {
         O usuário usará o e-mail no login e deverá definir uma nova senha no
         primeiro acesso.
       </p>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <label>
         Nome completo
         <input

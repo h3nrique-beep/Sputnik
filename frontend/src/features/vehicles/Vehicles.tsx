@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { Button, Loading, Table } from "../../components/ui";
 import { useSearchList } from "../../hooks/useSearchList";
 import { type Vehicle } from "../../types/domain";
@@ -14,7 +15,9 @@ export function Vehicles({ go }: { go: (v: string) => void }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button onClick={() => go("vehicles-new")}>＋ Novo veículo</Button>
+        <Button onClick={() => go("vehicles-new")}>
+          <Plus size={16} aria-hidden="true" /> Novo veículo
+        </Button>
       </div>
       {error && (
         <div className="alert error" role="alert">

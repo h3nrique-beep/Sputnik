@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge, Button, Table } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -25,9 +26,11 @@ export function Orders({ go }: { go: (v: string) => void }) {
         </div>
         <span className="toolbar-actions">
           <Button variant="secondary" onClick={() => go("quotes-new")}>
-            ＋ Novo orçamento
+            <Plus size={16} aria-hidden="true" /> Novo orçamento
           </Button>
-          <Button onClick={() => go("orders-new")}>＋ Nova ordem</Button>
+          <Button onClick={() => go("orders-new")}>
+            <Plus size={16} aria-hidden="true" /> Nova ordem
+          </Button>
         </span>
       </div>
       <Table

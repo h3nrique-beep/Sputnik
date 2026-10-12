@@ -13,7 +13,11 @@ export function MonthlyReport() {
   }, []);
   return (
     <>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <Table
         headers={[
           "Data",

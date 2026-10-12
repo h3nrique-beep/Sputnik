@@ -88,7 +88,12 @@ export function DeveloperConsole() {
   };
 
   if (!diagnostico && !erro) return <Loading />;
-  if (!diagnostico) return <div className="alert error">{erro}</div>;
+  if (!diagnostico)
+    return (
+      <div className="alert error" role="alert">
+        {erro}
+      </div>
+    );
 
   const memoria = percentual(
     diagnostico.memoriaUsadaMb,
@@ -143,7 +148,11 @@ export function DeveloperConsole() {
           <strong>{diagnostico.sistemaOperacional}</strong>
         </div>
       </section>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <section className="developer-metrics">
         <Metric
           label="Backups"

@@ -410,7 +410,7 @@ input[type="radio"] {
   top: 0;
   background: var(--surface-soft);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   padding: 10px 12px;
   letter-spacing: 0.055em;
@@ -899,5 +899,37 @@ body:has(.login) {
   }
   .shell {
     display: block;
+  }
+}
+
+/* Alvos de toque e leitura mínimos (WCAG 2.5.8 e zoom automático do iOS). */
+.password-field > button,
+.password-help > summary,
+.profile button,
+.toast > button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.password-help > summary {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.temp-password {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.toast > svg {
+  flex: none;
+  color: var(--green);
+}
+@media (max-width: 760px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 }

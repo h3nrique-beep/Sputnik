@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { Button, Loading, Table } from "../../components/ui";
 import { useSearchList } from "../../hooks/useSearchList";
 import { type Client } from "../../types/domain";
@@ -14,7 +15,9 @@ export function Clients({ go }: { go: (v: string) => void }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button onClick={() => go("clients-new")}>＋ Novo cliente</Button>
+        <Button onClick={() => go("clients-new")}>
+          <Plus size={16} aria-hidden="true" /> Novo cliente
+        </Button>
       </div>
       {error && (
         <div className="alert error" role="alert">

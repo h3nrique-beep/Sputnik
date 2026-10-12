@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
+import { label } from "../../lib/format";
 import { type Order } from "../../types/domain";
 import { type OrderDocumentData } from "../../types/order-document";
 import { OrderDocumentFields } from "./components/OrderDocumentFields";
@@ -57,7 +58,9 @@ export function OrderEdit({
             "CONCLUIDA",
             "CANCELADA",
           ].map((s) => (
-            <option key={s}>{s}</option>
+            <option key={s} value={s}>
+              {label(s)}
+            </option>
           ))}
         </select>
       </label>

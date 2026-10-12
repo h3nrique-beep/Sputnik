@@ -62,7 +62,11 @@ export function OrderCreate({
           aprovar.
         </p>
       )}
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <label>
         Cliente
         <select

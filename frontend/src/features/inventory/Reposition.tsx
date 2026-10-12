@@ -11,7 +11,12 @@ export function Reposition() {
       .then(setData)
       .catch((e) => setErro(e.message));
   }, []);
-  if (erro) return <div className="alert error">{erro}</div>;
+  if (erro)
+    return (
+      <div className="alert error" role="alert">
+        {erro}
+      </div>
+    );
   if (!data) return <Loading />;
   return (
     <div className="module-shell space-y-5">

@@ -1,3 +1,5 @@
+import { CircleCheck, X } from "lucide-react";
+
 export function Toast({
   message,
   onClose,
@@ -7,10 +9,10 @@ export function Toast({
 }) {
   return (
     <div className="toast" role="status" aria-live="polite">
-      <span aria-hidden="true">✓</span>
+      <CircleCheck size={18} aria-hidden="true" />
       <p>{message}</p>
       <button type="button" onClick={onClose} aria-label="Fechar aviso">
-        ×
+        <X size={16} aria-hidden="true" />
       </button>
     </div>
   );

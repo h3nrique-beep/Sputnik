@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, Loading, Metric } from "../../components/ui";
 import { api } from "../../lib/api";
+import { label } from "../../lib/format";
 
 type Subscription = {
   nome: string;
@@ -30,11 +31,8 @@ export function Subscription() {
   return (
     <div className="module-shell space-y-5">
       <div className="metrics">
-        <Metric label="Plano" value={data.plano as any} />
-        <Metric
-          label="Status"
-          value={data.status.replaceAll("_", " ") as any}
-        />
+        <Metric label="Plano" value={label(data.plano) as any} />
+        <Metric label="Status" value={label(data.status) as any} />
         <Metric
           label="Usuários"
           value={`${data.usuariosAtivos} / ${data.limiteUsuarios}` as any}

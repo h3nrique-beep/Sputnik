@@ -8,7 +8,8 @@ export function StockMovement({ done }: { done: () => void }) {
     [tipo, setTipo] = useState("ENTRADA"),
     [quantidade, setQuantidade] = useState("1"),
     [observacao, setObservacao] = useState(""),
-    [erro, setErro] = useState("");
+    [erro, setErro] = useState(""),
+    [aviso, setAviso] = useState("");
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     api<Piece[]>("/pecas")
@@ -20,6 +21,7 @@ export function StockMovement({ done }: { done: () => void }) {
     if (saving) return;
     setSaving(true);
     setErro("");
+    setAviso("");
     try {
       await api("/movimentacoes", {
         method: "POST",
@@ -37,7 +39,7 @@ export function StockMovement({ done }: { done: () => void }) {
       await api<Piece[]>("/pecas")
         .then(setPieces)
         .catch(() =>
-          setErro(
+          setAviso(
             "Movimentação registrada. Reabra esta tela para atualizar os saldos.",
           ),
         );
@@ -51,7 +53,16 @@ export function StockMovement({ done }: { done: () => void }) {
     <form className="form-card movement-form" onSubmit={submit}>
       <h2>Registrar entrada ou saída</h2>
       <p>O saldo contábil e disponível são atualizados automaticamente.</p>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
+      {aviso && (
+        <div className="alert success" role="status">
+          {aviso}
+        </div>
+      )}
       <label>
         Peça
         <select

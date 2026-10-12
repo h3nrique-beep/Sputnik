@@ -33,7 +33,11 @@ export function VehicleCreate({ done }: { done: () => void }) {
     <form className="form-card grid-form" onSubmit={submit}>
       <h2>Dados do veículo</h2>
       <p>O proprietário precisa estar cadastrado antes do vínculo.</p>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <label>
         Cliente
         <select

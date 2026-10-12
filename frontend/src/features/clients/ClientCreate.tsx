@@ -16,7 +16,11 @@ export function ClientCreate({ done }: { done: () => void }) {
   return (
     <form className="form-card" onSubmit={submit}>
       <h2>Dados do cliente</h2>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <label>
         Nome completo
         <input

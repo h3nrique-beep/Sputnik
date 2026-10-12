@@ -167,7 +167,11 @@ export function Finance({
           </Button>
         )}
       </div>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <div className="metrics">
         <Metric label="A receber" value={money(totals.receber) as any} />
         <Metric label="A pagar" value={money(totals.pagar) as any} />

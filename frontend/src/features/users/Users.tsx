@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { KeyRound, ShieldCheck, Trash2 } from "lucide-react";
+import { Copy, KeyRound, ShieldCheck, Trash2, X, Plus } from "lucide-react";
 import { Badge, Button, Table } from "../../components/ui";
 import { api } from "../../lib/api";
+import { permissionLabel } from "../../lib/format";
 import { UserCreate } from "./UserCreate";
 import { UserPermissions } from "./UserPermissions";
 
@@ -10,7 +11,8 @@ export function Users() {
     [erro, setErro] = useState(""),
     [showCreate, setShowCreate] = useState(false),
     [editing, setEditing] = useState<any>(),
-    [senhaTemporaria, setSenhaTemporaria] = useState("");
+    [senhaTemporaria, setSenhaTemporaria] = useState(""),
+    [copiada, setCopiada] = useState(false);
   const load = () =>
     api<any[]>("/admin/usuarios")
       .then(setItems)
@@ -18,9 +20,11 @@ export function Users() {
   useEffect(() => {
     load();
   }, []);
-  const reset = async (id: number) => {
+  const reset = async (id: number, nome: string) => {
     if (
-      !confirm("Gerar uma nova senha temporária aleatória para este usuário?")
+      !confirm(
+        `Gerar uma nova senha temporária para ${nome}? A senha atual deixa de funcionar.`,
+      )
     )
       return;
     try {
@@ -34,8 +38,11 @@ export function Users() {
       setErro((e as Error).message);
     }
   };
-  const remove = async (id: number) => {
-    if (!confirm("Remover este usuário?")) return;
+  const remove = async (id: number, nome: string) => {
+    if (
+      !confirm(`Remover o acesso de ${nome}? Esta ação não pode ser desfeita.`)
+    )
+      return;
     try {
       await api("/admin/usuarios/" + id, { method: "DELETE" });
       load();
@@ -45,11 +52,43 @@ export function Users() {
   };
   return (
     <>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       {senhaTemporaria && (
-        <div className="alert success">
-          Senha temporária gerada: <code>{senhaTemporaria}</code>. Entregue-a ao
-          usuário por canal seguro; ela será exibida somente agora.
+        <div className="alert success temp-password" role="status">
+          <p>
+            Senha temporária gerada: <code>{senhaTemporaria}</code>. Entregue ao
+            usuário por um canal seguro. Ela não aparece de novo depois que você
+            fechar este aviso.
+          </p>
+          <span className="row-actions">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                navigator.clipboard
+                  ?.writeText(senhaTemporaria)
+                  .then(() => setCopiada(true))
+                  .catch(() => setCopiada(false))
+              }
+            >
+              <Copy size={15} aria-hidden="true" />
+              {copiada ? "Copiada" : "Copiar senha"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSenhaTemporaria("");
+                setCopiada(false);
+              }}
+            >
+              <X size={15} aria-hidden="true" /> Fechar
+            </Button>
+          </span>
         </div>
       )}
       <div className="toolbar">
@@ -58,7 +97,7 @@ export function Users() {
           <p>Cadastre balcões e defina os módulos disponíveis.</p>
         </div>
         <Button onClick={() => setShowCreate(!showCreate)}>
-          ＋ Novo usuário
+          <Plus size={16} aria-hidden="true" /> Novo usuário
         </Button>
       </div>
       {showCreate && (
@@ -87,7 +126,7 @@ export function Users() {
           <Badge key="role" status={u.perfil} />,
           u.perfil === "ADMIN"
             ? "Acesso total"
-            : u.permissoes.join(", ") || "Sem módulos",
+            : u.permissoes.map(permissionLabel).join(", ") || "Sem módulos",
           u.perfil === "ADMIN" ? (
             <span className="muted">Protegido</span>
           ) : (
@@ -99,7 +138,7 @@ export function Users() {
                 variant="outline"
                 size="sm"
                 className="row-action-icon"
-                onClick={() => reset(u.id)}
+                onClick={() => reset(u.id, u.nome)}
                 aria-label={`Resetar senha de ${u.nome}`}
                 title="Resetar senha"
               >
@@ -109,7 +148,7 @@ export function Users() {
                 variant="outline"
                 size="sm"
                 className="row-action-icon row-action-danger"
-                onClick={() => remove(u.id)}
+                onClick={() => remove(u.id, u.nome)}
                 aria-label={`Remover ${u.nome}`}
                 title="Remover usuário"
               >

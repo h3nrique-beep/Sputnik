@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Card, Empty, Loading, Metric } from "../../components/ui";
 import { api, downloadApi } from "../../lib/api";
-import { dateTime, money } from "../../lib/format";
+import { dateTime, label, money } from "../../lib/format";
 import { type Order } from "../../types/domain";
 import { OrderEdit } from "./OrderEdit";
 import { OrderItems } from "./OrderItems";
@@ -22,7 +22,9 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
   if (!data)
     return erro ? (
       <div className="space-y-4">
-        <div className="alert error">{erro}</div>
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
         <Button variant="secondary" onClick={back}>
           Voltar para ordens
         </Button>
@@ -90,7 +92,11 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
           </Button>
         </span>
       </div>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <section
         className="sputnik-os-print"
         aria-label="Ordem de serviço para impressão"
@@ -109,7 +115,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
           <div className="sputnik-os-number">
             <span>{eOrcamento ? "ORÇAMENTO" : "ORDEM DE SERVIÇO"}</span>
             <strong>Nº {o.id}</strong>
-            <small>{o.status.replaceAll("_", " ")}</small>
+            <small>{label(o.status)}</small>
           </div>
         </header>
         <div className="sputnik-os-top-grid">
@@ -289,7 +295,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
         <Metric label="Cliente" value={o.cliente.nome as any} />
         <Metric label="Veículo" value={`${o.veiculo.placa}` as any} />
         <Metric label="KM" value={o.quilometragem} />
-        <Metric label="Status" value={o.status as any} />
+        <Metric label="Status" value={label(o.status) as any} />
         {o.agendamento && (
           <Metric label="Agendamento" value={dateTime(o.agendamento) as any} />
         )}

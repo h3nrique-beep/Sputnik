@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Button, Card, Empty, Loading } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -60,7 +61,9 @@ export function Schedule({ go }: { go: (view: string) => void }) {
             Organize os próximos atendimentos e abra a OS diretamente da fila.
           </p>
         </div>
-        <Button onClick={() => go("orders-new")}>＋ Agendar atendimento</Button>
+        <Button onClick={() => go("orders-new")}>
+          <Plus size={16} aria-hidden="true" /> Agendar atendimento
+        </Button>
       </div>
       <Card title="Próximos atendimentos">
         <div className="mb-4 flex flex-wrap items-end gap-3">

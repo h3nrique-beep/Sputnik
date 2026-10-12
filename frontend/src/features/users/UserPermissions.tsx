@@ -32,7 +32,11 @@ export function UserPermissions({
   return (
     <form className="form-card" onSubmit={submit}>
       <h2>Permissões de {user.nome}</h2>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <PermissionFields selected={permissoes} toggle={toggle} />
       <button className="primary">Salvar permissões</button>
     </form>

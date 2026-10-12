@@ -36,7 +36,11 @@ export function PieceCreate({ done }: { done: () => void }) {
   return (
     <form className="form-card grid-form" onSubmit={submit}>
       <h2>Novo item de estoque</h2>
-      {erro && <div className="alert error">{erro}</div>}
+      {erro && (
+        <div className="alert error" role="alert">
+          {erro}
+        </div>
+      )}
       <label>
         Código
         <input
