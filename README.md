@@ -10,6 +10,8 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 
 - Cadastro centralizado de **clientes, veículos e peças**.
 - Busca rápida por nome, CPF, telefone, placa, chassi, nome ou código da peça.
+- **Busca global** no topo: número da OS abre a ordem, placa abre veículos e o restante busca peças.
+- Seletores com busca (peça, cliente, veículo) que escolhem sozinhos quando sobra um resultado.
 - Controle de estoque com entradas, saídas, saldo disponível, estoque mínimo e bloqueio de saldo negativo.
 - Histórico de movimentações com operador, data, observação e saldo resultante.
 - Reposição de itens críticos e exportação CSV.
@@ -18,7 +20,8 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 
 - Abertura de OS e orçamentos com cliente, veículo, quilometragem e descrição.
 - Inclusão de peças e serviços, totais automáticos, histórico e acompanhamento por status.
-- Aprovação de orçamento com baixa de estoque somente após a aprovação.
+- Aprovação de orçamento com baixa de estoque somente após a aprovação, listando antes as peças que sairão do estoque.
+- Detalhe da OS com itens e lançamento em primeiro plano e histórico recolhível.
 - Agenda de atendimentos, retornos preventivos e período de garantia.
 - Documento A4 de OS com campos complementares, impressão na própria tela e download em PDF.
 
@@ -26,7 +29,8 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 
 - Lançamentos de receitas e despesas, vencimentos, vínculo opcional com OS e baixa de pagamentos.
 - Indicadores de contas a receber, a pagar, recebido e rentabilidade por OS, filtráveis por mês, próximos 30 dias ou histórico.
-- Painel operacional com métricas, itens críticos, atendimentos e indicadores de estoque.
+- **Painel de atenção**: o que exige ação hoje (clicável e filtrado por permissão), ações rápidas e indicadores de estoque.
+- Movimentação de estoque mostra o saldo antes e depois e bloqueia saída acima do disponível.
 - Console administrativo com diagnóstico do ambiente e backups locais.
 
 ### Acesso e permissões
@@ -35,7 +39,8 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 - Primeiro acesso obrigatório com troca de senha e política de senha forte.
 - Administração de usuários e permissões por módulo: **Peças**, **Ordens de serviço**, **Relatório mensal**, **Financeiro** e **Reposição**.
 - Perfil financeiro isolado: acessa somente os lançamentos financeiros, sem acesso ao painel operacional.
-- Menu lateral recolhível, com preferência preservada após atualizar a página.
+- Menu lateral agrupado e recolhível, com preferência preservada após atualizar a página; o F5 não exibe mais um lampejo da tela de login.
+- Tema claro/escuro que segue o sistema quando não há escolha salva; status com rótulo e ícone (a cor nunca é o único sinal), alvos de toque de 44px e erros anunciados a leitores de tela.
 - Dados operacionais separados pela empresa da sessão para clientes, veículos, peças, movimentações, OS e lançamentos financeiros.
 
 ## Stack
@@ -45,7 +50,7 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 | Frontend | React, TypeScript, Vite, Tailwind, shadcn/ui e Recharts |
 | Backend | Java 17, Spring Boot, Spring MVC e Spring Data JPA |
 | Banco de dados | H2 persistente em arquivo |
-| Segurança | BCrypt, sessão HTTP, CSRF e permissões por módulo |
+| Segurança | BCrypt, sessão HTTP, CSRF, limite de tentativas de login e permissões por módulo |
 | Testes | JUnit 5, Spring Boot Test e MockMvc |
 
 ## Arquitetura
@@ -149,6 +154,8 @@ frontend/src/
 - [Mapa de arquivos e responsabilidades](ARCHITECTURE.md)
 - [Modelo do documento de OS](docs/MODELO-OS.md)
 - [Plano de evolução do produto](docs/PLANO-EVOLUCAO-PRODUTO.md)
+- [Auditoria de código (out/2026)](docs/AUDITORIA-CODIGO-2026-10-11.md)
+- [Landing page de divulgação](docs/landing/sputnik-landing.html)
 - [Relatório de auditoria de segurança](docs/security-audit/relatorio-auditoria-seguranca.pdf)
 
 ## Segurança

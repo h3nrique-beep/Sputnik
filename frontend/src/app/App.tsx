@@ -58,6 +58,8 @@ const GRUPOS_MENU = ["Operação", "Estoque", "Cadastros", "Gestão"];
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
+  // Evita o flash da tela de login no F5 enquanto a sessão ainda é consultada.
+  const [verificandoSessao, setVerificandoSessao] = useState(true);
   const [view, setView] = useState(
     () => viewFromPath(window.location.pathname) ?? "dashboard",
   );
@@ -94,9 +96,9 @@ export function App() {
     };
   }, [mobileMenu]);
   useLayoutEffect(() => {
-    document.documentElement.dataset.theme = user && dark ? "dark" : "light";
+    document.documentElement.dataset.theme = (user || verificandoSessao) && dark ? "dark" : "light";
     window.localStorage.setItem(TEMA_STORAGE_KEY, dark ? "dark" : "light");
-  }, [dark, user]);
+  }, [dark, user, verificandoSessao]);
   const landingView = (account: User) => {
     const acessoOperacional =
       account.perfil === "ADMIN" ||
@@ -120,7 +122,8 @@ export function App() {
       .catch(() => {
         window.history.replaceState({}, "", "/login");
         setUser(null);
-      });
+      })
+      .finally(() => setVerificandoSessao(false));
   }, []);
   useEffect(() => {
     const onPopState = () =>
@@ -133,6 +136,7 @@ export function App() {
     const timeout = window.setTimeout(() => setNotice(""), 4500);
     return () => window.clearTimeout(timeout);
   }, [notice]);
+  if (!user && verificandoSessao) return null;
   if (!user)
     return (
       <Login
