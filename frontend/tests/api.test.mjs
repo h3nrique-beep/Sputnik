@@ -79,3 +79,19 @@ test("data financeira mantém o dia local perto da meia-noite", () => {
   assert.equal(localDate(new Date(2026, 8, 24, 23, 59)), "2026-09-24");
   assert.equal(localDate(new Date(2026, 11, 31, 23, 59)), "2026-12-31");
 });
+
+test("gravação invalida o cache das telas; leitura não", async (t) => {
+  const { api, queryClient } = await client();
+  t.mock.method(globalThis, "fetch", async (url) =>
+    url.endsWith("/csrf")
+      ? Response.json({ token: "token-teste" })
+      : url.endsWith("/pecas")
+        ? Response.json([])
+        : new Response(null, { status: 204 }),
+  );
+  queryClient.setQueryData(["/ordens"], []);
+  await api("/pecas");
+  assert.equal(queryClient.getQueryState(["/ordens"]).isInvalidated, false);
+  await api("/movimentacoes", { method: "POST", body: "{}" });
+  assert.equal(queryClient.getQueryState(["/ordens"]).isInvalidated, true);
+});

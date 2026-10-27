@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
 import { SearchSelect } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -12,8 +13,10 @@ export function OrderItems({
   saved: () => void;
   failed: (m: string) => void;
 }) {
-  const [pieces, setPieces] = useState<Piece[]>([]),
-    [pieceId, setPieceId] = useState(""),
+  const { data: pieces = [], error } = useQuery<Piece[]>({
+    queryKey: ["/pecas"],
+  });
+  const [pieceId, setPieceId] = useState(""),
     [quantidade, setQuantidade] = useState("1"),
     [descricao, setDescricao] = useState(""),
     [valor, setValor] = useState(""),
@@ -22,10 +25,8 @@ export function OrderItems({
   const peca = pieces.find((p) => String(p.id) === pieceId);
   const acimaDoDisponivel = peca && Number(quantidade) > peca.disponivel;
   useEffect(() => {
-    api<Piece[]>("/pecas")
-      .then(setPieces)
-      .catch((e) => failed(e.message));
-  }, []);
+    if (error) failed(error.message);
+  }, [error]);
   const addPiece = async (e: FormEvent) => {
     e.preventDefault();
     if (enviando) return;

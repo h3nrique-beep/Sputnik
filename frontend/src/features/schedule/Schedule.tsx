@@ -1,19 +1,15 @@
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge, Button, Card, Empty, Loading } from "../../components/ui";
-import { api } from "../../lib/api";
+
 import { dateTime } from "../../lib/format";
 import { type Order } from "../../types/domain";
 
 export function Schedule({ go }: { go: (view: string) => void }) {
-  const [orders, setOrders] = useState<Order[]>();
+  const { data: orders, error } = useQuery<Order[]>({ queryKey: ["/ordens"] });
   const [filter, setFilter] = useState("");
-  const [erro, setErro] = useState("");
-  useEffect(() => {
-    api<Order[]>("/ordens")
-      .then(setOrders)
-      .catch((e: Error) => setErro(e.message));
-  }, []);
+  const erro = error?.message;
   const scheduled = useMemo(
     () =>
       (orders ?? [])

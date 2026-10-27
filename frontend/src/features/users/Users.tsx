@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Copy, KeyRound, ShieldCheck, Trash2, X, Plus } from "lucide-react";
 import { Badge, Button, Table } from "../../components/ui";
 import { api } from "../../lib/api";
@@ -8,19 +9,15 @@ import { type SystemUser } from "../../types/domain";
 import { UserPermissions } from "./UserPermissions";
 
 export function Users() {
-  const [items, setItems] = useState<SystemUser[]>([]),
-    [erro, setErro] = useState(""),
+  const { data: items = [], error } = useQuery<SystemUser[]>({
+    queryKey: ["/admin/usuarios"],
+  });
+  const [erroEnvio, setErro] = useState(""),
     [showCreate, setShowCreate] = useState(false),
     [editing, setEditing] = useState<SystemUser>(),
     [senhaTemporaria, setSenhaTemporaria] = useState(""),
     [copiada, setCopiada] = useState(false);
-  const load = () =>
-    api<SystemUser[]>("/admin/usuarios")
-      .then(setItems)
-      .catch((e) => setErro(e.message));
-  useEffect(() => {
-    load();
-  }, []);
+  const erro = erroEnvio || error?.message || "";
   const reset = async (id: number, nome: string) => {
     if (
       !confirm(
@@ -34,7 +31,6 @@ export function Users() {
         { method: "POST" },
       );
       setSenhaTemporaria(resposta.senhaTemporaria);
-      load();
     } catch (e) {
       setErro((e as Error).message);
     }
@@ -46,7 +42,6 @@ export function Users() {
       return;
     try {
       await api("/admin/usuarios/" + id, { method: "DELETE" });
-      load();
     } catch (e) {
       setErro((e as Error).message);
     }
@@ -101,22 +96,12 @@ export function Users() {
           <Plus size={16} aria-hidden="true" /> Novo usuário
         </Button>
       </div>
-      {showCreate && (
-        <UserCreate
-          done={() => {
-            setShowCreate(false);
-            load();
-          }}
-        />
-      )}
+      {showCreate && <UserCreate done={() => setShowCreate(false)} />}
       {editing && (
         <UserPermissions
           key={editing.id}
           user={editing}
-          done={() => {
-            setEditing(undefined);
-            load();
-          }}
+          done={() => setEditing(undefined)}
         />
       )}
       <Table

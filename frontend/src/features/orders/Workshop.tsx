@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Badge, Button, Empty, Loading } from "../../components/ui";
-import { api } from "../../lib/api";
+
 import { label } from "../../lib/format";
 import { type Order } from "../../types/domain";
 import { mudarStatus } from "./mudarStatus";
@@ -33,19 +34,13 @@ export function Workshop({
   go: (v: string) => void;
   usuario: string;
 }) {
-  const [items, setItems] = useState<Order[]>();
-  const [erro, setErro] = useState("");
+  const { data: items, error } = useQuery<Order[]>({ queryKey: ["/ordens"] });
+  const [erroEnvio, setErro] = useState("");
+  const erro = erroEnvio || error?.message || "";
   const [salvando, setSalvando] = useState(0);
   const [soMinhas, setSoMinhas] = useState(
     () => window.localStorage.getItem(SO_MINHAS_STORAGE_KEY) === "true",
   );
-  const load = () =>
-    api<Order[]>("/ordens")
-      .then(setItems)
-      .catch((e: Error) => setErro(e.message));
-  useEffect(() => {
-    void load();
-  }, []);
   const avancar = async (ordem: Order, status: string) => {
     if (
       encerra(status) &&
@@ -58,7 +53,6 @@ export function Workshop({
     setSalvando(ordem.id);
     try {
       await mudarStatus(ordem, status);
-      await load();
     } catch (e) {
       setErro((e as Error).message);
     } finally {

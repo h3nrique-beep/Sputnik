@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Button, Loading, Metric, Table } from "../../components/ui";
-import { api, downloadApi } from "../../lib/api";
+import { downloadApi } from "../../lib/api";
 import { money } from "../../lib/format";
 import { type Restock } from "../../types/domain";
 
 export function Reposition() {
-  const [data, setData] = useState<Restock>(),
-    [erro, setErro] = useState(""),
+  const { data, error } = useQuery<Restock>({ queryKey: ["/reposicao"] });
+  const [erroEnvio, setErro] = useState(""),
     [baixando, setBaixando] = useState(false);
   const exportar = async () => {
     setBaixando(true);
@@ -18,11 +19,7 @@ export function Reposition() {
       setBaixando(false);
     }
   };
-  useEffect(() => {
-    api<Restock>("/reposicao")
-      .then(setData)
-      .catch((e) => setErro(e.message));
-  }, []);
+  const erro = erroEnvio || error?.message;
   if (erro)
     return (
       <div className="alert error" role="alert">

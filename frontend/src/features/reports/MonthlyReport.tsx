@@ -1,17 +1,15 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { Table } from "../../components/ui";
-import { api } from "../../lib/api";
+
 import { dateTime } from "../../lib/format";
 import { type Movement } from "../../types/domain";
 
 export function MonthlyReport() {
-  const [items, setItems] = useState<Movement[]>([]),
-    [erro, setErro] = useState("");
-  useEffect(() => {
-    api<Movement[]>("/relatorio-mensal")
-      .then(setItems)
-      .catch((e) => setErro(e.message));
-  }, []);
+  const { data: items = [], error } = useQuery<Movement[]>({
+    queryKey: ["/relatorio-mensal"],
+  });
+  const erro = error?.message;
   return (
     <>
       {erro && (

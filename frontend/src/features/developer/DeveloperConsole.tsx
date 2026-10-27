@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   CircleCheck,
@@ -15,9 +16,19 @@ import {
 } from "../../types/domain";
 
 export function DeveloperConsole() {
-  const [diagnostico, setDiagnostico] = useState<DeveloperDiagnostics>();
-  const [backups, setBackups] = useState<BackupEntry[]>([]);
-  const [erro, setErro] = useState("");
+  const consultaDiagnostico = useQuery<DeveloperDiagnostics>({
+    queryKey: ["/admin/desenvolvedor"],
+  });
+  const consultaBackups = useQuery<BackupEntry[]>({
+    queryKey: ["/admin/desenvolvedor/backups"],
+  });
+  const diagnostico = consultaDiagnostico.data;
+  const backups = consultaBackups.data ?? [];
+  const [erroEnvio, setErro] = useState("");
+  const erro =
+    erroEnvio ||
+    (consultaDiagnostico.error ?? consultaBackups.error)?.message ||
+    "";
   const [criando, setCriando] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const [motionPaused, setMotionPaused] = useState(false);
@@ -44,22 +55,6 @@ export function DeveloperConsole() {
     };
   }, [diagnostico, motionPaused]);
 
-  const carregar = () => {
-    Promise.all([
-      api<DeveloperDiagnostics>("/admin/desenvolvedor"),
-      api<BackupEntry[]>("/admin/desenvolvedor/backups"),
-    ])
-      .then(([dados, lista]) => {
-        setDiagnostico(dados);
-        setBackups(lista);
-      })
-      .catch((erro: Error) => setErro(erro.message));
-  };
-
-  useEffect(() => {
-    carregar();
-  }, []);
-
   const criarBackup = async () => {
     if (criando) return;
     setCriando(true);
@@ -68,7 +63,6 @@ export function DeveloperConsole() {
       await api<BackupEntry>("/admin/desenvolvedor/backups", {
         method: "POST",
       });
-      carregar();
     } catch (erro) {
       setErro((erro as Error).message);
     } finally {

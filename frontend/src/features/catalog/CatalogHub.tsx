@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { CarFront, Package, Users } from "lucide-react";
 import { TabsList, TabsTrigger } from "../../components/shadcn/tabs";
 import { type Client, type Piece, type Vehicle } from "../../types/domain";
-import { api } from "../../lib/api";
+
 import { Clients } from "../clients/Clients";
 import { Pieces } from "../inventory/Pieces";
 import { Vehicles } from "../vehicles/Vehicles";
@@ -19,27 +20,30 @@ export function CatalogHub({
   allowPieces: boolean;
 }) {
   const [tab, setTab] = useState<Tab>(allowPieces ? "pecas" : "clientes");
-  const [counts, setCounts] = useState<{
-    clientes: number;
-    veiculos: number;
-    pecas: number;
-  }>();
-  const [erro, setErro] = useState("");
-  useEffect(() => {
-    void Promise.all([
-      allowClients ? api<Client[]>("/clientes") : Promise.resolve([]),
-      allowClients ? api<Vehicle[]>("/veiculos") : Promise.resolve([]),
-      allowPieces ? api<Piece[]>("/pecas") : Promise.resolve([]),
-    ])
-      .then(([clientes, veiculos, pecas]) =>
-        setCounts({
-          clientes: clientes.length,
-          veiculos: veiculos.length,
-          pecas: pecas.length,
-        }),
-      )
-      .catch((e: Error) => setErro(e.message));
-  }, [allowClients, allowPieces]);
+  const clientes = useQuery<Client[]>({
+    queryKey: ["/clientes"],
+    enabled: allowClients,
+  });
+  const veiculos = useQuery<Vehicle[]>({
+    queryKey: ["/veiculos"],
+    enabled: allowClients,
+  });
+  const pecas = useQuery<Piece[]>({
+    queryKey: ["/pecas"],
+    enabled: allowPieces,
+  });
+  // Consulta desabilitada fica "pending" para sempre; só as liberadas contam.
+  const carregando =
+    (allowClients && (clientes.isPending || veiculos.isPending)) ||
+    (allowPieces && pecas.isPending);
+  const counts = carregando
+    ? undefined
+    : {
+        clientes: clientes.data?.length ?? 0,
+        veiculos: veiculos.data?.length ?? 0,
+        pecas: pecas.data?.length ?? 0,
+      };
+  const erro = (clientes.error ?? veiculos.error ?? pecas.error)?.message ?? "";
   return (
     <div className="module-shell space-y-6">
       {erro && (

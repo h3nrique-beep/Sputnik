@@ -43,7 +43,7 @@ import { MonthlyReport } from "../features/reports/MonthlyReport";
 import { Users } from "../features/users/Users";
 import { VehicleCreate } from "../features/vehicles/VehicleCreate";
 import { Vehicles } from "../features/vehicles/Vehicles";
-import { api } from "../lib/api";
+import { api, queryClient } from "../lib/api";
 import { type User } from "../types/domain";
 import {
   destinoDaBusca,
@@ -386,6 +386,8 @@ export function App() {
           <button
             onClick={async () => {
               await api("/auth/logout", { method: "POST" });
+              // O próximo login pode ser de outra pessoa ou empresa: nada do cache fica.
+              queryClient.clear();
               window.history.replaceState({}, "", "/login");
               setUser(null);
             }}

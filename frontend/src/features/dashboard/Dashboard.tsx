@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useRef } from "react";
 import {
   ArrowRight,
   Bell,
@@ -11,7 +12,7 @@ import {
   TriangleAlert,
   Warehouse,
 } from "lucide-react";
-import { api } from "../../lib/api";
+
 import { label } from "../../lib/format";
 import { type DashboardData } from "../../types/domain";
 
@@ -22,31 +23,22 @@ export function Dashboard({
   go: (view: string) => void;
   can: (permission: string) => boolean;
 }) {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [error, setError] = useState("");
-  const [refreshing, setRefreshing] = useState(false);
-  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  // refetchInterval pausa sozinho com a aba em segundo plano.
+  const consulta = useQuery<DashboardData>({
+    queryKey: ["/dashboard"],
+    refetchInterval: 60_000,
+  });
+  const data = consulta.data;
+  const error = consulta.error
+    ? "Não foi possível atualizar o painel. Tente novamente."
+    : "";
+  const refreshing = consulta.isFetching;
+  const updatedAt = consulta.dataUpdatedAt
+    ? new Date(consulta.dataUpdatedAt)
+    : null;
   const notifications = useRef<HTMLElement>(null);
 
-  const refresh = async () => {
-    setRefreshing(true);
-    try {
-      setData(await api<DashboardData>("/dashboard"));
-      setUpdatedAt(new Date());
-      setError("");
-    } catch {
-      setError("Não foi possível atualizar o painel. Tente novamente.");
-    } finally {
-      setRefreshing(false);
-    }
-  };
-  useEffect(() => {
-    void refresh();
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === "visible") void refresh();
-    }, 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
+  const refresh = () => consulta.refetch();
 
   if (!data)
     return (

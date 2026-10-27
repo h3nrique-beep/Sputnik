@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   Badge,
   Button,
@@ -14,21 +15,16 @@ import { OrderEdit } from "./OrderEdit";
 import { OrderItems } from "./OrderItems";
 
 export function OrderDetail({ id, back }: { id: number; back: () => void }) {
-  const [data, setData] = useState<Detail>(),
-    [erro, setErro] = useState(""),
+  const consulta = useQuery<Detail>({ queryKey: ["/ordens/" + id] });
+  const data = consulta.data;
+  const [erroEnvio, setErro] = useState(""),
     [baixandoPdf, setBaixandoPdf] = useState(false),
     [confirmando, setConfirmando] = useState(false),
     [aprovando, setAprovando] = useState(false),
     [aviso, setAviso] = useState("");
-  const reload = () => {
-    void api<Detail>("/ordens/" + id)
-      .then((result) => {
-        setData(result);
-        setErro("");
-      })
-      .catch((e) => setErro(e.message));
-  };
-  useEffect(reload, [id]);
+  const erro = erroEnvio || consulta.error?.message || "";
+  // A gravação já invalida o cache; aqui só some o erro anterior.
+  const reload = () => setErro("");
   if (!data)
     return erro ? (
       <div className="space-y-4">
@@ -76,7 +72,6 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
           ? `Orçamento aprovado. OS #${id} aberta e ${unidades} ${unidades === 1 ? "unidade baixada" : "unidades baixadas"} do estoque.`
           : `Orçamento aprovado. OS #${id} aberta.`,
       );
-      reload();
     } catch (e) {
       setErro((e as Error).message);
     } finally {

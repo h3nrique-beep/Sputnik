@@ -52,7 +52,7 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 
 | Camada | Tecnologias |
 | --- | --- |
-| Frontend | React, TypeScript, Vite, Tailwind, shadcn/ui e Recharts |
+| Frontend | React, TypeScript, Vite, Tailwind, shadcn/ui, TanStack Query e Recharts |
 | Backend | Java 21 (threads virtuais), Spring Boot, Spring MVC e Spring Data JPA |
 | Banco de dados | H2 em arquivo (local) ou PostgreSQL com migrações Flyway (perfil `postgres`) |
 | Segurança | BCrypt, sessão HTTP, CSRF, limite de tentativas de login e permissões por módulo |

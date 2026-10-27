@@ -1,4 +1,5 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { type FormEvent, useMemo, useState } from "react";
 import {
   Badge,
   Button,
@@ -20,8 +21,13 @@ export function Finance({
   canOrders: boolean;
 }) {
   const hoje = localDate(new Date());
-  const [entries, setEntries] = useState<Entry[]>(),
-    [orders, setOrders] = useState<Order[]>([]);
+  const lancamentos = useQuery<Entry[]>({ queryKey: ["/financeiro"] });
+  const ordens = useQuery<Order[]>({
+    queryKey: ["/ordens"],
+    enabled: canOrders,
+  });
+  const entries = lancamentos.data,
+    orders = ordens.data ?? [];
   const [period, setPeriod] = useState<"all" | "month" | "next30">("month");
   const [form, setForm] = useState({
     tipo: "RECEITA",
@@ -31,24 +37,16 @@ export function Finance({
     vencimento: hoje,
     ordemServicoId: "",
   });
-  const [erro, setErro] = useState("");
+  const [erroEnvio, setErro] = useState("");
+  const erro =
+    erroEnvio ||
+    lancamentos.error?.message ||
+    (ordens.error
+      ? "Não foi possível carregar as ordens para vínculo: " +
+        ordens.error.message
+      : "");
   const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
   const [baixandoLote, setBaixandoLote] = useState(false);
-  const load = () =>
-    api<Entry[]>("/financeiro")
-      .then(setEntries)
-      .catch((e) => setErro(e.message));
-  useEffect(() => {
-    void load();
-    if (canOrders)
-      api<Order[]>("/ordens")
-        .then(setOrders)
-        .catch((e: Error) =>
-          setErro(
-            "Não foi possível carregar as ordens para vínculo: " + e.message,
-          ),
-        );
-  }, [canOrders]);
   const entriesInPeriod = useMemo(() => {
     const date = new Date();
     const monthStart = localDate(
@@ -132,7 +130,6 @@ export function Finance({
         vencimento: hoje,
         ordemServicoId: "",
       });
-      load();
     } catch (e) {
       setErro((e as Error).message);
     }
@@ -140,7 +137,6 @@ export function Finance({
   const baixar = async (id: number) => {
     try {
       await api("/financeiro/" + id + "/baixar", { method: "POST" });
-      load();
     } catch (e) {
       setErro((e as Error).message);
     }
@@ -175,7 +171,6 @@ export function Finance({
     setBaixandoLote(false);
     setSelecionados(new Set());
     if (falhas.length) setErro("Não baixados: " + falhas.join(" · "));
-    load();
   };
   const exportar = () => {
     const linhas = (marcados.length ? marcados : entriesInPeriod).map((e) => [

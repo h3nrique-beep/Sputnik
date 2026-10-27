@@ -1,16 +1,14 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 import { type Client } from "../../types/domain";
 
 export function VehicleCreate({ done }: { done: () => void }) {
-  const [clients, setClients] = useState<Client[]>([]),
-    [form, setForm] = useState<any>({}),
-    [erro, setErro] = useState("");
-  useEffect(() => {
-    api<Client[]>("/clientes")
-      .then(setClients)
-      .catch((e: Error) => setErro(e.message));
-  }, []);
+  const lista = useQuery<Client[]>({ queryKey: ["/clientes"] });
+  const clients = lista.data ?? [];
+  const [form, setForm] = useState<any>({}),
+    [erroEnvio, setErro] = useState("");
+  const erro = erroEnvio || lista.error?.message || "";
   const set = (key: string, value: any) => setForm({ ...form, [key]: value });
   const submit = async (e: FormEvent) => {
     e.preventDefault();

@@ -1,4 +1,20 @@
+import { QueryClient } from "@tanstack/react-query";
+
 let csrfToken: string | undefined;
+
+/**
+ * Cache das leituras: a chave da consulta é a própria URL da API, então
+ * `useQuery<Order[]>({ queryKey: ["/ordens"] })` basta em qualquer tela.
+ */
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: ({ queryKey, signal }) => api(String(queryKey[0]), { signal }),
+      staleTime: 30_000,
+      retry: 1,
+    },
+  },
+});
 
 /** Rotas após as quais o servidor emite um novo token anti-CSRF para a sessão. */
 const ROTAS_QUE_RENOVAM_TOKEN = new Set([
@@ -50,6 +66,8 @@ export async function api<T>(url: string, options: RequestInit = {}) {
   if (ROTAS_QUE_RENOVAM_TOKEN.has(url)) {
     csrfToken = undefined;
   }
+  // Toda gravação pode mudar várias telas (estoque, OS, painel): as abertas recarregam.
+  if (requerToken) void queryClient.invalidateQueries();
 
   return response.status === 204
     ? (undefined as T)

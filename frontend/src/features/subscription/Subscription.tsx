@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { Card, Loading, Metric } from "../../components/ui";
-import { api } from "../../lib/api";
+
 import { label } from "../../lib/format";
 
 type Subscription = {
@@ -13,13 +14,10 @@ type Subscription = {
   usuariosAtivos: number;
 };
 export function Subscription() {
-  const [data, setData] = useState<Subscription>();
-  const [erro, setErro] = useState("");
-  useEffect(() => {
-    api<Subscription>("/empresa/assinatura")
-      .then(setData)
-      .catch((e: Error) => setErro(e.message));
-  }, []);
+  const { data, error } = useQuery<Subscription>({
+    queryKey: ["/empresa/assinatura"],
+  });
+  const erro = error?.message;
   if (!data)
     return erro ? (
       <div className="alert error" role="alert">

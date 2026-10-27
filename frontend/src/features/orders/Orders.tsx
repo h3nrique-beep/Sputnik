@@ -1,7 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { Columns3, List, Plus } from "lucide-react";
-import { type DragEvent, useEffect, useState } from "react";
+import { type DragEvent, useState } from "react";
 import { Badge, Button, Loading, Table } from "../../components/ui";
-import { api } from "../../lib/api";
+import { queryClient } from "../../lib/api";
 import { label } from "../../lib/format";
 import { type Order } from "../../types/domain";
 import { mudarStatus } from "./mudarStatus";
@@ -10,20 +11,14 @@ import { COLUNAS_QUADRO, encerra, podeMover } from "./status";
 const MODO_STORAGE_KEY = "sputnik.ordens-modo";
 
 export function Orders({ go }: { go: (v: string) => void }) {
-  const [items, setItems] = useState<Order[]>();
-  const [erro, setErro] = useState("");
+  const { data: items, error } = useQuery<Order[]>({ queryKey: ["/ordens"] });
+  const [erroEnvio, setErro] = useState("");
+  const erro = erroEnvio || error?.message || "";
   const [quadro, setQuadro] = useState(
     () => window.localStorage.getItem(MODO_STORAGE_KEY) !== "lista",
   );
   const [arrastando, setArrastando] = useState<Order | null>(null);
   const [alvo, setAlvo] = useState("");
-  const load = () =>
-    api<Order[]>("/ordens")
-      .then(setItems)
-      .catch((e: Error) => setErro(e.message));
-  useEffect(() => {
-    void load();
-  }, []);
   const alternarModo = (proximo: boolean) => {
     setQuadro(proximo);
     window.localStorage.setItem(MODO_STORAGE_KEY, proximo ? "quadro" : "lista");
@@ -43,13 +38,13 @@ export function Orders({ go }: { go: (v: string) => void }) {
       return;
     setErro("");
     // Atualiza na hora e desfaz se o servidor recusar.
-    const anterior = items;
-    setItems(items?.map((o) => (o.id === ordem.id ? { ...o, status } : o)));
+    queryClient.setQueryData<Order[]>(["/ordens"], (lista) =>
+      lista?.map((o) => (o.id === ordem.id ? { ...o, status } : o)),
+    );
     try {
       await mudarStatus(ordem, status);
-      void load();
     } catch (e) {
-      setItems(anterior);
+      queryClient.setQueryData(["/ordens"], items);
       setErro((e as Error).message);
     }
   };

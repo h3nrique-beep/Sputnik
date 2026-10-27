@@ -1,4 +1,5 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { type FormEvent, useState } from "react";
 import { SearchSelect } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Piece } from "../../types/domain";
@@ -10,13 +11,15 @@ export function StockMovement({
   done: () => void;
   initialPieceId?: string;
 }) {
-  const [pieces, setPieces] = useState<Piece[]>([]),
-    [pieceId, setPieceId] = useState(initialPieceId),
+  const { data: pieces = [], error } = useQuery<Piece[]>({
+    queryKey: ["/pecas"],
+  });
+  const [pieceId, setPieceId] = useState(initialPieceId),
     [tipo, setTipo] = useState("ENTRADA"),
     [quantidade, setQuantidade] = useState("1"),
     [observacao, setObservacao] = useState(""),
-    [erro, setErro] = useState(""),
-    [aviso, setAviso] = useState("");
+    [erroEnvio, setErro] = useState("");
+  const erro = erroEnvio || error?.message || "";
   const [saving, setSaving] = useState(false);
   const peca = pieces.find((p) => String(p.id) === pieceId);
   const qtd = Number(quantidade) || 0;
@@ -24,17 +27,11 @@ export function StockMovement({
   const saldoApos = peca
     ? peca.disponivel + (tipo === "SAIDA" ? -qtd : qtd)
     : null;
-  useEffect(() => {
-    api<Piece[]>("/pecas")
-      .then(setPieces)
-      .catch((e) => setErro(e.message));
-  }, []);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (saving) return;
     setSaving(true);
     setErro("");
-    setAviso("");
     try {
       await api("/movimentacoes", {
         method: "POST",
@@ -49,13 +46,6 @@ export function StockMovement({
       setQuantidade("1");
       setObservacao("");
       done();
-      await api<Piece[]>("/pecas")
-        .then(setPieces)
-        .catch(() =>
-          setAviso(
-            "Movimentação registrada. Reabra esta tela para atualizar os saldos.",
-          ),
-        );
     } catch (e) {
       setErro((e as Error).message);
     } finally {
@@ -69,11 +59,6 @@ export function StockMovement({
       {erro && (
         <div className="alert error" role="alert">
           {erro}
-        </div>
-      )}
-      {aviso && (
-        <div className="alert success" role="status">
-          {aviso}
         </div>
       )}
       <SearchSelect

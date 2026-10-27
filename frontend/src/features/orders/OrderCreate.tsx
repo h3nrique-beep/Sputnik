@@ -1,4 +1,5 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { type FormEvent, useState } from "react";
 import { SearchSelect } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Client, type Vehicle } from "../../types/domain";
@@ -13,24 +14,19 @@ export function OrderCreate({
   asQuote?: boolean;
 }) {
   const [documento, setDocumento] = useState<OrderDocumentData>({});
-  const [clients, setClients] = useState<Client[]>([]),
-    [vehicles, setVehicles] = useState<Vehicle[]>([]),
-    [client, setClient] = useState<number>(),
+  const clientes = useQuery<Client[]>({ queryKey: ["/clientes"] });
+  const veiculos = useQuery<Vehicle[]>({ queryKey: ["/veiculos"] });
+  const clients = clientes.data ?? [],
+    vehicles = veiculos.data ?? [];
+  const [client, setClient] = useState<number>(),
     [vehicle, setVehicle] = useState<number>(),
     [km, setKm] = useState(""),
     [agendamento, setAgendamento] = useState(""),
     [retornoEm, setRetornoEm] = useState(""),
     [garantiaAte, setGarantiaAte] = useState(""),
     [descricao, setDescricao] = useState(""),
-    [erro, setErro] = useState("");
-  useEffect(() => {
-    api<Client[]>("/clientes")
-      .then(setClients)
-      .catch((e: Error) => setErro(e.message));
-    api<Vehicle[]>("/veiculos")
-      .then(setVehicles)
-      .catch((e: Error) => setErro(e.message));
-  }, []);
+    [erroEnvio, setErro] = useState("");
+  const erro = erroEnvio || (clientes.error ?? veiculos.error)?.message || "";
   const filtered = vehicles.filter((v) => v.cliente?.id === client);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
