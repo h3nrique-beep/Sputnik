@@ -1,0 +1,17 @@
+.git
+.idea
+.claude
+.impeccable
+*.iml
+target
+data
+backups
+logs
+docs
+crud-logger
+*.log
+.env
+frontend/node_modules
+frontend/dist
+frontend/.node
+frontend/.npm-cache

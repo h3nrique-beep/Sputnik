@@ -38,7 +38,8 @@
 - `src/main/resources/application.properties`: H2 em arquivo, esquema automático (uso local).
 - `src/main/resources/application-postgres.properties`: perfil `postgres`, Flyway e `ddl-auto=validate`.
 - `src/main/resources/db/migration/`: migrações versionadas (`V1__esquema_inicial.sql`).
-- `docker-compose.yml`: PostgreSQL 16 local para o perfil `postgres`.
+- `docker-compose.yml`: serviços `postgres` (16, volume `sputnik-pg`) e `app` (perfil `postgres`, sobe só depois do banco saudável). Variáveis em `.env` (modelo em `.env.example`).
+- `Dockerfile`: três estágios: Node gera o bundle, Maven empacota o jar com esse bundle, e a imagem final tem só o JRE 21 e o jar, com usuário sem privilégios e healthcheck.
 
 ## Execução
 

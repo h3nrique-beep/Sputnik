@@ -1,19 +1,37 @@
-# PostgreSQL local para o perfil "postgres": docker compose up -d
+# Sputnik completo (app + PostgreSQL): copie .env.example para .env e rode docker compose up -d --build
+# Só o banco (para rodar o app pelo IntelliJ): docker compose up -d postgres
 services:
   postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: sputnik
       POSTGRES_USER: sputnik
-      POSTGRES_PASSWORD: ${SPUTNIK_DB_PASSWORD:?defina SPUTNIK_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${SPUTNIK_DB_PASSWORD:?defina SPUTNIK_DB_PASSWORD no .env}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - sputnik-pg:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sputnik -d sputnik"]
       interval: 5s
       retries: 10
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      SPUTNIK_DB_URL: jdbc:postgresql://postgres:5432/sputnik
+      SPUTNIK_DB_USER: sputnik
+      SPUTNIK_DB_PASSWORD: ${SPUTNIK_DB_PASSWORD}
+      # Exigida só na primeira subida, com o banco vazio, para criar o administrador.
+      SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD: ${SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD:-}
+      SPUTNIK_COOKIE_SECURE: ${SPUTNIK_COOKIE_SECURE:-false}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
 
 volumes:
   sputnik-pg:

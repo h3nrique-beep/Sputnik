@@ -122,9 +122,19 @@ pnpm run build:java
 
 O perfil `postgres` cria o esquema pelas migrações Flyway em `src/main/resources/db/migration` e o Hibernate apenas valida (`ddl-auto=validate`). Sem Docker, use um PostgreSQL instalado ou gerenciado e ajuste `SPUTNIK_DB_URL`.
 
+**Tudo em contêineres (app + banco):**
+
+```bash
+cp .env.example .env   # defina SPUTNIK_DB_PASSWORD e, na primeira subida, SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD
+docker compose up -d --build
+```
+
+O `Dockerfile` compila o frontend e o backend a partir do código (não usa o bundle versionado em `static/`) e roda o jar com JRE 21, usuário sem privilégios e healthcheck em `/login`. O app fica em [http://localhost:8080](http://localhost:8080); o banco só aceita conexões do próprio computador (`127.0.0.1:5432`) e os dados ficam no volume `sputnik-pg`.
+
+**Só o banco em contêiner, app pelo IntelliJ ou Maven:**
+
 ```powershell
-$env:SPUTNIK_DB_PASSWORD = Read-Host "Senha do banco"
-docker compose up -d
+docker compose up -d postgres
 $env:SPRING_PROFILES_ACTIVE = "postgres"
 mvn spring-boot:run
 ```
@@ -134,6 +144,8 @@ mvn spring-boot:run
 | `SPUTNIK_DB_URL` | `jdbc:postgresql://localhost:5432/sputnik` |
 | `SPUTNIK_DB_USER` | `sputnik` |
 | `SPUTNIK_DB_PASSWORD` | (obrigatória) |
+| `SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD` | só na primeira subida, com o banco vazio |
+| `SPUTNIK_COOKIE_SECURE` | `false`; use `true` atrás de HTTPS |
 
 Mudanças de esquema entram como um novo arquivo `V2__descricao.sql`, `V3__...`; um arquivo já aplicado nunca é editado. Os dados do H2 local não são copiados para o PostgreSQL automaticamente, e o backup do console do desenvolvedor usa o comando do H2: no PostgreSQL, use `pg_dump` ou o backup do provedor.
 

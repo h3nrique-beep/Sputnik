@@ -64,7 +64,7 @@ Este plano organiza a evolução do Sputnik de aplicação local para um produto
 
 **Objetivo:** tornar o produto instalável, observável e vendável.
 
-- Docker Compose para aplicação e PostgreSQL; configuração por variáveis de ambiente.
+- ~~Docker Compose para aplicação e PostgreSQL; configuração por variáveis de ambiente.~~ Entregue: `Dockerfile` e `docker-compose.yml` (out/2026).
 - CI no GitHub Actions para frontend, backend, testes e verificação de segurança.
 - Health checks, logs estruturados, monitoramento de erros e rotina de backup externo.
 - Armazenamento de documentos em serviço compatível com S3.

@@ -10,3 +10,4 @@ frontend/*.tsbuildinfo
 logs/
 backups/
 sputnik-run*.log
+.env
