@@ -9,7 +9,7 @@ import {
   Table,
 } from "../../components/ui";
 import { api } from "../../lib/api";
-import { localDate, money } from "../../lib/format";
+import { localDate, money, paraCsv, variacao } from "../../lib/format";
 import { type Order } from "../../types/domain";
 
 type Entry = {
@@ -43,6 +43,8 @@ export function Finance({
     ordemServicoId: "",
   });
   const [erro, setErro] = useState("");
+  const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
+  const [baixandoLote, setBaixandoLote] = useState(false);
   const load = () =>
     api<Entry[]>("/financeiro")
       .then(setEntries)
@@ -77,18 +79,26 @@ export function Finance({
           : true,
     );
   }, [entries, period, hoje]);
-  const totals = useMemo(() => {
-    const all = entriesInPeriod;
-    const total = (tipo: Entry["tipo"], status: Entry["status"]) =>
-      all
-        .filter((entry) => entry.tipo === tipo && entry.status === status)
-        .reduce((sum, entry) => sum + Number(entry.valor), 0);
+  const totals = useMemo(() => somar(entriesInPeriod), [entriesInPeriod]);
+  // Mesmo recorte do mês corrente aplicado ao mês anterior, para comparação.
+  const anterior = useMemo(() => {
+    const date = new Date();
+    const inicio = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+    const de = localDate(inicio);
+    const ate = localDate(new Date(date.getFullYear(), date.getMonth(), 1));
     return {
-      receber: total("RECEITA", "PENDENTE"),
-      pagar: total("DESPESA", "PENDENTE"),
-      recebido: total("RECEITA", "PAGO"),
+      rotulo: inicio
+        .toLocaleDateString("pt-BR", { month: "short" })
+        .replace(".", ""),
+      ...somar(
+        (entries ?? []).filter((e) => e.vencimento >= de && e.vencimento < ate),
+      ),
     };
-  }, [entriesInPeriod]);
+  }, [entries]);
+  const comparar = (chave: keyof ReturnType<typeof somar>) =>
+    period === "month"
+      ? variacao(totals[chave], anterior[chave], anterior.rotulo)
+      : "";
   const profitability = useMemo(
     () =>
       Object.values(
@@ -146,6 +156,62 @@ export function Finance({
       setErro((e as Error).message);
     }
   };
+  const pendentes = entriesInPeriod.filter((e) => e.status === "PENDENTE");
+  const marcados = pendentes.filter((e) => selecionados.has(e.id));
+  const somaMarcados = marcados.reduce((sum, e) => sum + Number(e.valor), 0);
+  const alternar = (id: number) =>
+    setSelecionados((atual) => {
+      const proximo = new Set(atual);
+      if (!proximo.delete(id)) proximo.add(id);
+      return proximo;
+    });
+  const baixarSelecionados = async () => {
+    if (
+      !confirm(
+        `Baixar ${marcados.length} ${marcados.length === 1 ? "lançamento" : "lançamentos"} (${money(somaMarcados)}) com a data de hoje?`,
+      )
+    )
+      return;
+    setErro("");
+    setBaixandoLote(true);
+    const falhas: string[] = [];
+    // Um por vez: cada baixa é independente e uma falha não desfaz as outras.
+    for (const entry of marcados) {
+      try {
+        await api("/financeiro/" + entry.id + "/baixar", { method: "POST" });
+      } catch (e) {
+        falhas.push(`${entry.descricao}: ${(e as Error).message}`);
+      }
+    }
+    setBaixandoLote(false);
+    setSelecionados(new Set());
+    if (falhas.length) setErro("Não baixados: " + falhas.join(" · "));
+    load();
+  };
+  const exportar = () => {
+    const linhas = (marcados.length ? marcados : entriesInPeriod).map((e) => [
+      e.tipo === "RECEITA" ? "Receita" : "Despesa",
+      e.descricao,
+      e.categoria,
+      e.vencimento,
+      Number(e.valor).toFixed(2).replace(".", ","),
+      e.status === "PAGO" ? "Pago" : "Pendente",
+      e.ordemServicoId ? "#" + e.ordemServicoId : "",
+    ]);
+    const csv = paraCsv([
+      ["Tipo", "Descrição", "Categoria", "Vencimento", "Valor", "Status", "OS"],
+      ...linhas,
+    ]);
+    // BOM para o Excel reconhecer UTF-8 e manter os acentos.
+    const url = URL.createObjectURL(
+      new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `lancamentos-${hoje}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
   if (!entries)
     return erro ? (
       <div className="alert error" role="alert">
@@ -173,9 +239,21 @@ export function Finance({
         </div>
       )}
       <div className="metrics">
-        <Metric label="A receber" value={money(totals.receber) as any} />
-        <Metric label="A pagar" value={money(totals.pagar) as any} />
-        <Metric label="Recebido" value={money(totals.recebido) as any} />
+        <Metric
+          label="A receber"
+          value={money(totals.receber) as any}
+          detail={comparar("receber")}
+        />
+        <Metric
+          label="A pagar"
+          value={money(totals.pagar) as any}
+          detail={comparar("pagar")}
+        />
+        <Metric
+          label="Recebido"
+          value={money(totals.recebido) as any}
+          detail={comparar("recebido")}
+        />
       </div>
       <div className="toolbar compact-toolbar">
         <p>
@@ -304,9 +382,46 @@ export function Finance({
         </Card>
       </div>
       <Card title="Lançamentos">
+        {entriesInPeriod.length > 0 && (
+          <div className="bulk-bar" role="group" aria-label="Ações em lote">
+            <span aria-live="polite">
+              {marcados.length
+                ? `${marcados.length} selecionado(s) · ${money(somaMarcados)}`
+                : "Marque os pendentes para baixar de uma vez."}
+            </span>
+            {pendentes.length > 0 && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() =>
+                  setSelecionados(
+                    marcados.length === pendentes.length
+                      ? new Set()
+                      : new Set(pendentes.map((e) => e.id)),
+                  )
+                }
+              >
+                {marcados.length === pendentes.length
+                  ? "Limpar seleção"
+                  : "Selecionar pendentes"}
+              </Button>
+            )}
+            <Button size="sm" variant="secondary" onClick={exportar}>
+              {marcados.length ? "Exportar selecionados" : "Exportar CSV"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={baixarSelecionados}
+              disabled={!marcados.length || baixandoLote}
+            >
+              {baixandoLote ? "Baixando..." : "Baixar selecionados"}
+            </Button>
+          </div>
+        )}
         {entriesInPeriod.length ? (
           <Table
             headers={[
+              "Seleção",
               "Tipo",
               "Descrição",
               "Vencimento",
@@ -315,6 +430,18 @@ export function Finance({
               "Ação",
             ]}
             rows={entriesInPeriod.map((entry) => [
+              entry.status === "PENDENTE" ? (
+                <input
+                  key="sel"
+                  type="checkbox"
+                  className="row-check"
+                  checked={selecionados.has(entry.id)}
+                  onChange={() => alternar(entry.id)}
+                  aria-label={`Selecionar ${entry.descricao}`}
+                />
+              ) : (
+                ""
+              ),
               entry.tipo === "RECEITA" ? "Receita" : "Despesa",
               <span key={entry.id}>
                 {entry.descricao}
@@ -343,4 +470,16 @@ export function Finance({
       </Card>
     </div>
   );
+}
+
+function somar(lista: Entry[]) {
+  const total = (tipo: Entry["tipo"], status: Entry["status"]) =>
+    lista
+      .filter((entry) => entry.tipo === tipo && entry.status === status)
+      .reduce((sum, entry) => sum + Number(entry.valor), 0);
+  return {
+    receber: total("RECEITA", "PENDENTE"),
+    pagar: total("DESPESA", "PENDENTE"),
+    recebido: total("RECEITA", "PAGO"),
+  };
 }

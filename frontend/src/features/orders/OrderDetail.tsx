@@ -402,19 +402,29 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
           {!eOrcamento && (
             <OrderEdit order={o} saved={reload} failed={setErro} />
           )}
-          <details className="order-history">
-            <summary>Histórico ({data.historico.length})</summary>
-            {data.historico.map((h: any, i: number) => (
-              <p key={i}>
-                <span>
+          <section className="order-history" aria-labelledby="historico-titulo">
+            <h2 id="historico-titulo">
+              Histórico <small>({data.historico.length})</small>
+            </h2>
+            <ol className="order-timeline">
+              {data.historico.map((h: any, i: number) => (
+                <li
+                  key={i}
+                  className={
+                    h.descricao.startsWith("Status alterado")
+                      ? "marco"
+                      : undefined
+                  }
+                >
                   {h.descricao}
                   <small>
-                    {dateTime(h.data)} · {h.responsavel}
+                    <time dateTime={h.data}>{dateTime(h.data)}</time> ·{" "}
+                    {h.responsavel}
                   </small>
-                </span>
-              </p>
-            ))}
-          </details>
+                </li>
+              ))}
+            </ol>
+          </section>
         </div>
       </div>
     </>

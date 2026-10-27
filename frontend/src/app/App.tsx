@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useLayoutEffect, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   BarChart3,
   CalendarDays,
@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ClipboardList,
   Cog,
+  Hammer,
   LayoutDashboard,
   Moon,
   LogOut,
@@ -35,6 +36,7 @@ import { StockMovement } from "../features/inventory/StockMovement";
 import { OrderCreate } from "../features/orders/OrderCreate";
 import { OrderDetail } from "../features/orders/OrderDetail";
 import { Orders } from "../features/orders/Orders";
+import { Workshop } from "../features/orders/Workshop";
 import { Schedule } from "../features/schedule/Schedule";
 import { Subscription } from "../features/subscription/Subscription";
 import { MonthlyReport } from "../features/reports/MonthlyReport";
@@ -78,6 +80,8 @@ export function App() {
   const [buscaGlobal, setBuscaGlobal] = useState("");
   const [pecaMovimento, setPecaMovimento] = useState("");
   const [mobileMenu, setMobileMenu] = useState(false);
+  const userRef = useRef(user);
+  userRef.current = user;
   useEffect(() => {
     if (!mobileMenu) return;
     const previousFocus = document.activeElement as HTMLElement | null;
@@ -96,7 +100,8 @@ export function App() {
     };
   }, [mobileMenu]);
   useLayoutEffect(() => {
-    document.documentElement.dataset.theme = (user || verificandoSessao) && dark ? "dark" : "light";
+    document.documentElement.dataset.theme =
+      (user || verificandoSessao) && dark ? "dark" : "light";
     window.localStorage.setItem(TEMA_STORAGE_KEY, dark ? "dark" : "light");
   }, [dark, user, verificandoSessao]);
   const landingView = (account: User) => {
@@ -130,6 +135,41 @@ export function App() {
       setView(viewFromPath(window.location.pathname) ?? "dashboard");
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+  useEffect(() => {
+    // Ctrl+K foca a busca do topo; N abre nova OS fora de campos de texto.
+    const atalho = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        const campo = document.querySelector<HTMLInputElement>(
+          ".global-search input",
+        );
+        if (!campo) return;
+        event.preventDefault();
+        campo.focus();
+        return;
+      }
+      const alvo = event.target as HTMLElement;
+      if (
+        event.key.toLowerCase() !== "n" ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        alvo.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT"].includes(alvo.tagName)
+      )
+        return;
+      const conta = userRef.current;
+      if (
+        conta &&
+        (conta.perfil === "ADMIN" || conta.permissoes.includes("ORDENS"))
+      ) {
+        event.preventDefault();
+        window.history.pushState({}, "", pathForView("orders-new"));
+        setView("orders-new");
+      }
+    };
+    window.addEventListener("keydown", atalho);
+    return () => window.removeEventListener("keydown", atalho);
   }, []);
   useEffect(() => {
     if (!notice) return;
@@ -215,6 +255,13 @@ export function App() {
       icon: <ClipboardList size={18} />,
       active: view.startsWith("orders") || view.startsWith("order-"),
       view: "orders",
+    },
+    allowed("ORDENS") && {
+      label: "Modo oficina",
+      group: "Operação",
+      icon: <Hammer size={18} />,
+      active: view === "workshop",
+      view: "workshop",
     },
     allowed("ORDENS") && {
       label: "Agenda",
@@ -386,7 +433,9 @@ export function App() {
                 onChange={(event) => setBuscaGlobal(event.target.value)}
                 placeholder="Código da peça, placa ou nº da OS"
                 aria-label="Buscar peça, veículo ou ordem de serviço"
+                aria-keyshortcuts="Control+K"
               />
+              <kbd aria-hidden="true">Ctrl K</kbd>
             </form>
           )}
           <div className="header-actions">
@@ -459,6 +508,7 @@ export function App() {
           )}{" "}
           {view === "orders" && <Orders go={change} />}{" "}
           {view === "schedule" && <Schedule go={change} />}{" "}
+          {view === "workshop" && <Workshop go={change} usuario={user.nome} />}{" "}
           {view === "orders-new" && (
             <OrderCreate
               done={() => {

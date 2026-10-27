@@ -51,3 +51,18 @@ export const localDate = (date: Date) =>
     String(date.getMonth() + 1).padStart(2, "0"),
     String(date.getDate()).padStart(2, "0"),
   ].join("-");
+
+/** "+12% vs. set"; vazio quando não há base de comparação. */
+export const variacao = (atual: number, anterior: number, rotulo: string) => {
+  if (!anterior) return atual ? `sem valor em ${rotulo}` : "";
+  const pct = Math.round(((atual - anterior) / anterior) * 100);
+  return `${pct > 0 ? "+" : ""}${pct}% vs. ${rotulo}`;
+};
+
+/** CSV com ";" (padrão do Excel em pt-BR) e aspas escapadas. */
+export const paraCsv = (linhas: (string | number)[][]) =>
+  linhas
+    .map((linha) =>
+      linha.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(";"),
+    )
+    .join("\r\n");

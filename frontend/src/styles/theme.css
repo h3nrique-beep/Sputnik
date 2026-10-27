@@ -1,3 +1,44 @@
+.loading-state {
+  padding: 16px 0;
+}
+.loading-lines {
+  display: grid;
+  gap: 10px;
+}
+.loading-lines span {
+  display: block;
+  height: 44px;
+  width: 100%;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--line) 0%,
+    var(--surface-soft) 50%,
+    var(--line) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+.loading-lines span:first-child {
+  height: 36px;
+  width: 40%;
+}
+.loading-lines span:last-child {
+  width: 75%;
+}
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-lines span {
+    animation: none;
+  }
+}
 /* Identidade operacional compartilhada por todas as views. */
 :root {
   color-scheme: light;
@@ -97,8 +138,14 @@ input[type="radio"] {
   position: sticky;
   top: 0;
   height: 100dvh;
+  overflow-x: hidden;
   overflow-y: auto;
+  /* Rola em telas baixas sem mostrar a barra. */
+  scrollbar-width: none;
   padding: 20px 12px 16px;
+}
+.shell > aside::-webkit-scrollbar {
+  display: none;
 }
 .brand {
   padding: 0 8px 16px;
@@ -1034,27 +1081,65 @@ body:has(.login) {
 .order-history {
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 0 16px;
+  padding: 4px 16px 12px;
   background: var(--card);
 }
-.order-history > summary {
+.order-history h2 {
   display: flex;
   align-items: center;
+  gap: 6px;
   min-height: 44px;
-  cursor: pointer;
+  margin: 0;
+  font-size: 15px;
+}
+.order-history h2 small {
+  color: var(--muted);
+  font-weight: 500;
+}
+.order-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.order-timeline li {
+  position: relative;
+  padding: 0 0 14px 22px;
+}
+/* Trilho vertical ligando os eventos; o último não continua a linha. */
+.order-timeline li::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: -6px;
+  width: 2px;
+  background: var(--line);
+}
+.order-timeline li:last-child::before {
+  display: none;
+}
+.order-timeline li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+  background: var(--card);
+}
+.order-timeline li.marco::after {
+  border-color: var(--button-primary-hover);
+  background: var(--button-primary);
+}
+.order-timeline li.marco {
   font-weight: 700;
 }
-.order-history[open] {
-  padding-bottom: 12px;
-}
-.order-history p {
-  margin: 0;
-  padding: 8px 0;
-  border-top: 1px solid var(--line);
-}
-.order-history small {
+.order-timeline small {
   display: block;
   color: var(--muted);
+  font-weight: 400;
 }
 @media (max-width: 960px) {
   .order-workspace {
@@ -1096,4 +1181,205 @@ body:has(.login) {
   display: grid;
   gap: 4px;
   font-variant-numeric: tabular-nums;
+}
+
+/* Atalho visível na busca do topo. */
+.global-search kbd {
+  flex: none;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font:
+    600 11px "DM Sans",
+    sans-serif;
+}
+@media (max-width: 760px) {
+  .global-search kbd {
+    display: none;
+  }
+}
+
+/* Variação contra o mês anterior nos indicadores. */
+.metric em {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Alternância quadro/lista das ordens. */
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.view-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--card);
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+.view-toggle button[aria-pressed="true"] {
+  background: var(--button-soft);
+  color: var(--ink);
+}
+
+/* Quadro das OS por status. */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(220px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.kanban-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 180px;
+  padding: 10px;
+  border: 2px dashed transparent;
+  border-radius: 13px;
+  background: var(--surface-soft);
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.kanban-col.aceita {
+  border-color: var(--line);
+}
+.kanban-col.sobre {
+  border-color: var(--button-primary-hover);
+  background: var(--button-soft);
+}
+.kanban-col h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+.kanban-col h3 span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.kanban-card {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.kanban-card[draggable="true"] {
+  cursor: grab;
+}
+.kanban-card:hover {
+  border-color: var(--muted);
+}
+.kanban-card small {
+  color: var(--muted);
+}
+
+/* Ações em lote sobre a tabela de lançamentos. */
+.bulk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.bulk-bar > span {
+  margin-right: auto;
+  color: var(--muted);
+}
+.row-check {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--button-primary-hover);
+  cursor: pointer;
+}
+
+/* Modo oficina: cartões grandes para tablet no pátio. */
+.workshop-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 600;
+}
+.workshop-filter input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--button-primary-hover);
+}
+.workshop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.workshop-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+.workshop-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.workshop-plate {
+  font:
+    800 24px Manrope,
+    sans-serif;
+  letter-spacing: 0.04em;
+}
+.workshop-card p {
+  margin: 0;
+}
+.workshop-card small {
+  display: block;
+  color: var(--muted);
+}
+.workshop-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--muted);
+}
+.workshop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+.workshop-actions .ui-button--lg {
+  flex: 1 1 140px;
+  min-height: 52px;
+  font-size: 16px;
+}
+@media (max-width: 760px) {
+  .workshop-grid {
+    grid-template-columns: 1fr;
+  }
 }
