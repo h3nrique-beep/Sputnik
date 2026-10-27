@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 
 /** Administração segura dos backups do banco H2 utilizado pelo Sputnik. */
 @Service
@@ -21,6 +22,8 @@ public class BackupService {
     private static final String PADRAO_NOME = "sputnik-.*\\.zip";
 
     private final JdbcTemplate jdbc;
+    // Lock em vez de synchronized: no Java 21 um monitor preso durante I/O fixa a thread virtual.
+    private final ReentrantLock criando = new ReentrantLock();
     private final Path raiz = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
     private final Path pastaBackups = raiz.resolve("backups").normalize();
     private final Path banco = raiz.resolve("data").resolve("sputnik.mv.db").normalize();
@@ -29,7 +32,8 @@ public class BackupService {
         this.jdbc = jdbc;
     }
 
-    public synchronized BackupInfo criar() {
+    public BackupInfo criar() {
+        criando.lock();
         try {
             Files.createDirectories(pastaBackups);
             String nome =
@@ -47,6 +51,8 @@ public class BackupService {
             return paraInfo(destino);
         } catch (Exception exception) {
             throw new IllegalStateException("Não foi possível criar o backup do banco.", exception);
+        } finally {
+            criando.unlock();
         }
     }
 

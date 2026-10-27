@@ -2,7 +2,7 @@
 
 > Gestão operacional para oficinas: estoque, atendimento, ordens de serviço e financeiro em uma única aplicação.
 
-O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolvida com **React + TypeScript** no frontend e **Java 17 + Spring Boot + H2** no backend. O projeto combina controle de estoque, cadastros, ordens de serviço, agenda e acompanhamento financeiro, com acesso orientado por permissões.
+O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolvida com **React + TypeScript** no frontend e **Java 21 + Spring Boot + PostgreSQL/H2** no backend. O projeto combina controle de estoque, cadastros, ordens de serviço, agenda e acompanhamento financeiro, com acesso orientado por permissões.
 
 ## Principais recursos
 
@@ -53,7 +53,7 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 | Camada | Tecnologias |
 | --- | --- |
 | Frontend | React, TypeScript, Vite, Tailwind, shadcn/ui e Recharts |
-| Backend | Java 17, Spring Boot, Spring MVC e Spring Data JPA |
+| Backend | Java 21 (threads virtuais), Spring Boot, Spring MVC e Spring Data JPA |
 | Banco de dados | H2 em arquivo (local) ou PostgreSQL com migrações Flyway (perfil `postgres`) |
 | Segurança | BCrypt, sessão HTTP, CSRF, limite de tentativas de login e permissões por módulo |
 | Testes | JUnit 5, Spring Boot Test e MockMvc |
@@ -79,7 +79,7 @@ Toda a interface é o frontend React compilado, servido pelo Spring Boot. A úni
 
 ### Pré-requisitos
 
-- JDK 17+
+- JDK 21+ (o bytecode é gerado para Java 21; JDKs mais novos, como 25 ou 26, também servem)
 - Maven 3.9+
 - Node.js 20+ (somente para alterar ou recompilar o frontend)
 

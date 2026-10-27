@@ -41,6 +41,9 @@
 
 ## Execução
 
+Java 21 com `spring.threads.virtual.enabled=true`: cada requisição roda numa thread virtual, então a espera por banco ou arquivo não ocupa uma thread do Tomcat. Trechos que bloqueiam I/O usam `ReentrantLock` em vez de `synchronized` (ver `BackupService`), porque no Java 21 um monitor preso fixa a thread virtual na portadora.
+
+
 O Spring Boot entrega a aplicação React compilada em `http://localhost:8080`.
 Durante desenvolvimento do front, execute `npm run dev` na pasta `frontend`.
 Use `npm run format` para padronizar TypeScript, TSX e CSS antes de alterações maiores.

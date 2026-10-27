@@ -5,7 +5,7 @@
 1. No IntelliJ IDEA, use **File → Open**.
 2. Selecione a pasta `sputnik-java`, a mesma que contém o arquivo `pom.xml`.
 3. Confirme a abertura como projeto Maven quando o IntelliJ solicitar.
-4. Em **File → Project Structure**, confirme o SDK **Java 17**.
+4. Em **File → Project Structure**, confirme um SDK **Java 21 ou superior** (o `pom.xml` compila com `--release 21`).
 5. Aguarde a importação do Maven terminar. As dependências aparecerão na janela Maven e em External Libraries.
 
 ## Executar
