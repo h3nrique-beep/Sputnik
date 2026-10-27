@@ -1,5 +1,8 @@
 package br.edu.fag.sputnik.controller.api;
 
+import java.util.List;
+import br.edu.fag.sputnik.controller.api.dto.VeiculoDto;
+import br.edu.fag.sputnik.controller.api.dto.ClienteDto;
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.clienteDto;
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.veiculoDto;
 
@@ -35,7 +38,7 @@ public class CadastrosApiController extends ApiSupport {
     }
 
     @GetMapping("/clientes")
-    public ResponseEntity<?> clientes(
+    public ResponseEntity<List<ClienteDto>> clientes(
             @RequestParam(required = false) String busca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         return ResponseEntity.ok(
@@ -43,7 +46,7 @@ public class CadastrosApiController extends ApiSupport {
     }
 
     @PostMapping("/clientes")
-    public ResponseEntity<?> salvarCliente(
+    public ResponseEntity<ClienteDto> salvarCliente(
             @Valid @RequestBody Cliente cliente, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -51,7 +54,7 @@ public class CadastrosApiController extends ApiSupport {
     }
 
     @GetMapping("/veiculos")
-    public ResponseEntity<?> veiculos(
+    public ResponseEntity<List<VeiculoDto>> veiculos(
             @RequestParam(required = false) String busca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         return ResponseEntity.ok(
@@ -59,7 +62,7 @@ public class CadastrosApiController extends ApiSupport {
     }
 
     @PostMapping("/veiculos")
-    public ResponseEntity<?> salvarVeiculo(
+    public ResponseEntity<VeiculoDto> salvarVeiculo(
             @Valid @RequestBody VeiculoRequest request, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         Veiculo veiculo = new Veiculo();

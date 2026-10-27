@@ -10,18 +10,7 @@ import {
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { localDate, money, paraCsv, variacao } from "../../lib/format";
-import { type Order } from "../../types/domain";
-
-type Entry = {
-  id: number;
-  tipo: "RECEITA" | "DESPESA";
-  status: "PENDENTE" | "PAGO";
-  descricao: string;
-  categoria: string;
-  valor: number;
-  vencimento: string;
-  ordemServicoId: number | "";
-};
+import { type FinanceEntry as Entry, type Order } from "../../types/domain";
 
 export function Finance({
   go,
@@ -192,7 +181,7 @@ export function Finance({
     const linhas = (marcados.length ? marcados : entriesInPeriod).map((e) => [
       e.tipo === "RECEITA" ? "Receita" : "Despesa",
       e.descricao,
-      e.categoria,
+      e.categoria ?? "",
       e.vencimento,
       Number(e.valor).toFixed(2).replace(".", ","),
       e.status === "PAGO" ? "Pago" : "Pendente",

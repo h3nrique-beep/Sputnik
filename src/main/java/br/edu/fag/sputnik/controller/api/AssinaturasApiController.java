@@ -1,5 +1,9 @@
 package br.edu.fag.sputnik.controller.api;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Content;
+import br.edu.fag.sputnik.controller.api.dto.UsuarioDto;
 import br.edu.fag.sputnik.auth.SessaoAutenticacao;
 import br.edu.fag.sputnik.auth.UsuarioService;
 import br.edu.fag.sputnik.controller.api.mapper.ApiMapper;
@@ -35,6 +39,7 @@ public class AssinaturasApiController {
     }
 
     @PostMapping("/cadastro")
+    @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = UsuarioDto.class)))
     public ResponseEntity<?> cadastrar(
             @Valid @RequestBody CadastroEmpresaForm form,
             HttpSession session,
@@ -47,15 +52,11 @@ public class AssinaturasApiController {
                                     "Cadastro público será liberado após a migração multiempresa"
                                             + " dos dados operacionais."));
         }
-        try {
-            var usuario = usuarios.cadastrarEmpresa(form);
-            // Mesmo cuidado do login: novo identificador de sessão e novo token anti-CSRF.
-            request.changeSessionId();
-            SessaoAutenticacao.iniciar(session, usuario);
-            csrfTokens.renovar(session);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ApiMapper.usuarioDto(usuario));
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
-        }
+        var usuario = usuarios.cadastrarEmpresa(form);
+        // Mesmo cuidado do login: novo identificador de sessão e novo token anti-CSRF.
+        request.changeSessionId();
+        SessaoAutenticacao.iniciar(session, usuario);
+        csrfTokens.renovar(session);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiMapper.usuarioDto(usuario));
     }
 }

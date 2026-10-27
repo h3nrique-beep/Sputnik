@@ -4,17 +4,18 @@ import { Badge, Button, Table } from "../../components/ui";
 import { api } from "../../lib/api";
 import { permissionLabel } from "../../lib/format";
 import { UserCreate } from "./UserCreate";
+import { type SystemUser } from "../../types/domain";
 import { UserPermissions } from "./UserPermissions";
 
 export function Users() {
-  const [items, setItems] = useState<any[]>([]),
+  const [items, setItems] = useState<SystemUser[]>([]),
     [erro, setErro] = useState(""),
     [showCreate, setShowCreate] = useState(false),
-    [editing, setEditing] = useState<any>(),
+    [editing, setEditing] = useState<SystemUser>(),
     [senhaTemporaria, setSenhaTemporaria] = useState(""),
     [copiada, setCopiada] = useState(false);
   const load = () =>
-    api<any[]>("/admin/usuarios")
+    api<SystemUser[]>("/admin/usuarios")
       .then(setItems)
       .catch((e) => setErro(e.message));
   useEffect(() => {

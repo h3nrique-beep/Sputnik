@@ -1,5 +1,9 @@
 package br.edu.fag.sputnik.controller.api;
 
+import java.util.List;
+import br.edu.fag.sputnik.controller.api.dto.ReposicaoResumoDto;
+import br.edu.fag.sputnik.controller.api.dto.MovimentacaoDto;
+import br.edu.fag.sputnik.controller.api.dto.PecaDto;
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.pecaDto;
 
 import br.edu.fag.sputnik.controller.api.dto.ReposicaoDto;
@@ -38,7 +42,7 @@ public class EstoqueApiController extends ApiSupport {
     }
 
     @GetMapping("/pecas")
-    public ResponseEntity<?> pecas(
+    public ResponseEntity<List<PecaDto>> pecas(
             @RequestParam(required = false) String busca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.PECAS)) return proibido();
         return ResponseEntity.ok(
@@ -46,58 +50,45 @@ public class EstoqueApiController extends ApiSupport {
     }
 
     @PostMapping("/pecas")
-    public ResponseEntity<?> salvarPeca(@Valid @RequestBody Peca peca, HttpSession session) {
+    public ResponseEntity<PecaDto> salvarPeca(@Valid @RequestBody Peca peca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.PECAS)) return proibido();
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(pecaDto(pecasService.salvar(peca)));
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(pecaDto(pecasService.salvar(peca)));
     }
 
     @PostMapping("/movimentacoes")
-    public ResponseEntity<?> movimentar(
+    public ResponseEntity<Void> movimentar(
             @Valid @RequestBody MovimentacaoForm form, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.PECAS)) return proibido();
-        try {
-            pecasService.movimentar(form, operador(session));
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        pecasService.movimentar(form, operador(session));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/relatorio-mensal")
-    public ResponseEntity<?> relatorioMensal(HttpSession session) {
+    public ResponseEntity<List<MovimentacaoDto>> relatorioMensal(HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.RELATORIO_MENSAL)) return proibido();
         return ResponseEntity.ok(
                 pecasService.relatorioMensal().stream().map(ApiMapper::movimentacaoDto).toList());
     }
 
     @GetMapping("/reposicao")
-    public ResponseEntity<?> reposicao(HttpSession session) {
+    public ResponseEntity<ReposicaoResumoDto> reposicao(HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.REPOSICAO)) return proibido();
         var pecas =
                 pecasService.criticas().stream()
                         .map(peca -> new ReposicaoDto(pecaDto(peca), pecasService.sugestao(peca)))
                         .toList();
         return ResponseEntity.ok(
-                Map.of(
-                        "pecas",
-                        pecas,
-                        "custo",
-                        pecasService.custoReposicao(),
-                        "zeradas",
-                        pecasService.quantidadeZeradas()));
+                new ReposicaoResumoDto(
+                        pecas, pecasService.custoReposicao(), pecasService.quantidadeZeradas()));
     }
 
     @GetMapping(value = "/reposicao.csv", produces = "text/csv")
-    public ResponseEntity<?> exportarReposicao(HttpSession session) {
+    public ResponseEntity<byte[]> exportarReposicao(HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.REPOSICAO)) return proibido();
         // BOM para o Excel reconhecer UTF-8 e manter os acentos.
         byte[] arquivo =
-                ("﻿" + pecasService.gerarCsvReposicao()).getBytes(StandardCharsets.UTF_8);
+                ("\uFEFF" + pecasService.gerarCsvReposicao()).getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,

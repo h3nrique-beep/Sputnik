@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Button, Loading, Metric, Table } from "../../components/ui";
 import { api, downloadApi } from "../../lib/api";
 import { money } from "../../lib/format";
+import { type Restock } from "../../types/domain";
 
 export function Reposition() {
-  const [data, setData] = useState<any>(),
+  const [data, setData] = useState<Restock>(),
     [erro, setErro] = useState(""),
     [baixando, setBaixando] = useState(false);
   const exportar = async () => {
@@ -18,7 +19,7 @@ export function Reposition() {
     }
   };
   useEffect(() => {
-    api<any>("/reposicao")
+    api<Restock>("/reposicao")
       .then(setData)
       .catch((e) => setErro(e.message));
   }, []);
@@ -59,7 +60,7 @@ export function Reposition() {
           "Custo estimado",
         ]}
         emptyText="Nenhuma peça abaixo do mínimo. O estoque está em dia."
-        rows={data.pecas.map((r: any) => [
+        rows={data.pecas.map((r) => [
           r.peca.codigo,
           r.peca.nome,
           r.peca.disponivel,

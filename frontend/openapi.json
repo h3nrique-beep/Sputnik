@@ -1,0 +1,1874 @@
+{
+  "components" : {
+    "schemas" : {
+      "BackupInfo" : {
+        "properties" : {
+          "criadoEm" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "tamanhoBytes" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "CadastroEmpresaForm" : {
+        "properties" : {
+          "email" : {
+            "maxLength" : 160,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "empresaNome" : {
+            "maxLength" : 120,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "nomeAdministrador" : {
+            "maxLength" : 120,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "senha" : {
+            "maxLength" : 128,
+            "minLength" : 12,
+            "type" : "string"
+          },
+          "slug" : {
+            "minLength" : 1,
+            "pattern" : "[a-z0-9-]{3,60}",
+            "type" : "string"
+          }
+        },
+        "required" : [ "email", "empresaNome", "nomeAdministrador", "senha", "slug" ],
+        "type" : "object"
+      },
+      "Cliente" : {
+        "properties" : {
+          "cpf" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "empresaId" : {
+            "format" : "int64",
+            "readOnly" : true,
+            "type" : "integer"
+          },
+          "id" : {
+            "format" : "int64",
+            "readOnly" : true,
+            "type" : "integer"
+          },
+          "nome" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "telefone" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "cpf", "nome", "telefone" ],
+        "type" : "object"
+      },
+      "ClienteDto" : {
+        "properties" : {
+          "cpf" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "telefone" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "cpf", "id", "nome", "telefone" ],
+        "type" : "object"
+      },
+      "DadosDocumentoOs" : {
+        "properties" : {
+          "anoModelo" : {
+            "format" : "int32",
+            "maximum" : 2200,
+            "minimum" : 1900,
+            "type" : "integer"
+          },
+          "certificadoGarantia" : {
+            "maxLength" : 80,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "combustivelPercentual" : {
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "condicaoPagamento" : {
+            "maxLength" : 120,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "consultorTecnico" : {
+            "maxLength" : 120,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "cor" : {
+            "maxLength" : 80,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "motor" : {
+            "maxLength" : 80,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "observacoes" : {
+            "maxLength" : 1200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "oficinaContato" : {
+            "maxLength" : 80,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "oficinaDocumento" : {
+            "maxLength" : 30,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "oficinaEndereco" : {
+            "maxLength" : 250,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "oficinaNome" : {
+            "maxLength" : 160,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "pagadorDocumento" : {
+            "maxLength" : 30,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "pagadorEmail" : {
+            "maxLength" : 160,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "pagadorEndereco" : {
+            "maxLength" : 250,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "pagadorNome" : {
+            "maxLength" : 160,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "pagadorTelefone" : {
+            "maxLength" : 80,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "previsaoEntrega" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "previsaoOrcamento" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "prisma" : {
+            "maxLength" : 40,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "proprietarioEmail" : {
+            "maxLength" : 160,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "proprietarioEndereco" : {
+            "maxLength" : 250,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "reembolso" : {
+            "maxLength" : 250,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "retiradaEm" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "tipoServico" : {
+            "pattern" : "EXTERNO|INTERNO|GARANTIA|REVISAO",
+            "type" : "string"
+          },
+          "validadeDias" : {
+            "format" : "int32",
+            "maximum" : 365,
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "DashboardDto" : {
+        "properties" : {
+          "aguardandoPeca" : {
+            "items" : {
+              "$ref" : "#/components/schemas/OrdemResumoDto"
+            },
+            "type" : "array"
+          },
+          "criticas" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "ordensAbertas" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "ordensConcluidasMes" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "pecas" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "pecasMaisUsadas" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PecaDto"
+            },
+            "type" : "array"
+          },
+          "porStatus" : {
+            "additionalProperties" : {
+              "format" : "int64",
+              "type" : "integer"
+            },
+            "type" : "object"
+          },
+          "retornos" : {
+            "items" : {
+              "$ref" : "#/components/schemas/OrdemResumoDto"
+            },
+            "type" : "array"
+          },
+          "valorEstoque" : {
+            "description" : "Somente para administradores.",
+            "nullable" : true,
+            "type" : "number"
+          }
+        },
+        "required" : [ "aguardandoPeca", "criticas", "ordensAbertas", "ordensConcluidasMes", "pecas", "pecasMaisUsadas", "porStatus", "retornos" ],
+        "type" : "object"
+      },
+      "Diagnostico" : {
+        "properties" : {
+          "backups" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "bancoMb" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "discoLivreMb" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "discoTotalMb" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "java" : {
+            "type" : "string"
+          },
+          "memoriaMaximaMb" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "memoriaUsadaMb" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sistemaOperacional" : {
+            "type" : "string"
+          },
+          "versao" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "HistoricoDto" : {
+        "properties" : {
+          "data" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "descricao" : {
+            "type" : "string"
+          },
+          "responsavel" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "descricao", "responsavel" ],
+        "type" : "object"
+      },
+      "ItemDto" : {
+        "properties" : {
+          "descricao" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "quantidade" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "tipo" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "number"
+          },
+          "valorUnitario" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "descricao", "id", "quantidade", "tipo", "total", "valorUnitario" ],
+        "type" : "object"
+      },
+      "ItemPecaOrdemForm" : {
+        "properties" : {
+          "pecaId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "quantidade" : {
+            "format" : "int32",
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        },
+        "required" : [ "pecaId", "quantidade" ],
+        "type" : "object"
+      },
+      "LancamentoDto" : {
+        "properties" : {
+          "categoria" : {
+            "nullable" : true,
+            "type" : "string"
+          },
+          "descricao" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "ordemServicoId" : {
+            "format" : "int64",
+            "nullable" : true,
+            "type" : "integer"
+          },
+          "pagamentoEm" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "tipo" : {
+            "type" : "string"
+          },
+          "valor" : {
+            "type" : "number"
+          },
+          "vencimento" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "descricao", "id", "status", "tipo", "valor", "vencimento" ],
+        "type" : "object"
+      },
+      "LancamentoFinanceiroForm" : {
+        "properties" : {
+          "categoria" : {
+            "maxLength" : 80,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "descricao" : {
+            "maxLength" : 160,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "ordemServicoId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "tipo" : {
+            "enum" : [ "RECEITA", "DESPESA" ],
+            "type" : "string"
+          },
+          "valor" : {
+            "exclusiveMinimum" : false,
+            "minimum" : 0.01,
+            "type" : "number"
+          },
+          "vencimento" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "descricao", "tipo", "valor", "vencimento" ],
+        "type" : "object"
+      },
+      "LoginRequest" : {
+        "properties" : {
+          "acesso" : {
+            "type" : "string"
+          },
+          "senha" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MovimentacaoDto" : {
+        "properties" : {
+          "data" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "observacao" : {
+            "nullable" : true,
+            "type" : "string"
+          },
+          "operador" : {
+            "type" : "string"
+          },
+          "peca" : {
+            "$ref" : "#/components/schemas/PecaDto"
+          },
+          "quantidade" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "saldoResultante" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "tipo" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "id", "operador", "peca", "quantidade", "saldoResultante", "tipo" ],
+        "type" : "object"
+      },
+      "MovimentacaoForm" : {
+        "properties" : {
+          "observacao" : {
+            "maxLength" : 255,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "pecaId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "quantidade" : {
+            "format" : "int32",
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "tipo" : {
+            "enum" : [ "ENTRADA", "SAIDA" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "pecaId", "quantidade", "tipo" ],
+        "type" : "object"
+      },
+      "OrdemDetalheDto" : {
+        "properties" : {
+          "historico" : {
+            "items" : {
+              "$ref" : "#/components/schemas/HistoricoDto"
+            },
+            "type" : "array"
+          },
+          "itens" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ItemDto"
+            },
+            "type" : "array"
+          },
+          "ordem" : {
+            "$ref" : "#/components/schemas/OrdemResumoDto"
+          }
+        },
+        "required" : [ "historico", "itens", "ordem" ],
+        "type" : "object"
+      },
+      "OrdemResumoDto" : {
+        "properties" : {
+          "abertura" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "agendamento" : {
+            "format" : "date-time",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "cliente" : {
+            "$ref" : "#/components/schemas/ClienteDto"
+          },
+          "descricao" : {
+            "type" : "string"
+          },
+          "documento" : {
+            "$ref" : "#/components/schemas/DadosDocumentoOs"
+          },
+          "garantiaAte" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "quilometragem" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "retornoEm" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "veiculo" : {
+            "$ref" : "#/components/schemas/VeiculoDto"
+          }
+        },
+        "required" : [ "abertura", "cliente", "descricao", "id", "quilometragem", "status", "veiculo" ],
+        "type" : "object"
+      },
+      "OrdemServicoEdicaoForm" : {
+        "properties" : {
+          "descricao" : {
+            "maxLength" : 1200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "documento" : {
+            "$ref" : "#/components/schemas/DadosDocumentoOs"
+          },
+          "quilometragemAtual" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "status" : {
+            "enum" : [ "ORCAMENTO", "ABERTA", "EM_ANDAMENTO", "AGUARDANDO_PECA", "CONCLUIDA", "CANCELADA" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "descricao", "quilometragemAtual", "status" ],
+        "type" : "object"
+      },
+      "OrdemServicoForm" : {
+        "properties" : {
+          "agendamento" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "clienteId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "descricao" : {
+            "maxLength" : 1200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "documento" : {
+            "$ref" : "#/components/schemas/DadosDocumentoOs"
+          },
+          "garantiaAte" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "orcamento" : {
+            "type" : "boolean"
+          },
+          "quilometragemAtual" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "retornoEm" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "veiculoId" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "clienteId", "descricao", "quilometragemAtual", "veiculoId" ],
+        "type" : "object"
+      },
+      "Peca" : {
+        "properties" : {
+          "categoria" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "codigo" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "empresaId" : {
+            "format" : "int64",
+            "readOnly" : true,
+            "type" : "integer"
+          },
+          "estoqueDisponivel" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "estoqueMinimo" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "fabricante" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "fornecedor" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "readOnly" : true,
+            "type" : "integer"
+          },
+          "localizacao" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "nome" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "preco" : {
+            "exclusiveMinimum" : false,
+            "minimum" : 0.01,
+            "type" : "number"
+          },
+          "saldo" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
+        "required" : [ "categoria", "codigo", "estoqueMinimo", "fabricante", "fornecedor", "localizacao", "nome", "preco", "saldo" ],
+        "type" : "object"
+      },
+      "PecaDto" : {
+        "properties" : {
+          "categoria" : {
+            "type" : "string"
+          },
+          "codigo" : {
+            "type" : "string"
+          },
+          "disponivel" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "fabricante" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "locacao" : {
+            "type" : "string"
+          },
+          "minimo" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "preco" : {
+            "type" : "number"
+          },
+          "saldo" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "categoria", "codigo", "disponivel", "fabricante", "id", "locacao", "minimo", "nome", "preco", "saldo" ],
+        "type" : "object"
+      },
+      "ReposicaoDto" : {
+        "properties" : {
+          "peca" : {
+            "$ref" : "#/components/schemas/PecaDto"
+          },
+          "sugestao" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "peca", "sugestao" ],
+        "type" : "object"
+      },
+      "ReposicaoResumoDto" : {
+        "properties" : {
+          "custo" : {
+            "type" : "number"
+          },
+          "pecas" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ReposicaoDto"
+            },
+            "type" : "array"
+          },
+          "zeradas" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "custo", "pecas", "zeradas" ],
+        "type" : "object"
+      },
+      "ServicoOrdemForm" : {
+        "properties" : {
+          "descricao" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "valor" : {
+            "exclusiveMinimum" : false,
+            "minimum" : 0.0,
+            "type" : "number"
+          }
+        },
+        "required" : [ "descricao", "valor" ],
+        "type" : "object"
+      },
+      "UsuarioCadastroForm" : {
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "nome" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "permissoes" : {
+            "items" : {
+              "enum" : [ "PECAS", "ORDENS", "FINANCEIRO", "RELATORIO_MENSAL", "REPOSICAO" ],
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "senha" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "nome", "senha" ],
+        "type" : "object"
+      },
+      "UsuarioDto" : {
+        "properties" : {
+          "empresaId" : {
+            "format" : "int64",
+            "nullable" : true,
+            "type" : "integer"
+          },
+          "empresaNome" : {
+            "nullable" : true,
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "perfil" : {
+            "type" : "string"
+          },
+          "permissoes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "trocaSenhaObrigatoria" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "id", "nome", "perfil", "permissoes", "trocaSenhaObrigatoria" ],
+        "type" : "object"
+      },
+      "UsuarioPermissoesForm" : {
+        "properties" : {
+          "permissoes" : {
+            "items" : {
+              "enum" : [ "PECAS", "ORDENS", "FINANCEIRO", "RELATORIO_MENSAL", "REPOSICAO" ],
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          }
+        },
+        "type" : "object"
+      },
+      "UsuarioSistemaDto" : {
+        "properties" : {
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "login" : {
+            "type" : "string"
+          },
+          "nome" : {
+            "type" : "string"
+          },
+          "perfil" : {
+            "type" : "string"
+          },
+          "permissoes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "trocaSenhaObrigatoria" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "id", "login", "nome", "perfil", "permissoes", "trocaSenhaObrigatoria" ],
+        "type" : "object"
+      },
+      "VeiculoDto" : {
+        "properties" : {
+          "ano" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "chassi" : {
+            "type" : "string"
+          },
+          "cliente" : {
+            "$ref" : "#/components/schemas/ClienteDto"
+          },
+          "id" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "marcaModelo" : {
+            "type" : "string"
+          },
+          "placa" : {
+            "type" : "string"
+          },
+          "quilometragemAtual" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "ano", "chassi", "id", "marcaModelo", "placa", "quilometragemAtual" ],
+        "type" : "object"
+      },
+      "VeiculoRequest" : {
+        "properties" : {
+          "ano" : {
+            "format" : "int32",
+            "maximum" : 2100,
+            "minimum" : 1886,
+            "type" : "integer"
+          },
+          "chassi" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "clienteId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "marcaModelo" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "placa" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "quilometragemAtual" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "ano", "chassi", "marcaModelo", "placa", "quilometragemAtual" ],
+        "type" : "object"
+      }
+    }
+  },
+  "info" : {
+    "title" : "OpenAPI definition",
+    "version" : "v0"
+  },
+  "openapi" : "3.0.1",
+  "paths" : {
+    "/api/admin/desenvolvedor" : {
+      "get" : {
+        "operationId" : "diagnosticoDesenvolvedor",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Diagnostico"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "desenvolvedor-api-controller" ]
+      }
+    },
+    "/api/admin/desenvolvedor/backups" : {
+      "get" : {
+        "operationId" : "listarBackups",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/BackupInfo"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "desenvolvedor-api-controller" ]
+      },
+      "post" : {
+        "operationId" : "criarBackup",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "desenvolvedor-api-controller" ]
+      }
+    },
+    "/api/admin/desenvolvedor/backups/{nome}" : {
+      "get" : {
+        "operationId" : "baixarBackup",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "nome",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "desenvolvedor-api-controller" ]
+      }
+    },
+    "/api/admin/usuarios" : {
+      "get" : {
+        "operationId" : "usuarios",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/UsuarioSistemaDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "usuarios-api-controller" ]
+      },
+      "post" : {
+        "operationId" : "cadastrarUsuario",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UsuarioCadastroForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsuarioSistemaDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "usuarios-api-controller" ]
+      }
+    },
+    "/api/admin/usuarios/{id}" : {
+      "delete" : {
+        "operationId" : "excluirUsuario",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "usuarios-api-controller" ]
+      }
+    },
+    "/api/admin/usuarios/{id}/permissoes" : {
+      "put" : {
+        "operationId" : "atualizarPermissoes",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UsuarioPermissoesForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "usuarios-api-controller" ]
+      }
+    },
+    "/api/admin/usuarios/{id}/resetar-senha" : {
+      "post" : {
+        "operationId" : "resetarSenha",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "usuarios-api-controller" ]
+      }
+    },
+    "/api/assinaturas/cadastro" : {
+      "post" : {
+        "operationId" : "cadastrar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CadastroEmpresaForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsuarioDto"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "assinaturas-api-controller" ]
+      }
+    },
+    "/api/auth/login" : {
+      "post" : {
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsuarioDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "auth-api-controller" ]
+      }
+    },
+    "/api/auth/logout" : {
+      "post" : {
+        "operationId" : "logout",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "auth-api-controller" ]
+      }
+    },
+    "/api/auth/session" : {
+      "get" : {
+        "operationId" : "sessao",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsuarioDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "auth-api-controller" ]
+      }
+    },
+    "/api/clientes" : {
+      "get" : {
+        "operationId" : "clientes",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "busca",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ClienteDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "cadastros-api-controller" ]
+      },
+      "post" : {
+        "operationId" : "salvarCliente",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Cliente"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClienteDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "cadastros-api-controller" ]
+      }
+    },
+    "/api/dashboard" : {
+      "get" : {
+        "operationId" : "dashboard",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DashboardDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "dashboard-api-controller" ]
+      }
+    },
+    "/api/empresa/assinatura" : {
+      "get" : {
+        "operationId" : "assinatura",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "object"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "empresa-api-controller" ]
+      }
+    },
+    "/api/financeiro" : {
+      "get" : {
+        "operationId" : "listar",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/LancamentoDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "financeiro-api-controller" ]
+      },
+      "post" : {
+        "operationId" : "criar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LancamentoFinanceiroForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LancamentoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "financeiro-api-controller" ]
+      }
+    },
+    "/api/financeiro/{id}/baixar" : {
+      "post" : {
+        "operationId" : "baixar",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "financeiro-api-controller" ]
+      }
+    },
+    "/api/movimentacoes" : {
+      "post" : {
+        "operationId" : "movimentar",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MovimentacaoForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "estoque-api-controller" ]
+      }
+    },
+    "/api/ordens" : {
+      "get" : {
+        "operationId" : "ordens",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/OrdemResumoDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      },
+      "post" : {
+        "operationId" : "abrirOrdem",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OrdemServicoForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrdemResumoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      }
+    },
+    "/api/ordens/{id}" : {
+      "get" : {
+        "operationId" : "detalheOrdem",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrdemDetalheDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      },
+      "put" : {
+        "operationId" : "editarOrdem",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OrdemServicoEdicaoForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      }
+    },
+    "/api/ordens/{id}/aprovar" : {
+      "post" : {
+        "operationId" : "aprovarOrcamento",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      }
+    },
+    "/api/ordens/{id}/impressao" : {
+      "get" : {
+        "operationId" : "imprimirOrdem",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/html;charset=UTF-8" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      }
+    },
+    "/api/ordens/{id}/itens/peca" : {
+      "post" : {
+        "operationId" : "adicionarPeca",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ItemPecaOrdemForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      }
+    },
+    "/api/ordens/{id}/itens/servico" : {
+      "post" : {
+        "operationId" : "adicionarServico",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ServicoOrdemForm"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      }
+    },
+    "/api/ordens/{id}/pdf" : {
+      "get" : {
+        "operationId" : "baixarPdfOrdem",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "ordens-api-controller" ]
+      }
+    },
+    "/api/pecas" : {
+      "get" : {
+        "operationId" : "pecas",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "busca",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PecaDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "estoque-api-controller" ]
+      },
+      "post" : {
+        "operationId" : "salvarPeca",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Peca"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PecaDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "estoque-api-controller" ]
+      }
+    },
+    "/api/relatorio-mensal" : {
+      "get" : {
+        "operationId" : "relatorioMensal",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/MovimentacaoDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "estoque-api-controller" ]
+      }
+    },
+    "/api/reposicao" : {
+      "get" : {
+        "operationId" : "reposicao",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReposicaoResumoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "estoque-api-controller" ]
+      }
+    },
+    "/api/reposicao.csv" : {
+      "get" : {
+        "operationId" : "exportarReposicao",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/csv" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "estoque-api-controller" ]
+      }
+    },
+    "/api/security/csrf" : {
+      "get" : {
+        "operationId" : "csrf",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "auth-api-controller" ]
+      }
+    },
+    "/api/veiculos" : {
+      "get" : {
+        "operationId" : "veiculos",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "busca",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/VeiculoDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "cadastros-api-controller" ]
+      },
+      "post" : {
+        "operationId" : "salvarVeiculo",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VeiculoRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VeiculoDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "cadastros-api-controller" ]
+      }
+    }
+  }
+}

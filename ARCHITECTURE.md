@@ -15,6 +15,7 @@
 - `controller/api/`: API REST em `/api`, separada em autenticação, dashboard, estoque, cadastros, usuários, desenvolvedor e ordens.
 - `controller/api/dto/`: contratos de entrada e saída da API, um tipo por arquivo.
 - `controller/api/mapper/ApiMapper`: conversões entre entidades e respostas da API.
+- Contrato OpenAPI: cada endpoint declara o tipo de resposta (`ResponseEntity<PecaDto>`, não `<?>`); erros de regra (`IllegalArgumentException`) viram 400 no `ApiExceptionHandler`, sem `try/catch` nos controladores. `config/OpenApiConfig` torna obrigatórios os campos dos `*Dto`, exceto os `@Schema(nullable = true)`. `OpenApiContratoTest` mantém `frontend/openapi.json` atualizado e `pnpm run api:types` gera `frontend/src/types/api.ts`.
 - `config/`: inicialização de dados, migrações locais, codificador de senha e interceptador do primeiro acesso.
 - `security/`: token anti-CSRF, cabeçalhos de segurança, limite de requisições e bloqueio de tentativas de login.
 - `tenant/`: identifica a empresa da sessão e ativa o filtro Hibernate que isola os dados operacionais.

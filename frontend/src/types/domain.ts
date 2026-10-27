@@ -1,55 +1,20 @@
-export type User = {
-  id: number;
-  empresaId?: number | null;
-  empresaNome?: string | null;
-  nome: string;
-  perfil: string;
-  permissoes: string[];
-  trocaSenhaObrigatoria: boolean;
-};
+import { type components } from "./api";
 
-export type Piece = {
-  id: number;
-  codigo: string;
-  nome: string;
-  categoria: string;
-  preco: number;
-  saldo: number;
-  disponivel: number;
-  minimo: number;
-  locacao: string;
-};
+type Schemas = components["schemas"];
 
-export type Client = {
-  id: number;
-  nome: string;
-  cpf: string;
-  telefone: string;
-};
-
-export type Vehicle = {
-  id: number;
-  placa: string;
-  marcaModelo: string;
-  ano: number;
-  chassi: string;
-  quilometragemAtual: number;
-  cliente?: Client;
-};
-
-export type Order = {
-  documento?: import("./order-document").OrderDocumentData | null;
-  id: number;
-  status: string;
-  abertura: string;
-  agendamento?: string | null;
-  retornoEm?: string | null;
-  garantiaAte?: string | null;
-  quilometragem: number;
-  descricao: string;
-  cliente: Client;
-  veiculo: Vehicle;
-};
+/** Contratos da API gerados de openapi.json (npm run api:types); não edite api.ts à mão. */
+export type User = Schemas["UsuarioDto"];
+export type Piece = Schemas["PecaDto"];
+export type Client = Schemas["ClienteDto"];
+export type Vehicle = Schemas["VeiculoDto"];
+export type Order = Schemas["OrdemResumoDto"];
+export type OrderDetail = Schemas["OrdemDetalheDto"];
+export type OrderItem = Schemas["ItemDto"];
+export type FinanceEntry = Schemas["LancamentoDto"];
+export type Restock = Schemas["ReposicaoResumoDto"];
+export type DashboardData = Schemas["DashboardDto"];
+export type Movement = Schemas["MovimentacaoDto"];
+export type SystemUser = Schemas["UsuarioSistemaDto"];
 
 export type BackupEntry = {
   nome: string;

@@ -1,5 +1,9 @@
 package br.edu.fag.sputnik.controller.api;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Content;
+import br.edu.fag.sputnik.controller.api.dto.UsuarioDto;
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.usuarioDto;
 
 import br.edu.fag.sputnik.auth.SessaoAutenticacao;
@@ -41,18 +45,19 @@ public class AuthApiController extends ApiSupport {
     }
 
     @GetMapping("/auth/session")
-    public ResponseEntity<?> sessao(HttpSession session) {
+    public ResponseEntity<UsuarioDto> sessao(HttpSession session) {
         return SessaoAutenticacao.usuario(session)
-                .<ResponseEntity<?>>map(usuario -> ResponseEntity.ok(usuarioDto(usuario)))
+                .map(usuario -> ResponseEntity.ok(usuarioDto(usuario)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @GetMapping("/security/csrf")
-    public ResponseEntity<?> csrf(HttpSession session) {
+    public ResponseEntity<Map<String, String>> csrf(HttpSession session) {
         return ResponseEntity.ok(Map.of("token", csrfTokens.obterOuCriar(session)));
     }
 
     @PostMapping("/auth/login")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UsuarioDto.class)))
     public ResponseEntity<?> login(
             @RequestBody LoginRequest request,
             HttpSession session,

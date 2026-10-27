@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Table } from "../../components/ui";
 import { api } from "../../lib/api";
 import { dateTime } from "../../lib/format";
+import { type Movement } from "../../types/domain";
 
 export function MonthlyReport() {
-  const [items, setItems] = useState<any[]>([]),
+  const [items, setItems] = useState<Movement[]>([]),
     [erro, setErro] = useState("");
   useEffect(() => {
-    api<any[]>("/relatorio-mensal")
+    api<Movement[]>("/relatorio-mensal")
       .then(setItems)
       .catch((e) => setErro(e.message));
   }, []);

@@ -1,5 +1,6 @@
 package br.edu.fag.sputnik.controller.api;
 
+import java.util.Map;
 import br.edu.fag.sputnik.auth.SessaoAutenticacao;
 import br.edu.fag.sputnik.domain.Perfil;
 import br.edu.fag.sputnik.service.AutorizacaoService;
@@ -23,14 +24,10 @@ public class EmpresaApiController extends ApiSupport {
     }
 
     @GetMapping("/assinatura")
-    public ResponseEntity<?> assinatura(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> assinatura(HttpSession session) {
         var usuario = SessaoAutenticacao.usuario(session).orElse(null);
         if (usuario == null || usuario.perfil() != Perfil.ADMIN || usuario.empresaId() == null)
             return proibido();
-        try {
-            return ResponseEntity.ok(empresas.assinatura(usuario.empresaId()));
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        return ResponseEntity.ok(empresas.assinatura(usuario.empresaId()));
     }
 }

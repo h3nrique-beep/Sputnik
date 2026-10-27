@@ -1,5 +1,6 @@
 package br.edu.fag.sputnik.controller.api.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
 public record MovimentacaoDto(
@@ -10,4 +11,4 @@ public record MovimentacaoDto(
         Integer saldoResultante,
         LocalDateTime data,
         String operador,
-        String observacao) {}
+        @Schema(nullable = true) String observacao) {}

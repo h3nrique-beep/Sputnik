@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Map;
 
 /** Autorização compartilhada; mantém as respostas e permissões existentes. */
 public abstract class ApiSupport {
@@ -22,16 +21,12 @@ public abstract class ApiSupport {
         return autorizacao.temAcesso(session, permissao);
     }
 
-    protected ResponseEntity<?> naoAutorizado() {
+    protected <T> ResponseEntity<T> naoAutorizado() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    protected ResponseEntity<?> proibido() {
+    protected <T> ResponseEntity<T> proibido() {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
-
-    protected ResponseEntity<Map<String, String>> invalido(IllegalArgumentException exception) {
-        return ResponseEntity.badRequest().body(Map.of("mensagem", exception.getMessage()));
     }
 
     protected String operador(HttpSession session) {

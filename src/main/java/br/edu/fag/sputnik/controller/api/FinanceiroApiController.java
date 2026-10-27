@@ -1,5 +1,7 @@
 package br.edu.fag.sputnik.controller.api;
 
+import java.util.List;
+import br.edu.fag.sputnik.controller.api.dto.LancamentoDto;
 import br.edu.fag.sputnik.domain.LancamentoFinanceiro;
 import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.service.AutorizacaoService;
@@ -26,47 +28,35 @@ public class FinanceiroApiController extends ApiSupport {
     }
 
     @GetMapping
-    public ResponseEntity<?> listar(HttpSession session) {
+    public ResponseEntity<List<LancamentoDto>> listar(HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.FINANCEIRO)) return proibido();
         return ResponseEntity.ok(financeiro.listar().stream().map(this::dto).toList());
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(
+    public ResponseEntity<LancamentoDto> criar(
             @Valid @RequestBody LancamentoFinanceiroForm form, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.FINANCEIRO)) return proibido();
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(dto(financeiro.criar(form)));
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto(financeiro.criar(form)));
     }
 
     @PostMapping("/{id}/baixar")
-    public ResponseEntity<?> baixar(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<Void> baixar(@PathVariable Long id, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.FINANCEIRO)) return proibido();
-        try {
-            financeiro.baixar(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        financeiro.baixar(id);
+        return ResponseEntity.noContent().build();
     }
 
-    private Map<String, Object> dto(LancamentoFinanceiro l) {
-        return Map.ofEntries(
-                Map.entry("id", l.getId()),
-                Map.entry("tipo", l.getTipo().name()),
-                Map.entry("status", l.getStatus().name()),
-                Map.entry("descricao", l.getDescricao()),
-                Map.entry("categoria", l.getCategoria() == null ? "" : l.getCategoria()),
-                Map.entry("valor", l.getValor()),
-                Map.entry("vencimento", l.getVencimento()),
-                Map.entry(
-                        "pagamentoEm",
-                        l.getPagamentoEm() == null ? "" : l.getPagamentoEm().toString()),
-                Map.entry(
-                        "ordemServicoId",
-                        l.getOrdemServico() == null ? "" : l.getOrdemServico().getId()));
+    private LancamentoDto dto(LancamentoFinanceiro l) {
+        return new LancamentoDto(
+                l.getId(),
+                l.getTipo().name(),
+                l.getStatus().name(),
+                l.getDescricao(),
+                l.getCategoria(),
+                l.getValor(),
+                l.getVencimento(),
+                l.getPagamentoEm(),
+                l.getOrdemServico() == null ? null : l.getOrdemServico().getId());
     }
 }

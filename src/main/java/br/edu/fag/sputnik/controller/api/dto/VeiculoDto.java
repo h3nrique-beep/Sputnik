@@ -1,5 +1,7 @@
 package br.edu.fag.sputnik.controller.api.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public record VeiculoDto(
         Long id,
         String placa,
@@ -7,4 +9,4 @@ public record VeiculoDto(
         Integer ano,
         String chassi,
         Integer quilometragemAtual,
-        ClienteDto cliente) {}
+        @Schema(nullable = true) ClienteDto cliente) {}

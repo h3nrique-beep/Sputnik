@@ -1,5 +1,7 @@
 package br.edu.fag.sputnik.controller.api;
 
+import java.util.List;
+import br.edu.fag.sputnik.controller.api.dto.UsuarioSistemaDto;
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.usuarioSistemaDto;
 
 import br.edu.fag.sputnik.auth.SessaoAutenticacao;
@@ -36,7 +38,7 @@ public class UsuariosApiController extends ApiSupport {
     }
 
     @GetMapping("/admin/usuarios")
-    public ResponseEntity<?> usuarios(HttpSession session) {
+    public ResponseEntity<List<UsuarioSistemaDto>> usuarios(HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
         return ResponseEntity.ok(
                 usuarios.listar(empresaId(session)).stream()
@@ -45,51 +47,35 @@ public class UsuariosApiController extends ApiSupport {
     }
 
     @PostMapping("/admin/usuarios")
-    public ResponseEntity<?> cadastrarUsuario(
+    public ResponseEntity<UsuarioSistemaDto> cadastrarUsuario(
             @Valid @RequestBody UsuarioCadastroForm form, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(usuarioSistemaDto(usuarios.cadastrar(form, empresaId(session))));
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(usuarioSistemaDto(usuarios.cadastrar(form, empresaId(session))));
     }
 
     @PutMapping("/admin/usuarios/{id}/permissoes")
-    public ResponseEntity<?> atualizarPermissoes(
+    public ResponseEntity<Void> atualizarPermissoes(
             @PathVariable Long id, @RequestBody UsuarioPermissoesForm form, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
-        try {
-            usuarios.atualizarPermissoes(id, form.getPermissoes(), empresaId(session));
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        usuarios.atualizarPermissoes(id, form.getPermissoes(), empresaId(session));
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/admin/usuarios/{id}/resetar-senha")
-    public ResponseEntity<?> resetarSenha(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<Map<String, String>> resetarSenha(@PathVariable Long id, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
-        try {
-            return ResponseEntity.ok(
-                    Map.of(
-                            "senhaTemporaria",
-                            usuarios.resetarSenhaBalconista(id, empresaId(session))));
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        return ResponseEntity.ok(
+                Map.of(
+                        "senhaTemporaria",
+                        usuarios.resetarSenhaBalconista(id, empresaId(session))));
     }
 
     @DeleteMapping("/admin/usuarios/{id}")
-    public ResponseEntity<?> excluirUsuario(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<Void> excluirUsuario(@PathVariable Long id, HttpSession session) {
         if (!autorizacao.ehAdministrador(session)) return proibido();
-        try {
-            usuarios.excluirBalconista(id, empresaId(session));
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        usuarios.excluirBalconista(id, empresaId(session));
+        return ResponseEntity.noContent().build();
     }
 
     private Long empresaId(HttpSession session) {

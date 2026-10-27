@@ -143,7 +143,17 @@ Mudanças de esquema entram como um novo arquivo `V2__descricao.sql`, `V3__...`;
 mvn test
 ```
 
-Os testes usam H2 em memória; `PostgresMigracaoIntegrationTest` sobe um PostgreSQL embutido (sem Docker), aplica o Flyway, valida o mapeamento e executa um fluxo de estoque. Os dados locais da aplicação são gravados em `data/sputnik` e não são enviados ao Git.
+Os testes usam H2 em memória; `PostgresMigracaoIntegrationTest` sobe um PostgreSQL embutido (sem Docker), aplica o Flyway, valida o mapeamento e executa um fluxo de estoque.
+
+### Contrato da API (OpenAPI → TypeScript)
+
+Os tipos que o frontend usa para conversar com a API são gerados, não escritos à mão:
+
+1. `OpenApiContratoTest` gera a especificação OpenAPI da API e compara com `frontend/openapi.json`. Se a API mudou, o teste regrava o arquivo e falha.
+2. Em `frontend`, `pnpm run api:types` gera `src/types/api.ts`; `src/types/domain.ts` dá nomes curtos a esses tipos.
+3. `pnpm run check` aponta toda tela que ficou incompatível com a API.
+
+Campos de resposta são obrigatórios por padrão; os que podem vir vazios levam `@Schema(nullable = true)` no record. A especificação não é exposta pela aplicação em execução (`springdoc.api-docs.enabled=false`). Os dados locais da aplicação são gravados em `data/sputnik` e não são enviados ao Git.
 
 ## Multiempresa e assinaturas
 

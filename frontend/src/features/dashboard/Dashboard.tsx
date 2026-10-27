@@ -13,18 +13,7 @@ import {
 } from "lucide-react";
 import { api } from "../../lib/api";
 import { label } from "../../lib/format";
-import { type Order, type Piece } from "../../types/domain";
-
-type DashboardData = {
-  pecas: number;
-  ordensAbertas: number;
-  ordensConcluidasMes: number;
-  criticas: number;
-  porStatus: Record<string, number>;
-  aguardandoPeca: Order[];
-  retornos: Order[];
-  pecasMaisUsadas: Piece[];
-};
+import { type DashboardData } from "../../types/domain";
 
 export function Dashboard({
   go,

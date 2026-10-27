@@ -1,5 +1,7 @@
 package br.edu.fag.sputnik.controller.api;
 
+import java.util.List;
+import br.edu.fag.sputnik.controller.api.dto.OrdemResumoDto;
 import static br.edu.fag.sputnik.controller.api.mapper.ApiMapper.ordemResumo;
 
 import br.edu.fag.sputnik.controller.api.dto.OrdemDetalheDto;
@@ -45,26 +47,22 @@ public class OrdensApiController extends ApiSupport {
     }
 
     @GetMapping("/ordens")
-    public ResponseEntity<?> ordens(HttpSession session) {
+    public ResponseEntity<List<OrdemResumoDto>> ordens(HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         return ResponseEntity.ok(
                 ordensService.ordens().stream().map(ApiMapper::ordemResumo).toList());
     }
 
     @PostMapping("/ordens")
-    public ResponseEntity<?> abrirOrdem(
+    public ResponseEntity<OrdemResumoDto> abrirOrdem(
             @Valid @RequestBody OrdemServicoForm form, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ordemResumo(ordensService.abrirOrdem(form, operador(session))));
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ordemResumo(ordensService.abrirOrdem(form, operador(session))));
     }
 
     @GetMapping("/ordens/{id}")
-    public ResponseEntity<?> detalheOrdem(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<OrdemDetalheDto> detalheOrdem(@PathVariable Long id, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         try {
             OrdemServico ordem = ordensService.buscarOrdem(id);
@@ -80,7 +78,7 @@ public class OrdensApiController extends ApiSupport {
     }
 
     @GetMapping(value = "/ordens/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<?> baixarPdfOrdem(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<byte[]> baixarPdfOrdem(@PathVariable Long id, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         try {
             OrdemServico ordem = ordensService.buscarOrdem(id);
@@ -101,7 +99,7 @@ public class OrdensApiController extends ApiSupport {
     }
 
     @GetMapping(value = "/ordens/{id}/impressao", produces = "text/html;charset=UTF-8")
-    public ResponseEntity<?> imprimirOrdem(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<String> imprimirOrdem(@PathVariable Long id, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         try {
             return ResponseEntity.ok()
@@ -117,55 +115,39 @@ public class OrdensApiController extends ApiSupport {
     }
 
     @PutMapping("/ordens/{id}")
-    public ResponseEntity<?> editarOrdem(
+    public ResponseEntity<Void> editarOrdem(
             @PathVariable Long id,
             @Valid @RequestBody OrdemServicoEdicaoForm form,
             HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
-        try {
-            ordensService.atualizarOrdem(id, form, operador(session));
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        ordensService.atualizarOrdem(id, form, operador(session));
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/ordens/{id}/itens/peca")
-    public ResponseEntity<?> adicionarPeca(
+    public ResponseEntity<Void> adicionarPeca(
             @PathVariable Long id,
             @Valid @RequestBody ItemPecaOrdemForm form,
             HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
-        try {
-            ordensService.adicionarPecaNaOrdem(
-                    id, form.getPecaId(), form.getQuantidade(), operador(session));
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        ordensService.adicionarPecaNaOrdem(
+                id, form.getPecaId(), form.getQuantidade(), operador(session));
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/ordens/{id}/itens/servico")
-    public ResponseEntity<?> adicionarServico(
+    public ResponseEntity<Void> adicionarServico(
             @PathVariable Long id, @Valid @RequestBody ServicoOrdemForm form, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
-        try {
-            ordensService.adicionarServicoNaOrdem(
-                    id, form.getDescricao(), form.getValor(), operador(session));
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        ordensService.adicionarServicoNaOrdem(
+                id, form.getDescricao(), form.getValor(), operador(session));
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/ordens/{id}/aprovar")
-    public ResponseEntity<?> aprovarOrcamento(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<Void> aprovarOrcamento(@PathVariable Long id, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
-        try {
-            ordensService.aprovarOrcamento(id, operador(session));
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException exception) {
-            return invalido(exception);
-        }
+        ordensService.aprovarOrcamento(id, operador(session));
+        return ResponseEntity.noContent().build();
     }
 }

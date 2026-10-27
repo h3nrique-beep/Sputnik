@@ -1,5 +1,6 @@
 package br.edu.fag.sputnik.controller.api;
 
+import java.util.List;
 import br.edu.fag.sputnik.service.AutorizacaoService;
 import br.edu.fag.sputnik.service.BackupService;
 
@@ -42,13 +43,13 @@ public class DesenvolvedorApiController extends ApiSupport {
     }
 
     @GetMapping("/admin/desenvolvedor")
-    public ResponseEntity<?> diagnosticoDesenvolvedor(HttpSession session) {
+    public ResponseEntity<BackupService.Diagnostico> diagnosticoDesenvolvedor(HttpSession session) {
         if (!podeAdministrarInstalacao(session)) return proibido();
         return ResponseEntity.ok(backups.diagnostico());
     }
 
     @GetMapping("/admin/desenvolvedor/backups")
-    public ResponseEntity<?> listarBackups(HttpSession session) {
+    public ResponseEntity<List<BackupService.BackupInfo>> listarBackups(HttpSession session) {
         if (!podeAdministrarInstalacao(session)) return proibido();
         return ResponseEntity.ok(backups.listar());
     }
@@ -65,7 +66,7 @@ public class DesenvolvedorApiController extends ApiSupport {
     }
 
     @GetMapping("/admin/desenvolvedor/backups/{nome:.+}")
-    public ResponseEntity<?> baixarBackup(@PathVariable String nome, HttpSession session) {
+    public ResponseEntity<FileSystemResource> baixarBackup(@PathVariable String nome, HttpSession session) {
         if (!podeAdministrarInstalacao(session)) return proibido();
         try {
             var arquivo = backups.localizar(nome);

@@ -9,19 +9,19 @@ import {
 } from "../../components/ui";
 import { api, downloadApi } from "../../lib/api";
 import { date, dateTime, label, money } from "../../lib/format";
-import { type Order } from "../../types/domain";
+import { type Order, type OrderDetail as Detail } from "../../types/domain";
 import { OrderEdit } from "./OrderEdit";
 import { OrderItems } from "./OrderItems";
 
 export function OrderDetail({ id, back }: { id: number; back: () => void }) {
-  const [data, setData] = useState<any>(),
+  const [data, setData] = useState<Detail>(),
     [erro, setErro] = useState(""),
     [baixandoPdf, setBaixandoPdf] = useState(false),
     [confirmando, setConfirmando] = useState(false),
     [aprovando, setAprovando] = useState(false),
     [aviso, setAviso] = useState("");
   const reload = () => {
-    void api<any>("/ordens/" + id)
+    void api<Detail>("/ordens/" + id)
       .then((result) => {
         setData(result);
         setErro("");
@@ -49,16 +49,10 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
     item === null || item === undefined || item === "" ? "—" : String(item);
   const dataDocumento = (item: string | number | null | undefined) =>
     item ? dateTime(String(item)) : "—";
-  const pecas = data.itens.filter((item: any) => item.tipo === "PECA");
-  const servicos = data.itens.filter((item: any) => item.tipo === "SERVICO");
-  const totalPecas = pecas.reduce(
-    (sum: number, item: any) => sum + item.total,
-    0,
-  );
-  const totalServicos = servicos.reduce(
-    (sum: number, item: any) => sum + item.total,
-    0,
-  );
+  const pecas = data.itens.filter((item) => item.tipo === "PECA");
+  const servicos = data.itens.filter((item) => item.tipo === "SERVICO");
+  const totalPecas = pecas.reduce((sum, item) => sum + item.total, 0);
+  const totalServicos = servicos.reduce((sum, item) => sum + item.total, 0);
   const baixarPdf = async () => {
     setBaixandoPdf(true);
     setErro("");
@@ -70,10 +64,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
       setBaixandoPdf(false);
     }
   };
-  const unidades = pecas.reduce(
-    (sum: number, item: any) => sum + item.quantidade,
-    0,
-  );
+  const unidades = pecas.reduce((sum, item) => sum + item.quantidade, 0);
   const aprovar = async () => {
     setErro("");
     setAprovando(true);
@@ -129,7 +120,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
             <>
               <p>Estas peças saem do estoque assim que você confirmar:</p>
               <ul>
-                {pecas.map((item: any) => (
+                {pecas.map((item) => (
                   <li key={item.id}>
                     <b>{item.quantidade}×</b> {item.descricao}
                   </li>
@@ -239,7 +230,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
             <section className="os-box os-services-box">
               <h3>ITENS / SERVIÇOS A EXECUTAR</h3>
               <p className="os-request">{o.descricao}</p>
-              {servicos.map((item: any, index: number) => (
+              {servicos.map((item, index) => (
                 <p className="os-service-row" key={item.id}>
                   {String(index + 1).padStart(3, "0")} · {item.descricao}
                   <b>{money(item.total)}</b>
@@ -292,7 +283,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
             <section className="os-box os-parts-box">
               <h3>REQUISIÇÃO DE PEÇAS</h3>
               {pecas.length
-                ? pecas.map((item: any) => (
+                ? pecas.map((item) => (
                     <p className="os-part-row" key={item.id}>
                       {item.quantidade} × {item.descricao}
                       <b>{money(item.total)}</b>
@@ -380,7 +371,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
         <div className="order-workspace-main">
           <Card title="Itens e custos">
             {data.itens.length ? (
-              data.itens.map((i: any) => (
+              data.itens.map((i) => (
                 <p key={i.id}>
                   <span>
                     {i.quantidade}× {i.descricao}
@@ -407,7 +398,7 @@ export function OrderDetail({ id, back }: { id: number; back: () => void }) {
               Histórico <small>({data.historico.length})</small>
             </h2>
             <ol className="order-timeline">
-              {data.historico.map((h: any, i: number) => (
+              {data.historico.map((h, i) => (
                 <li
                   key={i}
                   className={
