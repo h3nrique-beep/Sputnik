@@ -151,6 +151,17 @@ mvn spring-boot:run
 
 Mudanças de esquema entram como um novo arquivo `V2__descricao.sql`, `V3__...`; um arquivo já aplicado nunca é editado. Os dados do H2 local não são copiados para o PostgreSQL automaticamente, e o backup do console do desenvolvedor usa o comando do H2: no PostgreSQL, use `pg_dump` ou o backup do provedor.
 
+### Deploy público (Render)
+
+O [`render.yaml`](render.yaml) descreve o deploy inteiro: PostgreSQL gerenciado e o app pela imagem do `Dockerfile`, já ligados entre si, com HTTPS, cookie seguro e IP real do cliente (`X-Forwarded-For`) para o bloqueio de login.
+
+1. Crie uma conta em [render.com](https://render.com) e conecte o GitHub.
+2. **New → Blueprint** e escolha este repositório.
+3. Quando pedido, informe `SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD` (12+ caracteres com maiúscula, minúscula, número e símbolo) e confirme.
+4. Ao terminar, o link fica em `https://sputnik-XXXX.onrender.com`. Entre com `admin` e essa senha; o sistema pede a troca no primeiro acesso.
+
+A cada push na `main` o Render publica de novo (`autoDeploy`). No plano gratuito, o app hiberna após ~15 min sem acesso (a primeira visita depois disso leva cerca de 1 min) e o PostgreSQL gratuito expira após 30 dias; para uso real, troque os dois `plan: free` por um plano pago.
+
 ### Testes
 
 ```bash

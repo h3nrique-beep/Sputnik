@@ -1,0 +1,42 @@
+# Blueprint do Render: no painel, New > Blueprint e escolha este repositório.
+# Cria o PostgreSQL e o app (imagem do Dockerfile) já ligados entre si.
+databases:
+  - name: sputnik-db
+    plan: free
+    region: virginia
+    databaseName: sputnik
+    user: sputnik
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: sputnik
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: postgres
+      - key: SPUTNIK_DB_HOST
+        fromDatabase: { name: sputnik-db, property: host }
+      - key: SPUTNIK_DB_PORT
+        fromDatabase: { name: sputnik-db, property: port }
+      - key: SPUTNIK_DB_NAME
+        fromDatabase: { name: sputnik-db, property: database }
+      - key: SPUTNIK_DB_USER
+        fromDatabase: { name: sputnik-db, property: user }
+      - key: SPUTNIK_DB_PASSWORD
+        fromDatabase: { name: sputnik-db, property: password }
+      # Pedida pelo Render na criação; só é usada na primeira subida, com o banco vazio.
+      - key: SPUTNIK_BOOTSTRAP_ADMIN_PASSWORD
+        sync: false
+      # Atrás do HTTPS do Render: cookie só por HTTPS.
+      - key: SPUTNIK_COOKIE_SECURE
+        value: "true"
+      # O IP real do cliente vem no X-Forwarded-For; sem isso, bloqueio de login e limite de
+      # requisições tratariam todos os usuários como um só (o IP do proxy).
+      - key: SERVER_FORWARD_HEADERS_STRATEGY
+        value: native

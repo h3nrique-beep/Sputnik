@@ -39,6 +39,7 @@
 - `src/main/resources/application-postgres.properties`: perfil `postgres`, Flyway e `ddl-auto=validate`.
 - `src/main/resources/db/migration/`: migrações versionadas (`V1__esquema_inicial.sql`).
 - `docker-compose.yml`: serviços `postgres` (16, volume `sputnik-pg`) e `app` (perfil `postgres`, sobe só depois do banco saudável). Variáveis em `.env` (modelo em `.env.example`).
+- `render.yaml`: blueprint do Render (PostgreSQL + app Docker). Passa host/porta/nome do banco separados (`SPUTNIK_DB_HOST`, `SPUTNIK_DB_PORT`, `SPUTNIK_DB_NAME`), `SPUTNIK_COOKIE_SECURE=true` e `SERVER_FORWARD_HEADERS_STRATEGY=native`, sem o qual o bloqueio de login e o limite de requisições veriam todos os usuários com o IP do proxy.
 - `Dockerfile`: três estágios: Node gera o bundle, Maven empacota o jar com esse bundle, e a imagem final tem só o JRE 21 e o jar, com usuário sem privilégios e healthcheck.
 
 ## Execução
