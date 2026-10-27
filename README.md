@@ -54,7 +54,7 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 | --- | --- |
 | Frontend | React, TypeScript, Vite, Tailwind, shadcn/ui e Recharts |
 | Backend | Java 17, Spring Boot, Spring MVC e Spring Data JPA |
-| Banco de dados | H2 persistente em arquivo |
+| Banco de dados | H2 em arquivo (local) ou PostgreSQL com migrações Flyway (perfil `postgres`) |
 | Segurança | BCrypt, sessão HTTP, CSRF, limite de tentativas de login e permissões por módulo |
 | Testes | JUnit 5, Spring Boot Test e MockMvc |
 
@@ -118,13 +118,32 @@ cd frontend
 pnpm run build:java
 ```
 
+### Com PostgreSQL (perfil de produção)
+
+O perfil `postgres` cria o esquema pelas migrações Flyway em `src/main/resources/db/migration` e o Hibernate apenas valida (`ddl-auto=validate`). Sem Docker, use um PostgreSQL instalado ou gerenciado e ajuste `SPUTNIK_DB_URL`.
+
+```powershell
+$env:SPUTNIK_DB_PASSWORD = Read-Host "Senha do banco"
+docker compose up -d
+$env:SPRING_PROFILES_ACTIVE = "postgres"
+mvn spring-boot:run
+```
+
+| Variável | Padrão |
+| --- | --- |
+| `SPUTNIK_DB_URL` | `jdbc:postgresql://localhost:5432/sputnik` |
+| `SPUTNIK_DB_USER` | `sputnik` |
+| `SPUTNIK_DB_PASSWORD` | (obrigatória) |
+
+Mudanças de esquema entram como um novo arquivo `V2__descricao.sql`, `V3__...`; um arquivo já aplicado nunca é editado. Os dados do H2 local não são copiados para o PostgreSQL automaticamente, e o backup do console do desenvolvedor usa o comando do H2: no PostgreSQL, use `pg_dump` ou o backup do provedor.
+
 ### Testes
 
 ```bash
 mvn test
 ```
 
-Os testes usam H2 em memória. Os dados locais da aplicação são gravados em `data/sputnik` e não são enviados ao Git.
+Os testes usam H2 em memória; `PostgresMigracaoIntegrationTest` sobe um PostgreSQL embutido (sem Docker), aplica o Flyway, valida o mapeamento e executa um fluxo de estoque. Os dados locais da aplicação são gravados em `data/sputnik` e não são enviados ao Git.
 
 ## Multiempresa e assinaturas
 

@@ -164,4 +164,4 @@ O único template restante é `src/main/resources/templates/primeiro-acesso.html
 
 ## Persistência e limitações atuais
 
-O banco H2 é gravado em `data/sputnik`; peças, ordens, usuários e dados complementares do documento sobrevivem ao reinício. Reset de senha, troca obrigatória, edição de permissões e histórico da OS continuam implementados. O Hibernate atualiza localmente o esquema e inclui `empresa_id` nos registros operacionais principais; para produção, a migração deve ser versionada com Flyway e executada em PostgreSQL.
+O banco H2 é gravado em `data/sputnik`; peças, ordens, usuários e dados complementares do documento sobrevivem ao reinício. Reset de senha, troca obrigatória, edição de permissões e histórico da OS continuam implementados. No H2 local, o Hibernate atualiza o esquema sozinho (`ddl-auto=update`) para preservar os dados existentes. No perfil `postgres`, o esquema vem apenas das migrações Flyway (`db/migration/V1__esquema_inicial.sql`, com índices em `empresa_id` e nas chaves estrangeiras) e o Hibernate só valida que ele corresponde às entidades. `PostgresMigracaoIntegrationTest` comprova isso contra um PostgreSQL real a cada `mvn test`.

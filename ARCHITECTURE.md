@@ -32,6 +32,13 @@
 - `frontend/src/types/`: contratos reutilizáveis; os tipos de documento não dependem da camada de interface.
 - `frontend/src/styles/`: base, formulários, acesso, tema, console, impressão e modal. `index.css` mantém a ordem de carregamento para preservar a cascata.
 
+## Banco de dados
+
+- `src/main/resources/application.properties`: H2 em arquivo, esquema automático (uso local).
+- `src/main/resources/application-postgres.properties`: perfil `postgres`, Flyway e `ddl-auto=validate`.
+- `src/main/resources/db/migration/`: migrações versionadas (`V1__esquema_inicial.sql`).
+- `docker-compose.yml`: PostgreSQL 16 local para o perfil `postgres`.
+
 ## Execução
 
 O Spring Boot entrega a aplicação React compilada em `http://localhost:8080`.

@@ -8,8 +8,9 @@ Este plano organiza a evolução do Sputnik de aplicação local para um produto
 
 **Entregue nesta versão:** empresas, usuários por empresa, planos/assinaturas, `empresa_id` em entidades operacionais principais, atribuição automática no cadastro, migração de registros legados e teste de integração que bloqueia a listagem e a movimentação de uma peça de outra empresa.
 
-- Migrar a produção de H2 para PostgreSQL e manter H2 apenas no perfil local/teste.
-- Versionar o esquema com Flyway; eliminar `ddl-auto=update` em produção.
+- ~~Migrar a produção de H2 para PostgreSQL e manter H2 apenas no perfil local/teste.~~ Entregue: perfil `postgres` (out/2026).
+- ~~Versionar o esquema com Flyway; eliminar `ddl-auto=update` em produção.~~ Entregue: `V1__esquema_inicial.sql` e `ddl-auto=validate`.
+- Copiar os dados do H2 local para o PostgreSQL (script de exportação) quando houver dados reais a preservar.
 - Adicionar `empresa_id` a clientes, peças, veículos, ordens, itens, movimentações, histórico e financeiro.
 - Atualizar repositórios e serviços para sempre consultar e alterar dados da empresa da sessão.
 - Migrar dados existentes para a empresa padrão, sem perder o banco local.

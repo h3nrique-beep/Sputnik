@@ -1,0 +1,19 @@
+# PostgreSQL local para o perfil "postgres": docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sputnik
+      POSTGRES_USER: sputnik
+      POSTGRES_PASSWORD: ${SPUTNIK_DB_PASSWORD:?defina SPUTNIK_DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - sputnik-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sputnik -d sputnik"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  sputnik-pg:
