@@ -129,17 +129,6 @@ public class OrdensService {
                 .toList();
     }
 
-    @Transactional
-    public OrdemServico abrirOrdem(
-            Long clienteId,
-            Long veiculoId,
-            String descricao,
-            Integer quilometragemAtual,
-            String responsavel) {
-        return criarAtendimento(
-                clienteId, veiculoId, descricao, quilometragemAtual, responsavel, false);
-    }
-
     private OrdemServico criarAtendimento(
             Long clienteId,
             Long veiculoId,

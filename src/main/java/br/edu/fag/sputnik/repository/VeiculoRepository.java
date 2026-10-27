@@ -9,8 +9,6 @@ import java.util.List;
 public interface VeiculoRepository extends JpaRepository<Veiculo, Long> {
     List<Veiculo> findByClienteId(Long clienteId);
 
-    List<Veiculo> findByClienteIsNotNull();
-
     List<Veiculo> findByPlacaContainingIgnoreCaseOrChassiContainingIgnoreCase(
             String placa, String chassi);
 }

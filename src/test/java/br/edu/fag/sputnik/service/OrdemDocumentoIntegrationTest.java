@@ -31,7 +31,7 @@ import java.util.Set;
 @Transactional
 @ActiveProfiles("test")
 class OrdemDocumentoIntegrationTest {
-    @Autowired EstoqueService estoque;
+    @Autowired OrdensService ordensService;
     @Autowired EntityManager em;
     @Autowired MockMvc mvc;
 
@@ -59,10 +59,10 @@ class OrdemDocumentoIntegrationTest {
         d.pagadorNome = "Empresa pagadora";
         d.combustivelPercentual = 25;
         f.setDocumento(d);
-        Long id = estoque.abrirOrdem(f, "Teste").getId();
+        Long id = ordensService.abrirOrdem(f, "Teste").getId();
         em.flush();
         em.clear();
-        assertThat(estoque.buscarOrdem(id).getDocumento().pagadorNome)
+        assertThat(ordensService.buscarOrdem(id).getDocumento().pagadorNome)
                 .isEqualTo("Empresa pagadora");
         OrdemServicoEdicaoForm edit = new OrdemServicoEdicaoForm();
         edit.setDescricao("Revisão editada");
@@ -70,10 +70,11 @@ class OrdemDocumentoIntegrationTest {
         edit.setStatus(StatusOrdemServico.EM_ANDAMENTO);
         d.combustivelPercentual = 50;
         edit.setDocumento(d);
-        estoque.atualizarOrdem(id, edit, "Teste");
+        ordensService.atualizarOrdem(id, edit, "Teste");
         em.flush();
         em.clear();
-        assertThat(estoque.buscarOrdem(id).getDocumento().combustivelPercentual).isEqualTo(50);
+        assertThat(ordensService.buscarOrdem(id).getDocumento().combustivelPercentual)
+                .isEqualTo(50);
         MockHttpSession session = new MockHttpSession();
         SessaoAutenticacao.iniciar(
                 session, new UsuarioAutenticado(1L, "Teste", Perfil.ADMIN, Set.of(), false));

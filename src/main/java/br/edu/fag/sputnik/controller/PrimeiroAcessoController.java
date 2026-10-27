@@ -28,7 +28,7 @@ public class PrimeiroAcessoController {
     public String tela(HttpSession session, Model model) {
         var usuario = SessaoAutenticacao.usuario(session);
         if (usuario.isEmpty()) return "redirect:/login";
-        if (!usuario.get().trocaSenhaObrigatoria()) return "redirect:/inicio";
+        if (!usuario.get().trocaSenhaObrigatoria()) return "redirect:/sistemas";
         model.addAttribute("form", new SenhaPrimeiroAcessoForm());
         return "primeiro-acesso";
     }
@@ -40,13 +40,13 @@ public class PrimeiroAcessoController {
             HttpSession session) {
         var usuario = SessaoAutenticacao.usuario(session);
         if (usuario.isEmpty()) return "redirect:/login";
-        if (!usuario.get().trocaSenhaObrigatoria()) return "redirect:/inicio";
+        if (!usuario.get().trocaSenhaObrigatoria()) return "redirect:/sistemas";
         if (!Objects.equals(form.getSenha(), form.getConfirmacaoSenha()))
             resultado.rejectValue("confirmacaoSenha", "diferente", "As senhas não coincidem.");
         if (resultado.hasErrors()) return "primeiro-acesso";
         SessaoAutenticacao.iniciar(
                 session,
                 usuarios.definirSenhaDefinitiva(usuario.get().usuarioId(), form.getSenha()));
-        return "redirect:/inicio?senhaAtualizada";
+        return "redirect:/sistemas";
     }
 }

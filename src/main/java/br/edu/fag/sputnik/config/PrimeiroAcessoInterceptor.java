@@ -26,7 +26,6 @@ public class PrimeiroAcessoInterceptor implements HandlerInterceptor {
 
         boolean rotaPermitida =
                 request.getRequestURI().startsWith("/primeiro-acesso")
-                        || request.getRequestURI().equals("/logout")
                         || Set.of(
                                         "/",
                                         "/index.html",

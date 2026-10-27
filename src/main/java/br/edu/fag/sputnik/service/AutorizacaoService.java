@@ -35,8 +35,4 @@ public class AutorizacaoService {
                                         || usuario.permissoes().contains(modulo))
                 .orElse(false);
     }
-
-    public String redirecionarSemAcesso(HttpSession session) {
-        return estaLogado(session) ? "redirect:/inicio?acessoNegado" : "redirect:/login";
-    }
 }

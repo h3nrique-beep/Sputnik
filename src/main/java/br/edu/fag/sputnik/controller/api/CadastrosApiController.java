@@ -9,7 +9,7 @@ import br.edu.fag.sputnik.domain.Cliente;
 import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.domain.Veiculo;
 import br.edu.fag.sputnik.service.AutorizacaoService;
-import br.edu.fag.sputnik.service.EstoqueService;
+import br.edu.fag.sputnik.service.CadastrosService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -26,11 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class CadastrosApiController extends ApiSupport {
-    private final EstoqueService estoque;
+    private final CadastrosService cadastrosService;
 
-    public CadastrosApiController(AutorizacaoService autorizacao, EstoqueService estoque) {
+    public CadastrosApiController(
+            AutorizacaoService autorizacao, CadastrosService cadastrosService) {
         super(autorizacao);
-        this.estoque = estoque;
+        this.cadastrosService = cadastrosService;
     }
 
     @GetMapping("/clientes")
@@ -38,7 +39,7 @@ public class CadastrosApiController extends ApiSupport {
             @RequestParam(required = false) String busca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         return ResponseEntity.ok(
-                estoque.clientes(busca).stream().map(ApiMapper::clienteDto).toList());
+                cadastrosService.clientes(busca).stream().map(ApiMapper::clienteDto).toList());
     }
 
     @PostMapping("/clientes")
@@ -46,7 +47,7 @@ public class CadastrosApiController extends ApiSupport {
             @Valid @RequestBody Cliente cliente, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(clienteDto(estoque.salvarCliente(cliente)));
+                .body(clienteDto(cadastrosService.salvarCliente(cliente)));
     }
 
     @GetMapping("/veiculos")
@@ -54,7 +55,7 @@ public class CadastrosApiController extends ApiSupport {
             @RequestParam(required = false) String busca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.ORDENS)) return proibido();
         return ResponseEntity.ok(
-                estoque.veiculos(busca).stream().map(ApiMapper::veiculoDto).toList());
+                cadastrosService.veiculos(busca).stream().map(ApiMapper::veiculoDto).toList());
     }
 
     @PostMapping("/veiculos")
@@ -68,6 +69,6 @@ public class CadastrosApiController extends ApiSupport {
         veiculo.setChassi(request.chassi());
         veiculo.setQuilometragemAtual(request.quilometragemAtual());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(veiculoDto(estoque.salvarVeiculo(veiculo, request.clienteId())));
+                .body(veiculoDto(cadastrosService.salvarVeiculo(veiculo, request.clienteId())));
     }
 }

@@ -49,10 +49,6 @@ public class CadastrosService {
         return veiculos.findByPlacaContainingIgnoreCaseOrChassiContainingIgnoreCase(busca, busca);
     }
 
-    public List<Veiculo> veiculosVinculados() {
-        return veiculos.findByClienteIsNotNull();
-    }
-
     public Veiculo salvarVeiculo(Veiculo veiculo, Long clienteId) {
         veiculo.setCliente(clienteId == null ? null : buscarCliente(clienteId));
         veiculo.setPlaca(veiculo.getPlaca().trim().toUpperCase());

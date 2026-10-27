@@ -3,7 +3,8 @@ package br.edu.fag.sputnik.controller.api;
 import br.edu.fag.sputnik.controller.api.mapper.ApiMapper;
 import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.service.AutorizacaoService;
-import br.edu.fag.sputnik.service.EstoqueService;
+import br.edu.fag.sputnik.service.OrdensService;
+import br.edu.fag.sputnik.service.PecasService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -19,11 +20,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class DashboardApiController extends ApiSupport {
-    private final EstoqueService estoque;
+    private final PecasService pecasService;
+    private final OrdensService ordensService;
 
-    public DashboardApiController(AutorizacaoService autorizacao, EstoqueService estoque) {
+    public DashboardApiController(
+            AutorizacaoService autorizacao,
+            PecasService pecasService,
+            OrdensService ordensService) {
         super(autorizacao);
-        this.estoque = estoque;
+        this.pecasService = pecasService;
+        this.ordensService = ordensService;
     }
 
     @GetMapping("/dashboard")
@@ -39,30 +45,32 @@ public class DashboardApiController extends ApiSupport {
                 temAcesso(session, PermissaoModulo.PECAS)
                         || temAcesso(session, PermissaoModulo.REPOSICAO)
                         || temAcesso(session, PermissaoModulo.RELATORIO_MENSAL);
-        resposta.put("pecas", podeEstoque ? estoque.listar("").size() : 0);
-        resposta.put("ordensAbertas", podeOrdens ? estoque.ordensAbertas() : 0);
-        resposta.put("ordensConcluidasMes", podeOrdens ? estoque.ordensConcluidasNoMes() : 0);
-        resposta.put("criticas", podeEstoque ? estoque.criticas().size() : 0);
-        resposta.put("porStatus", podeOrdens ? estoque.resumoOrdensPorStatus() : Map.of());
+        resposta.put("pecas", podeEstoque ? pecasService.listar("").size() : 0);
+        resposta.put("ordensAbertas", podeOrdens ? ordensService.ordensAbertas() : 0);
+        resposta.put("ordensConcluidasMes", podeOrdens ? ordensService.ordensConcluidasNoMes() : 0);
+        resposta.put("criticas", podeEstoque ? pecasService.criticas().size() : 0);
+        resposta.put("porStatus", podeOrdens ? ordensService.resumoOrdensPorStatus() : Map.of());
         resposta.put(
                 "aguardandoPeca",
                 podeOrdens
-                        ? estoque.ordensAguardandoPeca().stream()
+                        ? ordensService.ordensAguardandoPeca().stream()
                                 .map(ApiMapper::ordemResumo)
                                 .toList()
                         : List.of());
         resposta.put(
                 "retornos",
                 podeOrdens
-                        ? estoque.veiculosEmRetorno().stream().map(ApiMapper::ordemResumo).toList()
+                        ? ordensService.veiculosEmRetorno().stream()
+                                .map(ApiMapper::ordemResumo)
+                                .toList()
                         : List.of());
         resposta.put(
                 "pecasMaisUsadas",
                 podeEstoque
-                        ? estoque.pecasMaisUsadas().stream().map(ApiMapper::pecaDto).toList()
+                        ? pecasService.pecasMaisUsadas().stream().map(ApiMapper::pecaDto).toList()
                         : List.of());
         if (autorizacao.ehAdministrador(session))
-            resposta.put("valorEstoque", estoque.valorEstoque());
+            resposta.put("valorEstoque", pecasService.valorEstoque());
         return ResponseEntity.ok(resposta);
     }
 }

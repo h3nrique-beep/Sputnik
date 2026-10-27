@@ -92,7 +92,7 @@ public class PecasService {
         movimentacoes.save(movimentacao);
     }
 
-    public List<Movimentacao> historico() {
+    private List<Movimentacao> historico() {
         return movimentacoes.findAllByOrderByDataDesc();
     }
 

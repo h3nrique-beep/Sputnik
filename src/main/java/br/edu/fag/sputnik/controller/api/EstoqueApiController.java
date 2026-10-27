@@ -7,13 +7,15 @@ import br.edu.fag.sputnik.controller.api.mapper.ApiMapper;
 import br.edu.fag.sputnik.domain.Peca;
 import br.edu.fag.sputnik.domain.PermissaoModulo;
 import br.edu.fag.sputnik.service.AutorizacaoService;
-import br.edu.fag.sputnik.service.EstoqueService;
+import br.edu.fag.sputnik.service.PecasService;
 import br.edu.fag.sputnik.web.MovimentacaoForm;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,30 +24,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 public class EstoqueApiController extends ApiSupport {
-    private final EstoqueService estoque;
+    private final PecasService pecasService;
 
-    public EstoqueApiController(AutorizacaoService autorizacao, EstoqueService estoque) {
+    public EstoqueApiController(AutorizacaoService autorizacao, PecasService pecasService) {
         super(autorizacao);
-        this.estoque = estoque;
+        this.pecasService = pecasService;
     }
 
     @GetMapping("/pecas")
     public ResponseEntity<?> pecas(
             @RequestParam(required = false) String busca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.PECAS)) return proibido();
-        return ResponseEntity.ok(estoque.listar(busca).stream().map(ApiMapper::pecaDto).toList());
+        return ResponseEntity.ok(
+                pecasService.listar(busca).stream().map(ApiMapper::pecaDto).toList());
     }
 
     @PostMapping("/pecas")
     public ResponseEntity<?> salvarPeca(@Valid @RequestBody Peca peca, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.PECAS)) return proibido();
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(pecaDto(estoque.salvar(peca)));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(pecaDto(pecasService.salvar(peca)));
         } catch (IllegalArgumentException exception) {
             return invalido(exception);
         }
@@ -56,7 +61,7 @@ public class EstoqueApiController extends ApiSupport {
             @Valid @RequestBody MovimentacaoForm form, HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.PECAS)) return proibido();
         try {
-            estoque.movimentar(form, operador(session));
+            pecasService.movimentar(form, operador(session));
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException exception) {
             return invalido(exception);
@@ -67,23 +72,37 @@ public class EstoqueApiController extends ApiSupport {
     public ResponseEntity<?> relatorioMensal(HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.RELATORIO_MENSAL)) return proibido();
         return ResponseEntity.ok(
-                estoque.relatorioMensal().stream().map(ApiMapper::movimentacaoDto).toList());
+                pecasService.relatorioMensal().stream().map(ApiMapper::movimentacaoDto).toList());
     }
 
     @GetMapping("/reposicao")
     public ResponseEntity<?> reposicao(HttpSession session) {
         if (!temAcesso(session, PermissaoModulo.REPOSICAO)) return proibido();
         var pecas =
-                estoque.criticas().stream()
-                        .map(peca -> new ReposicaoDto(pecaDto(peca), estoque.sugestao(peca)))
+                pecasService.criticas().stream()
+                        .map(peca -> new ReposicaoDto(pecaDto(peca), pecasService.sugestao(peca)))
                         .toList();
         return ResponseEntity.ok(
                 Map.of(
                         "pecas",
                         pecas,
                         "custo",
-                        estoque.custoReposicao(),
+                        pecasService.custoReposicao(),
                         "zeradas",
-                        estoque.quantidadeZeradas()));
+                        pecasService.quantidadeZeradas()));
+    }
+
+    @GetMapping(value = "/reposicao.csv", produces = "text/csv")
+    public ResponseEntity<?> exportarReposicao(HttpSession session) {
+        if (!temAcesso(session, PermissaoModulo.REPOSICAO)) return proibido();
+        // BOM para o Excel reconhecer UTF-8 e manter os acentos.
+        byte[] arquivo =
+                ("﻿" + pecasService.gerarCsvReposicao()).getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=relatorio-reposicao.csv")
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(arquivo);
     }
 }

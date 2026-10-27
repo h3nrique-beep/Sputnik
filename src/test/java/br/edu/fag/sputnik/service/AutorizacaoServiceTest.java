@@ -32,8 +32,6 @@ class AutorizacaoServiceTest {
 
         assertThat(autorizacao.temAcesso(session, PermissaoModulo.PECAS)).isTrue();
         assertThat(autorizacao.temAcesso(session, PermissaoModulo.ORDENS)).isFalse();
-        assertThat(autorizacao.redirecionarSemAcesso(session))
-                .isEqualTo("redirect:/inicio?acessoNegado");
     }
 
     private MockHttpSession sessaoDe(

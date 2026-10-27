@@ -175,35 +175,29 @@ class AuditoriaApiIntegrationTest {
     }
 
     @Test
-    void administracaoMvcNaoUsaEmpresaPadraoDeOutroAdministrador() throws Exception {
+    void administracaoNaoAlcancaUsuarioDeOutraEmpresa() throws Exception {
         var cadastro = new br.edu.fag.sputnik.web.UsuarioCadastroForm();
         cadastro.setNome("Conta de outra empresa");
-        cadastro.setEmail("mvc-" + UUID.randomUUID() + "@example.test");
+        cadastro.setEmail("adm-" + UUID.randomUUID() + "@example.test");
         cadastro.setSenha("Temporaria#2026");
         var conta = usuarios.cadastrar(cadastro);
         var empresa = new br.edu.fag.sputnik.web.CadastroEmpresaForm();
         empresa.setEmpresaNome("Outra oficina");
-        empresa.setSlug("mvc-" + UUID.randomUUID());
+        empresa.setSlug("adm-" + UUID.randomUUID());
         empresa.setNomeAdministrador("Admin de outra oficina");
         empresa.setEmail("admin-" + UUID.randomUUID() + "@example.test");
         empresa.setSenha("SenhaForte#2026");
         var administrador = usuarios.cadastrarEmpresa(empresa);
         var session = new MockHttpSession();
         SessaoAutenticacao.iniciar(session, administrador);
-        var resposta =
-                mvc.perform(get("/admin/usuarios").session(session))
-                        .andExpect(status().isOk())
-                        .andReturn();
-        @SuppressWarnings("unchecked")
-        var lista =
-                (List<br.edu.fag.sputnik.domain.UsuarioSistema>)
-                        resposta.getModelAndView().getModel().get("usuarios");
-        assertThat(lista).allMatch(u -> u.getEmpresa().getId().equals(administrador.empresaId()));
-        mvc.perform(
-                        post("/admin/usuarios/" + conta.getId() + "/resetar-senha")
-                                .session(session)
-                                .param("_csrf", csrf.obterOuCriar(session)))
-                .andExpect(redirectedUrl("/admin/usuarios?erro=usuario"));
+        mvc.perform(get("/api/admin/usuarios").session(session))
+                .andExpect(status().isOk())
+                .andExpect(
+                        jsonPath(
+                                "$[*].id",
+                                Matchers.not(Matchers.hasItem(conta.getId().intValue()))));
+        enviar("/admin/usuarios/" + conta.getId() + "/resetar-senha", session, "{}")
+                .andExpect(status().isBadRequest());
         assertThat(usuarios.autenticar(cadastro.getEmail(), cadastro.getSenha())).isPresent();
     }
 
@@ -268,27 +262,37 @@ class AuditoriaApiIntegrationTest {
     }
 
     @Test
-    void formulariosMvcRecebemCsrfEBloqueiamEmpresaForjada() throws Exception {
+    void formularioDePrimeiroAcessoRecebeCsrfEApiIgnoraEmpresaForjada() throws Exception {
         var anonymous = new MockHttpSession();
         mvc.perform(get("/login").session(anonymous))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.forwardedUrl("/index.html"));
         mvc.perform(post("/login").session(anonymous)).andExpect(status().isForbidden());
-        var session = sessao(861L, false);
-        mvc.perform(get("/pecas/nova").session(session))
+        mvc.perform(get("/primeiro-acesso").session(sessao(861L, true)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString("name=\"_csrf\"")));
-        mvc.perform(
-                        post("/clientes")
-                                .session(session)
-                                .param("_csrf", csrf.obterOuCriar(session))
-                                .param("nome", "Cliente MVC")
-                                .param("cpf", "33333333333")
-                                .param("telefone", "4500000000")
-                                .param("empresaId", "801"))
-                .andExpect(status().is3xxRedirection());
-        mvc.perform(get("/api/clientes").session(session).param("busca", "Cliente MVC"))
+        var session = sessao(861L, false);
+        enviar(
+                        "/clientes",
+                        session,
+                        """
+                        {"nome":"Cliente forjado","cpf":"33333333333",
+                         "telefone":"4500000000","empresaId":801}
+                        """)
+                .andExpect(status().isCreated());
+        mvc.perform(get("/api/clientes").session(session).param("busca", "Cliente forjado"))
                 .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void reposicaoExportaCsvSomenteParaQuemTemPermissao() throws Exception {
+        mvc.perform(get("/api/reposicao.csv").session(sessao(881L, false)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/csv"))
+                .andExpect(
+                        header().string("Content-Disposition", Matchers.containsString(".csv")));
+        mvc.perform(get("/api/reposicao.csv").session(new MockHttpSession()))
+                .andExpect(status().isForbidden());
     }
 
     @Test
