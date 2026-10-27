@@ -14,21 +14,24 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 - Seletores com busca (peça, cliente, veículo) que escolhem sozinhos quando sobra um resultado.
 - Controle de estoque com entradas, saídas, saldo disponível, estoque mínimo e bloqueio de saldo negativo.
 - Histórico de movimentações com operador, data, observação e saldo resultante.
-- Reposição de itens críticos e exportação CSV.
+- Reposição de itens críticos com exportação CSV (`/api/reposicao.csv`).
 
 ### Ordens de serviço
 
 - Abertura de OS e orçamentos com cliente, veículo, quilometragem e descrição.
 - Inclusão de peças e serviços, totais automáticos, histórico e acompanhamento por status.
 - Aprovação de orçamento com baixa de estoque somente após a aprovação, listando antes as peças que sairão do estoque.
-- Detalhe da OS com itens e lançamento em primeiro plano e histórico recolhível.
+- **Quadro das OS** por status: arrastar o cartão muda o status (orçamento só muda pela aprovação); alterna com a visão em lista.
+- Detalhe da OS com itens e lançamento em primeiro plano e histórico em linha do tempo, com as trocas de status destacadas.
+- **Modo oficina** para tablet: OS em execução em cartões grandes, com o próximo passo a um toque e filtro "só as minhas" pelo consultor técnico.
 - Agenda de atendimentos, retornos preventivos e período de garantia.
 - Documento A4 de OS com campos complementares, impressão na própria tela e download em PDF.
 
 ### Financeiro e gestão
 
 - Lançamentos de receitas e despesas, vencimentos, vínculo opcional com OS e baixa de pagamentos.
-- Indicadores de contas a receber, a pagar, recebido e rentabilidade por OS, filtráveis por mês, próximos 30 dias ou histórico.
+- Indicadores de contas a receber, a pagar, recebido e rentabilidade por OS, filtráveis por mês, próximos 30 dias ou histórico, com comparação ao mês anterior.
+- Ações em lote nos lançamentos: baixar vários pendentes de uma vez e exportar os selecionados ou o período em CSV.
 - **Painel de atenção**: o que exige ação hoje (clicável e filtrado por permissão), ações rápidas e indicadores de estoque.
 - Movimentação de estoque mostra o saldo antes e depois e bloqueia saída acima do disponível.
 - Console administrativo com diagnóstico do ambiente e backups locais.
@@ -40,6 +43,8 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 - Administração de usuários e permissões por módulo: **Peças**, **Ordens de serviço**, **Relatório mensal**, **Financeiro** e **Reposição**.
 - Perfil financeiro isolado: acessa somente os lançamentos financeiros, sem acesso ao painel operacional.
 - Menu lateral agrupado e recolhível, com preferência preservada após atualizar a página; o F5 não exibe mais um lampejo da tela de login.
+- Atalhos de teclado: `Ctrl+K` foca a busca global e `N` abre uma nova OS.
+- Carregamento com skeletons no lugar de spinners, respeitando a preferência de movimento reduzido.
 - Tema claro/escuro que segue o sistema quando não há escolha salva; status com rótulo e ícone (a cor nunca é o único sinal), alvos de toque de 44px e erros anunciados a leitores de tela.
 - Dados operacionais separados pela empresa da sessão para clientes, veículos, peças, movimentações, OS e lançamentos financeiros.
 
@@ -68,7 +73,7 @@ Spring Data JPA
 H2 (data/sputnik)
 ```
 
-As páginas Thymeleaf legadas continuam disponíveis para compatibilidade, enquanto a experiência principal é servida pelo frontend React compilado.
+Toda a interface é o frontend React compilado, servido pelo Spring Boot. A única página renderizada no servidor é a troca obrigatória de senha do primeiro acesso (`/primeiro-acesso`, Thymeleaf).
 
 ## Como executar
 
@@ -131,12 +136,16 @@ O cadastro público continua **desativado por padrão** (`SPUTNIK_SAAS_SELF_SIGN
 
 ```text
 src/main/java/.../
-├── auth/                # autenticação e usuários
-├── controller/api/      # API REST por módulo
+├── auth/                # autenticação, sessão e usuários
+├── config/              # dados iniciais, migrações locais e interceptadores
+├── controller/          # entrega do React (SPA) e primeiro acesso
+├── controller/api/      # API REST por módulo, DTOs e mapeadores
 ├── domain/              # entidades e enums JPA
-├── repository/          # acesso a dados
+├── repository/          # acesso a dados (Spring Data JPA)
+├── security/            # CSRF, cabeçalhos, limite de requisições e de login
 ├── service/             # regras de negócio
-└── web/                 # formulários de entrada
+├── tenant/              # empresa da sessão e isolamento dos dados
+└── web/                 # formulários de entrada validados
 
 frontend/src/
 ├── app/                 # composição e navegação

@@ -28,19 +28,20 @@ Para alterações React, execute `pnpm run build:java` no terminal em `frontend`
 ```text
 sputnik-java
 ├── src/main/java/br.edu.fag.sputnik
-│   ├── auth, config, controller, domain, repository, service e web
+│   ├── auth, config, controller, domain, repository,
+│   │   security, service, tenant e web
 │   └── SputnikApplication.java
 ├── src/main/resources
 │   ├── static
-│   ├── templates
+│   ├── templates        (somente primeiro-acesso.html)
 │   └── application.properties
 ├── src/test/java
 ├── frontend/src
 │   ├── app
 │   ├── components/ui
 │   ├── features
-│   │   ├── auth, dashboard, inventory, clients, vehicles
-│   │   └── orders, reports, users, developer
+│   │   ├── auth, dashboard, catalog, inventory, clients, vehicles
+│   │   └── orders, schedule, finance, reports, users, subscription, developer
 │   ├── lib, types e styles
 │   └── main.tsx
 ├── docs
@@ -48,9 +49,9 @@ sputnik-java
 └── README.md
 ```
 
-No pacote `controller`, utilize a visualização **Project** do IntelliJ: cada arquivo corresponde a um módulo funcional (`PecaController`, `CadastroController`, `OrdemServicoController` e assim por diante). Isso evita concentrar alterações diferentes na mesma classe.
+O pacote `controller` contém apenas `SpaController` (entrega o React), `PrimeiroAcessoController` (troca obrigatória de senha) e o tratamento de erros. As telas antigas em Thymeleaf foram removidas.
 
-A API utilizada pelo React está em `controller/api`. Os tipos de resposta ficam em `controller/api/dto` e as conversões em `controller/api/mapper`. Os serviços principais são `PecasService`, `CadastrosService` e `OrdensService`; `EstoqueService` mantém compatibilidade com as chamadas anteriores.
+A API utilizada pelo React está em `controller/api`. Os tipos de resposta ficam em `controller/api/dto` e as conversões em `controller/api/mapper`. Os serviços principais são `PecasService`, `CadastrosService` e `OrdensService`, chamados diretamente pelos controladores da API.
 
 A configuração local do módulo aponta para `sputnik.iml` e para o `pom.xml` deste projeto. Se o IntelliJ estiver aberto com uma árvore antiga, use **Reload All Maven Projects** na janela Maven. O Maven recompõe suas dependências ao importar o projeto. Não execute uma segunda instância se a porta 8080 já estiver ocupada.
 

@@ -2,11 +2,10 @@
 
 ## Visão geral
 
-O Sputnik utiliza React/TypeScript na interface principal e Spring Boot na API. O Spring entrega o frontend compilado em `/`; as chamadas `/api` passam pelos controladores, serviços e repositórios até o H2. As páginas Thymeleaf anteriores continuam presentes para compatibilidade, incluindo os fluxos de acesso existentes.
+O Sputnik utiliza React/TypeScript na interface principal e Spring Boot na API. O Spring entrega o frontend compilado em `/`; as chamadas `/api` passam pelos controladores, serviços e repositórios até o H2. A única página renderizada no servidor é a troca obrigatória de senha do primeiro acesso (Thymeleaf).
 
 ```text
 React (features) → cliente HTTP → contexto da empresa → /api → serviços → repositórios → H2
-Thymeleaf (legado) → controladores → EstoqueService → serviços especializados
 ```
 
 ## Organização dos pacotes
@@ -15,15 +14,16 @@ Thymeleaf (legado) → controladores → EstoqueService → serviços especializ
 | --- | --- |
 | `auth` | Login, sessão e autenticação de usuários persistidos. |
 | `config` | Beans técnicos, dados iniciais e migrações locais de dados legados. |
-| `controller` | Páginas Thymeleaf legadas. |
+| `controller` | Entrega do React (`SpaController`), primeiro acesso e tratamento de erros da API. |
 | `controller/api` | API React: autenticação, dashboard, estoque, cadastros, usuários, desenvolvedor e OS. |
 | `controller/api/dto` | Contratos de requisição e resposta, com validações preservadas. |
 | `controller/api/mapper` | Conversões de entidades em respostas JSON. |
 | `domain` | Entidades JPA e enums que representam o negócio. |
 | `repository` | Interfaces Spring Data JPA para leitura e gravação no H2. |
-| `service` | Regras de negócio, autorização centralizada e preparação dos dados comuns das views. |
+| `service` | Regras de negócio, autorização centralizada, financeiro, PDF da OS e backups. |
+| `security` | Token anti-CSRF, cabeçalhos, limite de requisições e de tentativas de login. |
 | `tenant` | Contexto da empresa autenticada e filtro de isolamento de dados operacionais. |
-| `web` | Objetos de formulário usados nas telas de movimentação e ordem de serviço. |
+| `web` | Objetos de entrada validados recebidos pela API e pelo primeiro acesso. |
 
 ## Inicialização
 
@@ -39,14 +39,14 @@ O teste de integração `empresaDaSessaoIsolaDadosOperacionais` confirma que uma
 
 ## Autenticação e sessão
 
-`AuthApiController` recebe o login React em `POST /api/auth/login`; `AuthController` atende o formulário legado em `POST /login`. Ambos utilizam `UsuarioService`, que:
+`AuthApiController` recebe o login React em `POST /api/auth/login` e usa `UsuarioService`, que:
 
 1. Normaliza o usuário para minúsculas.
 2. Localiza o usuário na tabela `usuarios_sistema`.
 3. Compara a senha informada com o hash BCrypt armazenado.
 4. Retorna um `UsuarioAutenticado` com empresa, nome, perfil e módulos permitidos.
 
-Quando a autenticação é válida, `SessaoAutenticacao.iniciar` grava esse objeto na `HttpSession`. As páginas consultam essa sessão antes de responder. O logout invalida a sessão inteira.
+Quando a autenticação é válida, `SessaoAutenticacao.iniciar` grava esse objeto na `HttpSession`. Cada rota da API consulta essa sessão antes de responder. O logout invalida a sessão inteira.
 
 ### Perfis atuais
 
@@ -59,23 +59,26 @@ As senhas são armazenadas como hash BCrypt. Usuários, perfis e permissões sã
 
 Ao cadastrar um Balconista, o Admin define uma senha temporária. No primeiro login, o usuário é impedido de abrir as demais telas até criar uma senha definitiva com no mínimo oito caracteres, letra maiúscula, minúscula, número e caractere especial.
 
-## Controladores por módulo
+## Controladores da API
 
 | Classe | Responsabilidade |
 | --- | --- |
-| `DashboardController` | Página inicial e indicadores gerenciais. |
-| `PecaController` | Consulta e cadastro de peças. |
-| `CadastroController` | Clientes, veículos e vínculo entre ambos. |
-| `OrdemServicoController` | Seleção e abertura das ordens de serviço. |
-| `EstoqueController` | Movimentações, relatório mensal, reposição e CSV. |
-| `AuthController` e `PrimeiroAcessoController` | Login, logout e troca obrigatória de senha. |
-| `UsuarioAdminController` | Gestão de contas de Balconista e permissões. |
+| `AuthApiController` | Login, logout, sessão atual e token anti-CSRF. |
+| `DashboardApiController` | Indicadores do painel, filtrados por permissão. |
+| `EstoqueApiController` | Peças, movimentações, relatório mensal, reposição e CSV. |
+| `CadastrosApiController` | Clientes, veículos e vínculo entre ambos. |
+| `OrdensApiController` | OS e orçamentos: abertura, edição, itens, aprovação, PDF e impressão. |
+| `FinanceiroApiController` | Lançamentos e baixa. |
+| `UsuariosApiController` | Contas, permissões, reset de senha e exclusão (somente Admin). |
+| `EmpresaApiController` e `AssinaturasApiController` | Assinatura da empresa e cadastro de nova empresa. |
+| `DesenvolvedorApiController` | Diagnóstico do ambiente e backups (somente Admin da empresa principal). |
+| `PrimeiroAcessoController` | Troca obrigatória de senha, fora da API. |
 
 ## Autorização
 
-Cada controlador protege suas próprias rotas verificando a sessão. As ações funcionais chamam `temAcesso(session, modulo)`, que aceita o módulo liberado ou o perfil `ADMIN`. As rotas de gestão de usuários exigem `ADMIN`.
+Cada controlador protege suas rotas verificando a sessão. As ações funcionais chamam `temAcesso(session, modulo)`, que aceita o módulo liberado ou o perfil `ADMIN`; sem permissão, a API responde HTTP 403. As rotas de gestão de usuários exigem `ADMIN`.
 
-O menu esconde os itens administrativos do Balconista, mas a regra principal está no servidor: se ele tentar abrir a URL diretamente, é redirecionado para o início com a mensagem de acesso negado. A exportação CSV retorna HTTP 403 para usuário autenticado sem permissão e HTTP 401 para usuário não autenticado.
+O menu do React esconde os itens sem permissão, mas a regra principal está no servidor: chamar a rota diretamente também recebe 403. Enquanto a troca de senha do primeiro acesso não é feita, `PrimeiroAcessoInterceptor` só libera a sessão, o logout e a própria tela de troca.
 
 ## Entidades e relacionamentos
 
@@ -94,7 +97,7 @@ Peça    1 ─── N Movimentação
 
 ## Regras de negócio
 
-As regras estão em `PecasService` (estoque), `CadastrosService` (clientes e veículos) e `OrdensService` (atendimento). `EstoqueService` é uma fachada que encaminha as chamadas anteriores aos serviços especializados, preservando as interfaces e transações.
+As regras estão em `PecasService` (estoque), `CadastrosService` (clientes e veículos), `OrdensService` (atendimento) e `FinanceiroService` (lançamentos). Os controladores da API chamam esses serviços diretamente.
 
 | Regra | Comportamento |
 | --- | --- |
@@ -111,7 +114,7 @@ As regras estão em `PecasService` (estoque), `CadastrosService` (clientes e ve�
 
 ### Cadastro e consulta de peça
 
-1. O React envia a peça para `POST /api/pecas`; o formulário legado mantém `POST /pecas`.
+1. O React envia a peça para `POST /api/pecas`.
 2. A validação Bean Validation verifica os campos obrigatórios.
 3. O serviço verifica duplicidade de código e persiste no H2.
 4. A listagem aceita busca por nome, código ou fabricante e filtros de estoque baixo ou zerado.
@@ -134,27 +137,30 @@ As regras estão em `PecasService` (estoque), `CadastrosService` (clientes e ve�
 
 ## Rotas
 
-A tabela abaixo descreve as rotas legadas. O React utiliza `/api/auth/*`, `/api/dashboard`, `/api/pecas`, `/api/clientes`, `/api/veiculos`, `/api/movimentacoes`, `/api/ordens`, `/api/relatorio-mensal`, `/api/reposicao` e `/api/admin/*`. O documento da OS usa `/api/ordens/{id}/pdf` e `/api/ordens/{id}/impressao`. A organização em classes não altera os caminhos públicos.
+Todas as rotas de dados ficam em `/api` e respondem JSON (exceto PDF, impressão e CSV).
 
-| Rota | Finalidade | Perfil |
+| Rota | Finalidade | Permissão |
 | --- | --- | --- |
-| `GET/POST /login` | Entrar no sistema | Público |
-| `POST /logout` | Encerrar sessão | Autenticado |
-| `GET /inicio` | Painel principal | Balconista ou Admin |
-| `GET/POST /pecas` | Listar e cadastrar peças | Balconista ou Admin |
-| `GET/POST /movimentacoes` | Registrar entrada ou saída | Balconista ou Admin |
-| `GET/POST /pessoas` e `/veiculos` | Preparar atendimento | Balconista ou Admin |
-| `GET/POST /ordens` | Listar e abrir ordens | Balconista ou Admin |
-| `GET /relatorio-mensal` | Histórico do mês | Módulo Relatório mensal ou Admin |
-| `GET /reposicao` | Itens críticos e custo | Módulo Reposição ou Admin |
-| `GET /reposicao.csv` | Exportar reposição | Módulo Reposição ou Admin |
-| `GET/POST /admin/usuarios` | Listar e cadastrar usuários | Admin |
+| `GET /api/security/csrf` · `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/session` | Sessão e token | Público / autenticado |
+| `GET /api/dashboard` | Painel | Qualquer módulo operacional |
+| `GET/POST /api/pecas` · `POST /api/movimentacoes` | Peças e estoque | Peças |
+| `GET /api/relatorio-mensal` | Movimentações do mês | Relatório mensal |
+| `GET /api/reposicao` · `GET /api/reposicao.csv` | Itens críticos e exportação | Reposição |
+| `GET/POST /api/clientes` · `GET/POST /api/veiculos` | Cadastros | Peças ou Ordens |
+| `GET/POST /api/ordens` · `GET/PUT /api/ordens/{id}` | OS e orçamentos | Ordens |
+| `POST /api/ordens/{id}/itens/peca` · `/itens/servico` · `/aprovar` | Itens e aprovação | Ordens |
+| `GET /api/ordens/{id}/pdf` · `/impressao` | Documento da OS | Ordens |
+| `GET/POST /api/financeiro` · `POST /api/financeiro/{id}/baixar` | Financeiro | Financeiro |
+| `/api/admin/usuarios/**` | Usuários e permissões | Admin |
+| `/api/admin/desenvolvedor/**` | Diagnóstico e backups | Admin da empresa principal |
+| `GET /api/empresa/assinatura` · `POST /api/assinaturas/cadastro` | Assinatura e cadastro de empresa | Admin / público quando habilitado |
+| `GET/POST /primeiro-acesso` | Troca obrigatória de senha (Thymeleaf) | Sessão com troca pendente |
 
 ## Interface
 
 As telas principais ficam em `frontend/src/features`, agrupadas por funcionalidade. `app/App.tsx` compõe a navegação e as telas; `main.tsx` apenas inicia o React. Os componentes compartilhados ficam em `components/ui` e os estilos em `styles`, preservando a ordem de importação.
 
-Os templates antigos ficam em `src/main/resources/templates`, com `static/app.css` e `fragments.html`. A validação definitiva de permissões, estoque e vínculo entre cliente e veículo continua no servidor.
+O único template restante é `src/main/resources/templates/primeiro-acesso.html`, estilizado por `static/app.css`. A validação definitiva de permissões, estoque e vínculo entre cliente e veículo continua no servidor.
 
 ## Persistência e limitações atuais
 
