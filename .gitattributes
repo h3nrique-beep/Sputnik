@@ -1,0 +1,6 @@
+# Arquivos gerados comparados byte a byte no CI: sempre LF, em qualquer sistema.
+frontend/openapi.json text eol=lf
+frontend/src/types/api.ts text eol=lf
+# Scripts executados dentro de contêineres Linux.
+Dockerfile text eol=lf
+*.sh text eol=lf

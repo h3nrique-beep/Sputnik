@@ -1,5 +1,7 @@
 # Sputnik 2.0
 
+[![CI](https://github.com/h3nrique-beep/Sputnik/actions/workflows/ci.yml/badge.svg)](https://github.com/h3nrique-beep/Sputnik/actions/workflows/ci.yml)
+
 > Gestão operacional para oficinas: estoque, atendimento, ordens de serviço e financeiro em uma única aplicação.
 
 O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolvida com **React + TypeScript** no frontend e **Java 21 + Spring Boot + PostgreSQL/H2** no backend. O projeto combina controle de estoque, cadastros, ordens de serviço, agenda e acompanhamento financeiro, com acesso orientado por permissões.
@@ -156,6 +158,16 @@ mvn test
 ```
 
 Os testes usam H2 em memória; `PostgresMigracaoIntegrationTest` sobe um PostgreSQL embutido (sem Docker), aplica o Flyway, valida o mapeamento e executa um fluxo de estoque.
+
+### Integração contínua
+
+A cada push na `main` e em pull requests, o GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) roda três verificações em paralelo:
+
+| Job | O que garante |
+| --- | --- |
+| Backend | `mvn test`: os 38 testes, incluindo o PostgreSQL embutido e o contrato OpenAPI. |
+| Frontend | Tipos da API iguais ao `openapi.json`, `check`, `format:check`, testes e build. |
+| Imagem Docker + compose | `docker compose up --build --wait` até o healthcheck passar e login real do admin inicial. |
 
 ### Contrato da API (OpenAPI → TypeScript)
 

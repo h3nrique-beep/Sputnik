@@ -46,9 +46,13 @@ class OpenApiContratoTest {
                                 .enable(SerializationFeature.INDENT_OUTPUT)
                                 .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
                                 .writeValueAsString(json.treeToValue(arvore, Object.class))
+                                // O indentador do Jackson usa o separador do sistema (CRLF no Windows).
+                                .replace("\r\n", "\n")
                         + "\n";
         String salvo =
-                Files.exists(CONTRATO) ? Files.readString(CONTRATO, StandardCharsets.UTF_8) : "";
+                Files.exists(CONTRATO)
+                        ? Files.readString(CONTRATO, StandardCharsets.UTF_8).replace("\r\n", "\n")
+                        : "";
         if (!atual.equals(salvo)) Files.writeString(CONTRATO, atual, StandardCharsets.UTF_8);
         assertThat(salvo)
                 .as("frontend/openapi.json estava desatualizado e foi regravado; rode npm run"
