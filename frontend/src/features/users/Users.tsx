@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Copy, KeyRound, ShieldCheck, Trash2, X, Plus } from "lucide-react";
-import { Badge, Button, Table } from "../../components/ui";
+import { Badge, Button, Table, confirmar } from "../../components/ui";
 import { api } from "../../lib/api";
 import { permissionLabel } from "../../lib/format";
 import { UserCreate } from "./UserCreate";
@@ -20,9 +20,11 @@ export function Users() {
   const erro = erroEnvio || error?.message || "";
   const reset = async (id: number, nome: string) => {
     if (
-      !confirm(
-        `Gerar uma nova senha temporária para ${nome}? A senha atual deixa de funcionar.`,
-      )
+      !(await confirmar(
+        `Gerar nova senha para ${nome}?`,
+        "Uma senha temporária será criada e a senha atual deixa de funcionar.",
+        { acao: "Gerar senha" },
+      ))
     )
       return;
     try {
@@ -37,7 +39,11 @@ export function Users() {
   };
   const remove = async (id: number, nome: string) => {
     if (
-      !confirm(`Remover o acesso de ${nome}? Esta ação não pode ser desfeita.`)
+      !(await confirmar(
+        `Remover o acesso de ${nome}?`,
+        "Esta ação não pode ser desfeita.",
+        { acao: "Remover", perigo: true },
+      ))
     )
       return;
     try {

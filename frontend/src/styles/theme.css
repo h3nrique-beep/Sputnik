@@ -1383,3 +1383,72 @@ body:has(.login) {
     grid-template-columns: 1fr;
   }
 }
+
+/* Diálogo de confirmação no padrão do sistema (substitui o confirm do navegador). */
+.confirm-dialog {
+  width: min(440px, calc(100% - 32px));
+  /* O reset do Tailwind zera a margem que centraliza o <dialog> modal. */
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 24px 64px rgb(10 25 56 / 38%);
+}
+.confirm-dialog::backdrop {
+  background: rgb(8 18 39 / 58%);
+}
+.confirm-dialog[open] {
+  animation: confirm-entra 0.16s ease-out;
+}
+@keyframes confirm-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+.confirm-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 20px;
+}
+.confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.confirm-icon.perigo {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.confirm-body h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+.confirm-body p {
+  margin: 0;
+  color: var(--muted);
+}
+.confirm-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+@media (max-width: 560px) {
+  .confirm-actions {
+    flex-direction: column-reverse;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirm-dialog[open] {
+    animation: none;
+  }
+}

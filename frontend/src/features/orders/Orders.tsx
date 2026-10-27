@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Columns3, List, Plus } from "lucide-react";
 import { type DragEvent, useState } from "react";
-import { Badge, Button, Loading, Table } from "../../components/ui";
+import { Badge, Button, Loading, Table, confirmar } from "../../components/ui";
 import { queryClient } from "../../lib/api";
 import { label } from "../../lib/format";
 import { type Order } from "../../types/domain";
@@ -31,9 +31,11 @@ export function Orders({ go }: { go: (v: string) => void }) {
     if (!ordem || !podeMover(ordem.status, status)) return;
     if (
       encerra(status) &&
-      !confirm(
-        `Marcar a OS #${ordem.id} como ${label(status).toLowerCase()}? Depois disso ela não aceita novos itens.`,
-      )
+      !(await confirmar(
+        `Marcar a OS #${ordem.id} como ${label(status).toLowerCase()}?`,
+        "Depois disso ela não aceita novos itens.",
+        { acao: `Marcar como ${label(status).toLowerCase()}` },
+      ))
     )
       return;
     setErro("");

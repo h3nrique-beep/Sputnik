@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Badge, Button, Empty, Loading } from "../../components/ui";
+import { Badge, Button, Empty, Loading, confirmar } from "../../components/ui";
 
 import { label } from "../../lib/format";
 import { type Order } from "../../types/domain";
@@ -44,9 +44,11 @@ export function Workshop({
   const avancar = async (ordem: Order, status: string) => {
     if (
       encerra(status) &&
-      !confirm(
-        `Concluir a OS #${ordem.id}? Depois disso ela não aceita novos itens.`,
-      )
+      !(await confirmar(
+        `Concluir a OS #${ordem.id}?`,
+        "Depois disso ela não aceita novos itens.",
+        { acao: "Concluir" },
+      ))
     )
       return;
     setErro("");

@@ -4,6 +4,7 @@ export { Card } from "./Card";
 export { Empty } from "./Empty";
 export { Loading } from "./Loading";
 export { Toast } from "./Toast";
+export { ConfirmDialog, confirmar } from "./Confirm";
 export { Badge } from "./Badge";
 export { Table } from "./Table";
 export { Button } from "../shadcn/button";

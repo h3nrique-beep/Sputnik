@@ -1,3 +1,4 @@
+import { confirmar } from "../../components/ui";
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 import { label } from "../../lib/format";
@@ -27,9 +28,14 @@ export function OrderEdit({
       status !== order.status && ["CONCLUIDA", "CANCELADA"].includes(status);
     if (
       encerrando &&
-      !confirm(
-        `Marcar a OS #${order.id} como ${label(status).toLowerCase()}? Depois disso ela não aceita novos itens.`,
-      )
+      !(await confirmar(
+        `Marcar a OS #${order.id} como ${label(status).toLowerCase()}?`,
+        "Depois disso ela não aceita novos itens.",
+        {
+          acao: `Marcar como ${label(status).toLowerCase()}`,
+          perigo: status === "CANCELADA",
+        },
+      ))
     )
       return;
     setSaving(true);

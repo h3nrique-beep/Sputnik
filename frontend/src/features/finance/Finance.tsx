@@ -8,6 +8,7 @@ import {
   Loading,
   Metric,
   Table,
+  confirmar,
 } from "../../components/ui";
 import { api } from "../../lib/api";
 import { localDate, money, paraCsv, variacao } from "../../lib/format";
@@ -151,10 +152,13 @@ export function Finance({
       return proximo;
     });
   const baixarSelecionados = async () => {
+    const varios = marcados.length > 1;
     if (
-      !confirm(
-        `Baixar ${marcados.length} ${marcados.length === 1 ? "lançamento" : "lançamentos"} (${money(somaMarcados)}) com a data de hoje?`,
-      )
+      !(await confirmar(
+        `Baixar ${marcados.length} ${varios ? "lançamentos" : "lançamento"}?`,
+        `${money(somaMarcados)} ${varios ? "serão marcados" : "será marcado"} como pago com a data de hoje.`,
+        { acao: "Baixar" },
+      ))
     )
       return;
     setErro("");
