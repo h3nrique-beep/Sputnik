@@ -25,7 +25,6 @@ O Sputnik é uma aplicação web para gestão de oficinas automotivas, desenvolv
 - Aprovação de orçamento com baixa de estoque somente após a aprovação, listando antes as peças que sairão do estoque.
 - **Quadro das OS** por status: arrastar o cartão muda o status (orçamento só muda pela aprovação); alterna com a visão em lista.
 - Detalhe da OS com itens e lançamento em primeiro plano e histórico em linha do tempo, com as trocas de status destacadas.
-- **Modo oficina** para tablet: OS em execução em cartões grandes, com o próximo passo a um toque e filtro "só as minhas" pelo consultor técnico.
 - Agenda de atendimentos, retornos preventivos e período de garantia.
 - Documento A4 de OS com campos complementares, impressão na própria tela e download em PDF.
 

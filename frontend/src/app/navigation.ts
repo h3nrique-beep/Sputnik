@@ -13,11 +13,9 @@ const pathByView: Record<string, string> = {
   "orders-new": "/sistemas/ordens/nova",
   "quotes-new": "/sistemas/orcamentos/novo",
   schedule: "/sistemas/agenda",
-  workshop: "/sistemas/oficina",
   report: "/sistemas/relatorios/mensal",
   finance: "/sistemas/financeiro",
   users: "/sistemas/usuarios",
-  subscription: "/sistemas/assinatura",
   developer: "/sistemas/desenvolvedor",
 };
 
@@ -47,39 +45,35 @@ export const title = (v: string) =>
         ? "Movimentar estoque"
         : v === "schedule"
           ? "Agenda"
-          : v === "workshop"
-            ? "Modo oficina"
-            : v === "finance"
-              ? "Financeiro operacional"
-              : v === "report"
-                ? "Relatório mensal"
-                : v === "reposition"
-                  ? "Reposição"
-                  : v === "users"
-                    ? "Usuários"
-                    : v === "subscription"
-                      ? "Assinatura"
-                      : v === "developer"
-                        ? "Desenvolvedor"
-                        : v.startsWith("pieces")
-                          ? v === "pieces-new"
-                            ? "Cadastrar peça"
-                            : "Estoque de peças"
-                          : v.startsWith("clients")
-                            ? v === "clients-new"
-                              ? "Cadastrar cliente"
-                              : "Clientes"
-                            : v.startsWith("vehicles")
-                              ? v === "vehicles-new"
-                                ? "Cadastrar veículo"
-                                : "Veículos"
-                              : v === "quotes-new"
-                                ? "Novo orçamento"
-                                : v === "orders-new"
-                                  ? "Nova ordem de serviço"
-                                  : v.startsWith("order-")
-                                    ? "Detalhes da OS"
-                                    : "Ordens de serviço";
+          : v === "finance"
+            ? "Financeiro operacional"
+            : v === "report"
+              ? "Relatório mensal"
+              : v === "reposition"
+                ? "Reposição"
+                : v === "users"
+                  ? "Usuários"
+                  : v === "developer"
+                    ? "Desenvolvedor"
+                    : v.startsWith("pieces")
+                      ? v === "pieces-new"
+                        ? "Cadastrar peça"
+                        : "Estoque de peças"
+                      : v.startsWith("clients")
+                        ? v === "clients-new"
+                          ? "Cadastrar cliente"
+                          : "Clientes"
+                        : v.startsWith("vehicles")
+                          ? v === "vehicles-new"
+                            ? "Cadastrar veículo"
+                            : "Veículos"
+                          : v === "quotes-new"
+                            ? "Novo orçamento"
+                            : v === "orders-new"
+                              ? "Nova ordem de serviço"
+                              : v.startsWith("order-")
+                                ? "Detalhes da OS"
+                                : "Ordens de serviço";
 
 export const subtitle = (v: string) =>
   v === "dashboard"
@@ -96,15 +90,13 @@ export const subtitle = (v: string) =>
               ? "Monte a proposta; o estoque só muda após a aprovação do cliente"
               : v === "schedule"
                 ? "Próximos atendimentos da oficina"
-                : v === "workshop"
-                  ? "OS em execução com botões grandes para o pátio"
-                  : v === "finance"
-                    ? "Valores previstos e concluídos nas ordens de serviço"
-                    : v === "orders-new"
-                      ? "Selecione o cliente e o veículo para registrar o atendimento"
-                      : v === "developer"
-                        ? "Monitoramento, manutenção e cópias seguras do sistema"
-                        : "Gestão simples, segura e organizada";
+                : v === "finance"
+                  ? "Valores previstos e concluídos nas ordens de serviço"
+                  : v === "orders-new"
+                    ? "Selecione o cliente e o veículo para registrar o atendimento"
+                    : v === "developer"
+                      ? "Monitoramento, manutenção e cópias seguras do sistema"
+                      : "Gestão simples, segura e organizada";
 
 // Placa antiga (ABC-1234) ou Mercosul (ABC1D23).
 const PLACA = /^[A-Z]{3}-?\d[A-Z0-9]\d{2}$/i;

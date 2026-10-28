@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   ClipboardList,
   Cog,
-  Hammer,
   LayoutDashboard,
   Moon,
   LogOut,
@@ -15,7 +14,6 @@ import {
   PackageSearch,
   Search,
   RefreshCw,
-  Settings,
   Sun,
   X,
   UsersRound,
@@ -36,9 +34,7 @@ import { StockMovement } from "../features/inventory/StockMovement";
 import { OrderCreate } from "../features/orders/OrderCreate";
 import { OrderDetail } from "../features/orders/OrderDetail";
 import { Orders } from "../features/orders/Orders";
-import { Workshop } from "../features/orders/Workshop";
 import { Schedule } from "../features/schedule/Schedule";
-import { Subscription } from "../features/subscription/Subscription";
 import { MonthlyReport } from "../features/reports/MonthlyReport";
 import { Users } from "../features/users/Users";
 import { VehicleCreate } from "../features/vehicles/VehicleCreate";
@@ -257,13 +253,6 @@ export function App() {
       view: "orders",
     },
     allowed("ORDENS") && {
-      label: "Modo oficina",
-      group: "Operação",
-      icon: <Hammer size={18} />,
-      active: view === "workshop",
-      view: "workshop",
-    },
-    allowed("ORDENS") && {
       label: "Agenda",
       group: "Operação",
       icon: <CalendarDays size={18} />,
@@ -297,13 +286,6 @@ export function App() {
       icon: <UsersRound size={18} />,
       active: view === "users",
       view: "users",
-    },
-    user.perfil === "ADMIN" && {
-      label: "Assinatura",
-      group: "Gestão",
-      icon: <Settings size={18} />,
-      active: view === "subscription",
-      view: "subscription",
     },
     user.perfil === "ADMIN" && {
       label: "Desenvolvedor",
@@ -510,7 +492,6 @@ export function App() {
           )}{" "}
           {view === "orders" && <Orders go={change} />}{" "}
           {view === "schedule" && <Schedule go={change} />}{" "}
-          {view === "workshop" && <Workshop go={change} usuario={user.nome} />}{" "}
           {view === "orders-new" && (
             <OrderCreate
               done={() => {
@@ -550,7 +531,6 @@ export function App() {
           )}{" "}
           {view === "reposition" && <Reposition />}{" "}
           {view === "users" && <Users />}
-          {view === "subscription" && <Subscription />}
           {view === "developer" && <DeveloperConsole />}
         </section>
       </main>

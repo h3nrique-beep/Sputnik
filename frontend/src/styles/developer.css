@@ -31,26 +31,6 @@
   pointer-events: none;
   z-index: -1;
   animation: developer-scan 7s linear infinite;
-  animation-play-state: paused;
-}
-.developer-hero.motion-running::after {
-  animation-play-state: running;
-}
-.developer-motion-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 4px 8px;
-  border: 1px solid #53617b;
-  border-radius: 8px;
-  background: transparent;
-  color: #e5c774;
-  cursor: pointer;
-  font-size: 12px;
-}
-.developer-motion-toggle:hover {
-  background: #ffffff0d;
 }
 @keyframes developer-scan {
   0% {
@@ -246,9 +226,6 @@
   .developer-metrics article,
   .developer-health {
     animation: none;
-  }
-  .developer-motion-toggle {
-    display: none;
   }
 }
 @media (max-width: 900px) {

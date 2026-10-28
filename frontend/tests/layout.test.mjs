@@ -17,18 +17,11 @@ test("views usam a largura disponível, inclusive com formulário compacto", () 
   );
 });
 
-test("varredura do console é pausável e respeita movimento reduzido", () => {
+test("varredura do console roda continuamente e respeita movimento reduzido", () => {
   const motion = css("developer");
   assert.match(motion, /@keyframes developer-rise/);
   assert.match(motion, /developer-scan 7s linear infinite/);
-  assert.match(motion, /animation-play-state: paused/);
-  const source = readFileSync(
-    new URL("../src/features/developer/DeveloperConsole.tsx", import.meta.url),
-    "utf8",
-  );
-  assert.match(source, /IntersectionObserver/);
-  assert.match(source, /!document.hidden && !motionPaused/);
-  assert.match(source, /aria-pressed=\{motionPaused\}/);
+  assert.doesNotMatch(motion, /animation-play-state: paused/);
   assert.match(
     motion,
     /@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*animation:\s*none/s,

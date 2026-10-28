@@ -25,7 +25,7 @@
 - `frontend/src/main.tsx`: inicialização do React.
 - `frontend/src/app/`: composição do aplicativo e títulos da navegação.
 - `frontend/src/features/`: telas agrupadas por auth, dashboard, catalog, inventory, clients, vehicles, orders, schedule, finance, reports, users, subscription e developer.
-- `frontend/src/features/orders/`: lista e quadro (`Orders`), detalhe, modo oficina (`Workshop`), regras do quadro (`status.ts`) e troca de status (`mudarStatus.ts`).
+- `frontend/src/features/orders/`: lista e quadro (`Orders`), detalhe, regras do quadro (`status.ts`) e troca de status (`mudarStatus.ts`).
 - `frontend/src/features/orders/components/`: modal do documento da OS e definição dos campos por etapa.
 - `frontend/src/components/ui/`: componentes visuais reutilizáveis, um por arquivo.
 - `frontend/src/lib/api.ts`: cliente HTTP único para a API Spring e sessão, e o `queryClient` do TanStack Query. A chave de cada leitura é a própria URL (`useQuery<Order[]>({ queryKey: ["/ordens"] })`), com cache de 30 s. Toda gravação bem-sucedida (POST/PUT/DELETE) invalida o cache, e as telas abertas recarregam sozinhas, sem `load()` manual. O logout limpa o cache.

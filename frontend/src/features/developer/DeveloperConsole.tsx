@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import {
-  CircleCheck,
-  Clock3,
-  Pause,
-  Play,
-  Plus,
-  ShieldCheck,
-} from "lucide-react";
+import { useState } from "react";
+import { CircleCheck, Clock3, Plus, ShieldCheck } from "lucide-react";
 import { Loading, Table } from "../../components/ui";
 import { api, downloadApi } from "../../lib/api";
 import {
@@ -30,31 +23,6 @@ export function DeveloperConsole() {
     (consultaDiagnostico.error ?? consultaBackups.error)?.message ||
     "";
   const [criando, setCriando] = useState(false);
-  const heroRef = useRef<HTMLElement>(null);
-  const [motionPaused, setMotionPaused] = useState(false);
-
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    let visible = false;
-    const update = () =>
-      hero.classList.toggle(
-        "motion-running",
-        visible && !document.hidden && !motionPaused,
-      );
-    const observer = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      update();
-    });
-    observer.observe(hero);
-    document.addEventListener("visibilitychange", update);
-    return () => {
-      observer.disconnect();
-      document.removeEventListener("visibilitychange", update);
-      hero.classList.remove("motion-running");
-    };
-  }, [diagnostico, motionPaused]);
-
   const criarBackup = async () => {
     if (criando) return;
     setCriando(true);
@@ -102,7 +70,7 @@ export function DeveloperConsole() {
 
   return (
     <div className="developer-console">
-      <section className="developer-hero" ref={heroRef}>
+      <section className="developer-hero">
         <div>
           <h2>Console do Desenvolvedor</h2>
           <p>
@@ -118,19 +86,6 @@ export function DeveloperConsole() {
               <Clock3 size={14} aria-hidden="true" />
               Ambiente local
             </span>
-            <button
-              type="button"
-              className="developer-motion-toggle"
-              aria-pressed={motionPaused}
-              onClick={() => setMotionPaused(!motionPaused)}
-            >
-              {motionPaused ? (
-                <Play size={14} aria-hidden="true" />
-              ) : (
-                <Pause size={14} aria-hidden="true" />
-              )}
-              {motionPaused ? "Retomar animação" : "Pausar animação"}
-            </button>
           </span>
         </div>
         <div className="developer-runtime">
