@@ -11,6 +11,7 @@ export function Reposition() {
     [baixando, setBaixando] = useState(false);
   const exportar = async () => {
     setBaixando(true);
+    setErro("");
     try {
       await downloadApi("/reposicao.csv", "relatorio-reposicao.csv");
     } catch (e) {
@@ -19,14 +20,14 @@ export function Reposition() {
       setBaixando(false);
     }
   };
-  const erro = erroEnvio || error?.message;
-  if (erro)
-    return (
+  if (!data)
+    return error ? (
       <div className="alert error" role="alert">
-        {erro}
+        {error.message}
       </div>
+    ) : (
+      <Loading />
     );
-  if (!data) return <Loading />;
   return (
     <div className="module-shell space-y-5">
       <div className="toolbar">
@@ -42,6 +43,11 @@ export function Reposition() {
           {baixando ? "Gerando CSV..." : "Exportar CSV"}
         </Button>
       </div>
+      {erroEnvio && (
+        <div className="alert error" role="alert">
+          {erroEnvio}
+        </div>
+      )}
       <div className="metrics metric-grid-3">
         <Metric label="Itens críticos" value={data.pecas.length} />
         <Metric label="Itens zerados" value={data.zeradas} />

@@ -48,6 +48,7 @@ export function Finance({
       : "");
   const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
   const [baixandoLote, setBaixandoLote] = useState(false);
+  const [baixandoId, setBaixandoId] = useState<number>();
   const entriesInPeriod = useMemo(() => {
     const date = new Date();
     const monthStart = localDate(
@@ -136,10 +137,14 @@ export function Finance({
     }
   };
   const baixar = async (id: number) => {
+    setErro("");
+    setBaixandoId(id);
     try {
       await api("/financeiro/" + id + "/baixar", { method: "POST" });
     } catch (e) {
       setErro((e as Error).message);
+    } finally {
+      setBaixandoId(undefined);
     }
   };
   const pendentes = entriesInPeriod.filter((e) => e.status === "PENDENTE");
@@ -444,8 +449,13 @@ export function Finance({
               money(entry.valor),
               <Badge key="status" status={entry.status} />,
               entry.status === "PENDENTE" ? (
-                <Button key="baixar" size="sm" onClick={() => baixar(entry.id)}>
-                  Baixar
+                <Button
+                  key="baixar"
+                  size="sm"
+                  onClick={() => baixar(entry.id)}
+                  disabled={baixandoLote || baixandoId !== undefined}
+                >
+                  {baixandoId === entry.id ? "Baixando..." : "Baixar"}
                 </Button>
               ) : (
                 "Pago"

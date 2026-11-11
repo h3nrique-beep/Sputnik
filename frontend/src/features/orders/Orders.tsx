@@ -1,7 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Columns3, List, Plus } from "lucide-react";
 import { type DragEvent, useState } from "react";
-import { Badge, Button, Loading, Table, confirmar } from "../../components/ui";
+import {
+  Badge,
+  Button,
+  Empty,
+  Loading,
+  Table,
+  confirmar,
+} from "../../components/ui";
 import { queryClient } from "../../lib/api";
 import { label } from "../../lib/format";
 import { type Order } from "../../types/domain";
@@ -11,7 +18,11 @@ import { COLUNAS_QUADRO, encerra, podeMover } from "./status";
 const MODO_STORAGE_KEY = "sputnik.ordens-modo";
 
 export function Orders({ go }: { go: (v: string) => void }) {
-  const { data: items, error } = useQuery<Order[]>({ queryKey: ["/ordens"] });
+  const {
+    data: items,
+    error,
+    refetch,
+  } = useQuery<Order[]>({ queryKey: ["/ordens"] });
   const [erroEnvio, setErro] = useState("");
   const erro = erroEnvio || error?.message || "";
   const [quadro, setQuadro] = useState(
@@ -97,7 +108,15 @@ export function Orders({ go }: { go: (v: string) => void }) {
         </span>
       </div>
       {!items ? (
-        !erro && <Loading />
+        erro ? (
+          <Button variant="secondary" onClick={() => void refetch()}>
+            Tentar novamente
+          </Button>
+        ) : (
+          <Loading />
+        )
+      ) : !items.length ? (
+        <Empty text="Nenhum atendimento ainda. Abra uma ordem ou crie um orçamento." />
       ) : quadro ? (
         <>
           <div className="kanban">

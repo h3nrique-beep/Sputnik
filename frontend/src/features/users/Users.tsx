@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Copy, KeyRound, ShieldCheck, Trash2, X, Plus } from "lucide-react";
-import { Badge, Button, Table, confirmar } from "../../components/ui";
+import { Badge, Button, Loading, Table, confirmar } from "../../components/ui";
 import { api } from "../../lib/api";
 import { permissionLabel } from "../../lib/format";
 import { UserCreate } from "./UserCreate";
@@ -9,7 +9,7 @@ import { type SystemUser } from "../../types/domain";
 import { UserPermissions } from "./UserPermissions";
 
 export function Users() {
-  const { data: items = [], error } = useQuery<SystemUser[]>({
+  const { data: items, error } = useQuery<SystemUser[]>({
     queryKey: ["/admin/usuarios"],
   });
   const [erroEnvio, setErro] = useState(""),
@@ -110,46 +110,55 @@ export function Users() {
           done={() => setEditing(undefined)}
         />
       )}
-      <Table
-        headers={["Nome", "Login", "Perfil", "Módulos", "Ações"]}
-        rows={items.map((u) => [
-          u.nome,
-          u.login,
-          <Badge key="role" status={u.perfil} />,
-          u.perfil === "ADMIN"
-            ? "Acesso total"
-            : u.permissoes.map(permissionLabel).join(", ") || "Sem módulos",
-          u.perfil === "ADMIN" ? (
-            <span className="muted">Protegido</span>
-          ) : (
-            <span className="row-actions">
-              <Button variant="outline" size="sm" onClick={() => setEditing(u)}>
-                <ShieldCheck size={15} aria-hidden="true" /> Permissões
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="row-action-icon"
-                onClick={() => reset(u.id, u.nome)}
-                aria-label={`Resetar senha de ${u.nome}`}
-                title="Resetar senha"
-              >
-                <KeyRound size={15} aria-hidden="true" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="row-action-icon row-action-danger"
-                onClick={() => remove(u.id, u.nome)}
-                aria-label={`Remover ${u.nome}`}
-                title="Remover usuário"
-              >
-                <Trash2 size={15} aria-hidden="true" />
-              </Button>
-            </span>
-          ),
-        ])}
-      />
+      {items ? (
+        <Table
+          headers={["Nome", "Login", "Perfil", "Módulos", "Ações"]}
+          emptyText="Nenhum usuário cadastrado."
+          rows={items.map((u) => [
+            u.nome,
+            u.login,
+            <Badge key="role" status={u.perfil} />,
+            u.perfil === "ADMIN"
+              ? "Acesso total"
+              : u.permissoes.map(permissionLabel).join(", ") || "Sem módulos",
+            u.perfil === "ADMIN" ? (
+              <span className="muted">Protegido</span>
+            ) : (
+              <span className="row-actions">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditing(u)}
+                >
+                  <ShieldCheck size={15} aria-hidden="true" /> Permissões
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="row-action-icon"
+                  onClick={() => reset(u.id, u.nome)}
+                  aria-label={`Resetar senha de ${u.nome}`}
+                  title="Resetar senha"
+                >
+                  <KeyRound size={15} aria-hidden="true" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="row-action-icon row-action-danger"
+                  onClick={() => remove(u.id, u.nome)}
+                  aria-label={`Remover ${u.nome}`}
+                  title="Remover usuário"
+                >
+                  <Trash2 size={15} aria-hidden="true" />
+                </Button>
+              </span>
+            ),
+          ])}
+        />
+      ) : (
+        !erro && <Loading />
+      )}
     </>
   );
 }
