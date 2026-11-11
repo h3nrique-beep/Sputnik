@@ -526,8 +526,7 @@ input[type="radio"] {
   border: 1px solid var(--line);
   border-radius: 10px;
 }
-.alert.error,
-.dashboard-error {
+.alert.error {
   color: var(--danger);
   background: var(--danger-bg);
   border-color: var(--danger);

@@ -347,34 +347,6 @@
 .dashboard-action-list button span {
   flex: 1;
 }
-.dashboard-empty {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 0;
-  padding: 12px 0;
-}
-.dashboard-error {
-  margin: 0;
-  padding: 12px;
-  border: 1px solid #e6a5a5;
-  border-radius: 9px;
-  color: #b42318;
-  background: #fff0f0;
-}
-.dashboard-state {
-  padding: 30px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  color: var(--muted);
-}
-.dashboard-state button {
-  border: 0;
-  background: none;
-  color: var(--blue);
-  cursor: pointer;
-  font-weight: 700;
-}
 @media (max-width: 1120px) {
   .dashboard-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));

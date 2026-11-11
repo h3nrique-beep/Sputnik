@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Bell,
   ClipboardList,
-  Package,
   PackagePlus,
   PackageSearch,
   RefreshCw,
@@ -13,8 +12,10 @@ import {
   Warehouse,
 } from "lucide-react";
 
+import { Button, Empty, Loading } from "../../components/ui";
 import { label } from "../../lib/format";
 import { type DashboardData } from "../../types/domain";
+import { contarAvisos, DashboardNotifications } from "./DashboardNotifications";
 
 export function Dashboard({
   go,
@@ -41,23 +42,24 @@ export function Dashboard({
   const refresh = () => consulta.refetch();
 
   if (!data)
-    return (
-      <div className="dashboard-state" role="status">
-        <p>{error || "Carregando visão geral..."}</p>
-        {error && (
-          <button onClick={() => void refresh()}>Tentar novamente</button>
-        )}
+    return error ? (
+      <div className="space-y-4">
+        <div className="alert error" role="alert">
+          {error}
+        </div>
+        <Button variant="secondary" onClick={() => void refresh()}>
+          Tentar novamente
+        </Button>
       </div>
+    ) : (
+      <Loading />
     );
 
   const statusEntries = Object.entries(data.porStatus).filter(
     ([, count]) => count > 0,
   );
   const maxStatus = Math.max(1, ...statusEntries.map(([, count]) => count));
-  const notificationCount =
-    (data.criticas > 0 ? 1 : 0) +
-    data.aguardandoPeca.length +
-    data.retornos.length;
+  const notificationCount = contarAvisos(data);
   const actions = [
     can("ORDENS") && {
       label: "Nova ordem de serviço",
@@ -168,9 +170,9 @@ export function Dashboard({
         </div>
       </div>
       {error && (
-        <p className="dashboard-error" role="alert">
+        <div className="alert error" role="alert">
           {error}
-        </p>
+        </div>
       )}
       {actions.length > 0 && (
         <nav className="dashboard-quick" aria-label="Ações rápidas">
@@ -256,105 +258,15 @@ export function Dashboard({
               ))}
             </div>
           ) : (
-            <p className="dashboard-empty">Nenhuma ordem registrada ainda.</p>
+            <Empty text="Nenhuma ordem registrada ainda." />
           )}
         </section>
-        <section
-          className="dashboard-panel dashboard-notifications"
-          ref={notifications}
-          aria-labelledby="dashboard-notifications-title"
-        >
-          <div className="dashboard-panel-heading">
-            <div>
-              <h3 id="dashboard-notifications-title">Notificações</h3>
-              <p>
-                {notificationCount
-                  ? `${notificationCount} ${notificationCount === 1 ? "item precisa" : "itens precisam"} de atenção`
-                  : "Tudo em dia por aqui"}
-              </p>
-            </div>
-            <span className="dashboard-count">{notificationCount}</span>
-          </div>
-          {notificationCount ? (
-            <div className="dashboard-notification-list">
-              {data.criticas > 0 && (
-                <div className="dashboard-notification">
-                  <span className="dashboard-notification-icon tone-amber">
-                    <TriangleAlert size={18} />
-                  </span>
-                  <div>
-                    <strong>
-                      {data.criticas}{" "}
-                      {data.criticas === 1 ? "peça precisa" : "peças precisam"}{" "}
-                      de reposição
-                    </strong>
-                    <small>Estoque abaixo do mínimo</small>
-                  </div>
-                  {(can("REPOSICAO") || can("PECAS")) && (
-                    <button
-                      onClick={() =>
-                        go(can("REPOSICAO") ? "reposition" : "pieces")
-                      }
-                      aria-label={
-                        can("REPOSICAO") ? "Ver reposição" : "Ver estoque"
-                      }
-                    >
-                      <ArrowRight size={17} />
-                    </button>
-                  )}
-                </div>
-              )}
-              {data.aguardandoPeca.map((order) => (
-                <div
-                  className="dashboard-notification"
-                  key={`piece-${order.id}`}
-                >
-                  <span className="dashboard-notification-icon tone-blue">
-                    <Package size={18} />
-                  </span>
-                  <div>
-                    <strong>OS #{order.id} aguardando peça</strong>
-                    <small>{order.cliente.nome}</small>
-                  </div>
-                  {can("ORDENS") && (
-                    <button
-                      onClick={() => go(`order-${order.id}`)}
-                      aria-label={`Abrir OS ${order.id}`}
-                    >
-                      <ArrowRight size={17} />
-                    </button>
-                  )}
-                </div>
-              ))}
-              {data.retornos.map((order) => (
-                <div
-                  className="dashboard-notification"
-                  key={`return-${order.id}`}
-                >
-                  <span className="dashboard-notification-icon tone-violet">
-                    <RefreshCw size={18} />
-                  </span>
-                  <div>
-                    <strong>Retorno da OS #{order.id}</strong>
-                    <small>{order.cliente.nome}</small>
-                  </div>
-                  {can("ORDENS") && (
-                    <button
-                      onClick={() => go(`order-${order.id}`)}
-                      aria-label={`Abrir OS ${order.id}`}
-                    >
-                      <ArrowRight size={17} />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="dashboard-empty">
-              Nenhum alerta operacional no momento.
-            </p>
-          )}
-        </section>
+        <DashboardNotifications
+          data={data}
+          go={go}
+          can={can}
+          painel={notifications}
+        />
       </div>
       <div className="dashboard-bottom">
         <section
@@ -388,9 +300,7 @@ export function Dashboard({
               ))}
             </div>
           ) : (
-            <p className="dashboard-empty">
-              O uso de peças aparecerá aqui após os primeiros atendimentos.
-            </p>
+            <Empty text="O uso de peças aparecerá aqui após os primeiros atendimentos." />
           )}
         </section>
       </div>
