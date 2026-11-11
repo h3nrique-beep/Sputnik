@@ -18,6 +18,7 @@ export function Vehicles({
     <div className="module-shell space-y-5">
       <div className="toolbar">
         <input
+          type="search"
           aria-label="Buscar veículos"
           placeholder="Buscar por placa ou chassi"
           value={query}

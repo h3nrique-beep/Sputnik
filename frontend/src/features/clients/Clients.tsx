@@ -10,6 +10,7 @@ export function Clients({ go }: { go: (v: string) => void }) {
     <div className="module-shell space-y-5">
       <div className="toolbar">
         <input
+          type="search"
           aria-label="Buscar clientes"
           placeholder="Buscar por nome, CPF ou telefone"
           value={query}

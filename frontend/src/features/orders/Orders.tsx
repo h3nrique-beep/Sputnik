@@ -25,9 +25,13 @@ export function Orders({ go }: { go: (v: string) => void }) {
   } = useQuery<Order[]>({ queryKey: ["/ordens"] });
   const [erroEnvio, setErro] = useState("");
   const erro = erroEnvio || error?.message || "";
-  const [quadro, setQuadro] = useState(
-    () => window.localStorage.getItem(MODO_STORAGE_KEY) !== "lista",
-  );
+  const [quadro, setQuadro] = useState(() => {
+    // Sem escolha salva, tela estreita abre em lista: arrastar não funciona por toque.
+    const salvo = window.localStorage.getItem(MODO_STORAGE_KEY);
+    return salvo
+      ? salvo !== "lista"
+      : !window.matchMedia("(max-width: 760px)").matches;
+  });
   const [arrastando, setArrastando] = useState<Order | null>(null);
   const [alvo, setAlvo] = useState("");
   const alternarModo = (proximo: boolean) => {

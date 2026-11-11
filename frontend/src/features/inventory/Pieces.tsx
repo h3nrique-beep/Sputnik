@@ -30,6 +30,7 @@ export function Pieces({
     <div className="module-shell space-y-5">
       <div className="toolbar">
         <input
+          type="search"
           aria-label="Buscar peças"
           placeholder="Buscar por nome ou código"
           value={query}

@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 export function Table({
   headers,
@@ -9,12 +9,23 @@ export function Table({
   rows: ReactNode[][];
   emptyText?: string;
 }) {
+  // Só vira região focável quando há rolagem horizontal para alcançar pelo teclado.
+  // shortcut: mede a cada render, não ao redimensionar a janela; trocar por ResizeObserver se fizer falta.
+  const regiao = useRef<HTMLDivElement>(null);
+  const [rola, setRola] = useState(false);
+  useEffect(() => {
+    const el = regiao.current;
+    if (el) setRola(el.scrollWidth > el.clientWidth);
+  });
   return (
     <div
+      ref={regiao}
       className="data-table w-full overflow-x-auto"
-      tabIndex={0}
-      role="region"
-      aria-label={`Tabela de ${headers.join(", ")}`}
+      {...(rola && {
+        tabIndex: 0,
+        role: "region",
+        "aria-label": `Tabela de ${headers.join(", ")}`,
+      })}
     >
       <table className="w-full text-sm">
         <thead className="bg-(--card)">
