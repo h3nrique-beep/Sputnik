@@ -22,7 +22,6 @@ import {
 import { Nav, Toast } from "../components/ui";
 import { Login } from "../features/auth/Login";
 import { ClientCreate } from "../features/clients/ClientCreate";
-import { Clients } from "../features/clients/Clients";
 import { Dashboard } from "../features/dashboard/Dashboard";
 import { CatalogHub } from "../features/catalog/CatalogHub";
 import { DeveloperConsole } from "../features/developer/DeveloperConsole";
@@ -38,7 +37,6 @@ import { Schedule } from "../features/schedule/Schedule";
 import { MonthlyReport } from "../features/reports/MonthlyReport";
 import { Users } from "../features/users/Users";
 import { VehicleCreate } from "../features/vehicles/VehicleCreate";
-import { Vehicles } from "../features/vehicles/Vehicles";
 import { api, queryClient } from "../lib/api";
 import { type User } from "../types/domain";
 import {
@@ -228,7 +226,7 @@ export function App() {
       active: view.startsWith("pieces"),
       view: "pieces",
     },
-    (allowed("PECAS") || allowed("ORDENS")) && {
+    allowed("ORDENS") && {
       label: "Central de cadastros",
       group: "Cadastros",
       icon: <PackageSearch size={18} />,
@@ -444,11 +442,11 @@ export function App() {
         {notice && <Toast message={notice} onClose={() => setNotice("")} />}
         <section className="content">
           {view === "dashboard" && <Dashboard go={change} can={allowed} />}{" "}
-          {view === "cadastros" && (
+          {["cadastros", "clients", "vehicles"].includes(view) && (
             <CatalogHub
               go={change}
-              allowClients={allowed("ORDENS")}
-              allowPieces={allowed("PECAS")}
+              tab={view === "vehicles" ? "vehicles" : "clients"}
+              initialQuery={busca}
             />
           )}{" "}
           {view === "pieces" && (
@@ -470,7 +468,6 @@ export function App() {
               }}
             />
           )}{" "}
-          {view === "clients" && <Clients go={change} />}{" "}
           {view === "clients-new" && (
             <ClientCreate
               done={() => {
@@ -478,9 +475,6 @@ export function App() {
                 change("clients", true);
               }}
             />
-          )}{" "}
-          {view === "vehicles" && (
-            <Vehicles key={busca} go={change} initialQuery={busca} />
           )}{" "}
           {view === "vehicles-new" && (
             <VehicleCreate

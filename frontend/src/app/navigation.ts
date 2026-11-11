@@ -41,14 +41,20 @@ const TELAS: Record<string, [titulo: string, subtitulo: string]> = {
   dashboard: ["Visão geral", "Estoque automotivo, reposição e atendimento"],
   cadastros: [
     "Central de cadastros",
-    "Peças, clientes e veículos para a operação diária",
+    "Clientes e veículos para a operação diária",
   ],
-  clients: ["Clientes", "Contatos e documentos de quem traz o veículo"],
+  clients: [
+    "Central de cadastros",
+    "Contatos e documentos de quem traz o veículo",
+  ],
   "clients-new": [
     "Cadastrar cliente",
     "Dados de contato para abrir atendimentos",
   ],
-  vehicles: ["Veículos", "Placa, chassi e quilometragem de cada veículo"],
+  vehicles: [
+    "Central de cadastros",
+    "Placa, chassi e quilometragem de cada veículo",
+  ],
   "vehicles-new": [
     "Cadastrar veículo",
     "Vincule o veículo ao cliente responsável",
