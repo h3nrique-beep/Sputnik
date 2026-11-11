@@ -1,5 +1,4 @@
 import { type ReactNode } from "react";
-import { CardContent, CardHeader, CardTitle, ShadcnCard } from "../shadcn/card";
 
 export function Card({
   title,
@@ -9,11 +8,13 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <ShadcnCard className="card">
-      <CardHeader className="card-heading p-0 pb-3">
-        <CardTitle className="text-base">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">{children}</CardContent>
-    </ShadcnCard>
+    <div className="card">
+      <div className="card-heading flex flex-col gap-1.5 pb-3">
+        <h2 className="text-base leading-none font-semibold tracking-tight">
+          {title}
+        </h2>
+      </div>
+      <div>{children}</div>
+    </div>
   );
 }
