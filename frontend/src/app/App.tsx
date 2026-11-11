@@ -1,56 +1,22 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
-import {
-  BarChart3,
-  CalendarDays,
-  CircleDollarSign,
-  ChevronLeft,
-  ClipboardList,
-  Cog,
-  LayoutDashboard,
-  Moon,
-  LogOut,
-  Menu,
-  Package,
-  PackageSearch,
-  Search,
-  RefreshCw,
-  Sun,
-  X,
-  UsersRound,
-  Wrench,
-} from "lucide-react";
+import { ChevronLeft, Moon, LogOut, Menu, Search, Sun, X } from "lucide-react";
 import { Nav, Toast } from "../components/ui";
 import { Login } from "../features/auth/Login";
-import { ClientCreate } from "../features/clients/ClientCreate";
-import { Dashboard } from "../features/dashboard/Dashboard";
-import { CatalogHub } from "../features/catalog/CatalogHub";
-import { DeveloperConsole } from "../features/developer/DeveloperConsole";
-import { Finance } from "../features/finance/Finance";
-import { PieceCreate } from "../features/inventory/PieceCreate";
-import { Pieces } from "../features/inventory/Pieces";
-import { Reposition } from "../features/inventory/Reposition";
-import { StockMovement } from "../features/inventory/StockMovement";
-import { OrderCreate } from "../features/orders/OrderCreate";
-import { OrderDetail } from "../features/orders/OrderDetail";
-import { Orders } from "../features/orders/Orders";
-import { Schedule } from "../features/schedule/Schedule";
-import { MonthlyReport } from "../features/reports/MonthlyReport";
-import { Users } from "../features/users/Users";
-import { VehicleCreate } from "../features/vehicles/VehicleCreate";
 import { api, queryClient } from "../lib/api";
 import { type User } from "../types/domain";
+import { itensDoMenu } from "./menu";
 import {
   destinoDaBusca,
   pathForView,
+  podeAbrir,
   subtitle,
   title,
   viewFromPath,
 } from "./navigation";
+import { Views } from "./Views";
 
 const MENU_RECOLHIDO_STORAGE_KEY = "sputnik.menu-recolhido";
 const TEMA_STORAGE_KEY = "sputnik.tema-escuro";
-
-const GRUPOS_MENU = ["Operação", "Estoque", "Cadastros", "Gestão"];
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -108,6 +74,14 @@ export function App() {
       ? "finance"
       : "dashboard";
   };
+  useEffect(() => {
+    // URL de módulo sem permissão leva à tela inicial do usuário.
+    if (!user || podeAbrir(view, user)) return;
+    const next = landingView(user);
+    if (next === view) return;
+    window.history.replaceState({}, "", pathForView(next));
+    setView(next);
+  }, [user, view]);
   useEffect(() => {
     api<User>("/auth/session")
       .then((account) => {
@@ -205,99 +179,7 @@ export function App() {
   };
   const allowed = (permission: string) =>
     user.perfil === "ADMIN" || user.permissoes.includes(permission);
-  const dashboardAllowed = [
-    "PECAS",
-    "ORDENS",
-    "RELATORIO_MENSAL",
-    "REPOSICAO",
-  ].some(allowed);
-  const menuItems = [
-    dashboardAllowed && {
-      label: "Visão geral",
-      group: "Operação",
-      icon: <LayoutDashboard size={18} />,
-      active: view === "dashboard",
-      view: "dashboard",
-    },
-    allowed("PECAS") && {
-      label: "Estoque de peças",
-      group: "Estoque",
-      icon: <Package size={18} />,
-      active: view.startsWith("pieces"),
-      view: "pieces",
-    },
-    allowed("ORDENS") && {
-      label: "Central de cadastros",
-      group: "Cadastros",
-      icon: <PackageSearch size={18} />,
-      active:
-        view === "cadastros" ||
-        view.startsWith("clients") ||
-        view.startsWith("vehicles"),
-      view: "cadastros",
-    },
-    allowed("PECAS") && {
-      label: "Movimentar estoque",
-      group: "Estoque",
-      icon: <RefreshCw size={18} />,
-      active: view === "movement",
-      view: "movement",
-    },
-    allowed("ORDENS") && {
-      label: "Ordens de serviço",
-      group: "Operação",
-      icon: <ClipboardList size={18} />,
-      active: view.startsWith("orders") || view.startsWith("order-"),
-      view: "orders",
-    },
-    allowed("ORDENS") && {
-      label: "Agenda",
-      group: "Operação",
-      icon: <CalendarDays size={18} />,
-      active: view === "schedule",
-      view: "schedule",
-    },
-    allowed("RELATORIO_MENSAL") && {
-      label: "Relatório mensal",
-      group: "Gestão",
-      icon: <BarChart3 size={18} />,
-      active: view === "report",
-      view: "report",
-    },
-    allowed("FINANCEIRO") && {
-      label: "Financeiro",
-      group: "Gestão",
-      icon: <CircleDollarSign size={18} />,
-      active: view === "finance",
-      view: "finance",
-    },
-    allowed("REPOSICAO") && {
-      label: "Reposição",
-      group: "Estoque",
-      icon: <Wrench size={18} />,
-      active: view === "reposition",
-      view: "reposition",
-    },
-    user.perfil === "ADMIN" && {
-      label: "Usuários",
-      group: "Gestão",
-      icon: <UsersRound size={18} />,
-      active: view === "users",
-      view: "users",
-    },
-    user.perfil === "ADMIN" && {
-      label: "Desenvolvedor",
-      group: "Gestão",
-      icon: <Cog size={18} />,
-      active: view === "developer",
-      view: "developer",
-    },
-  ]
-    .filter((item) => item !== false)
-    // Ordem estável por grupo; dentro do grupo mantém a ordem declarada.
-    .sort(
-      (a, b) => GRUPOS_MENU.indexOf(a.group) - GRUPOS_MENU.indexOf(b.group),
-    );
+  const menuItems = itensDoMenu(view, user);
   return (
     <div
       className={`shell${menuRecolhido ? " menu-recolhido" : ""}${mobileMenu ? " mobile-menu-open" : ""}`}
@@ -441,91 +323,15 @@ export function App() {
         </header>
         {notice && <Toast message={notice} onClose={() => setNotice("")} />}
         <section className="content">
-          {view === "dashboard" && <Dashboard go={change} can={allowed} />}{" "}
-          {["cadastros", "clients", "vehicles"].includes(view) && (
-            <CatalogHub
-              go={change}
-              tab={view === "vehicles" ? "vehicles" : "clients"}
-              initialQuery={busca}
-            />
-          )}{" "}
-          {view === "pieces" && (
-            <Pieces
-              key={busca}
-              go={change}
-              initialQuery={busca}
-              move={(pieceId) => {
-                setPecaMovimento(String(pieceId));
-                change("movement");
-              }}
-            />
-          )}{" "}
-          {view === "pieces-new" && (
-            <PieceCreate
-              done={() => {
-                setNotice("Peça cadastrada com sucesso.");
-                change("pieces", true);
-              }}
-            />
-          )}{" "}
-          {view === "clients-new" && (
-            <ClientCreate
-              done={() => {
-                setNotice("Cliente cadastrado com sucesso.");
-                change("clients", true);
-              }}
-            />
-          )}{" "}
-          {view === "vehicles-new" && (
-            <VehicleCreate
-              done={() => {
-                setNotice("Veículo cadastrado e vinculado.");
-                change("vehicles", true);
-              }}
-            />
-          )}{" "}
-          {view === "orders" && <Orders go={change} />}{" "}
-          {view === "schedule" && <Schedule go={change} />}{" "}
-          {view === "orders-new" && (
-            <OrderCreate
-              done={() => {
-                setNotice("Ordem de serviço aberta.");
-                change("orders", true);
-              }}
-            />
-          )}{" "}
-          {view === "quotes-new" && (
-            <OrderCreate
-              asQuote
-              done={() => {
-                setNotice(
-                  "Orçamento criado. Inclua os itens previstos e aprove-o quando o cliente confirmar.",
-                );
-                change("orders", true);
-              }}
-            />
-          )}{" "}
-          {view.startsWith("order-") && (
-            <OrderDetail
-              key={view}
-              id={Number(view.substring(6))}
-              back={() => change("orders")}
-            />
-          )}{" "}
-          {view === "movement" && (
-            <StockMovement
-              key={pecaMovimento}
-              initialPieceId={pecaMovimento}
-              done={() => setNotice("Movimentação registrada com sucesso.")}
-            />
-          )}{" "}
-          {view === "report" && <MonthlyReport />}{" "}
-          {view === "finance" && (
-            <Finance go={change} canOrders={allowed("ORDENS")} />
-          )}{" "}
-          {view === "reposition" && <Reposition />}{" "}
-          {view === "users" && <Users />}
-          {view === "developer" && <DeveloperConsole />}
+          <Views
+            view={view}
+            user={user}
+            go={change}
+            avisar={setNotice}
+            busca={busca}
+            pecaMovimento={pecaMovimento}
+            setPecaMovimento={setPecaMovimento}
+          />
         </section>
       </main>
     </div>

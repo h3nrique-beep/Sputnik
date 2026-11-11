@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { destinoDaBusca, subtitle, title } from "../src/app/navigation.ts";
+import { destinoDaBusca, podeAbrir, subtitle, title } from "../src/app/navigation.ts";
 
 const tudo = () => true;
 const soEstoque = (p) => p === "PECAS";
@@ -23,4 +23,18 @@ test("toda rota tem título e subtítulo próprios", () => {
   assert.equal(title("order-7"), "Detalhes da OS");
   assert.equal(title("clients-new"), "Cadastrar cliente");
   assert.notEqual(subtitle("clients"), subtitle("orders"));
+});
+
+test("tela só abre com a permissão do módulo", () => {
+  const balcao = { perfil: "BALCONISTA", permissoes: ["PECAS"] };
+  assert.equal(podeAbrir("pieces-new", balcao), true);
+  assert.equal(podeAbrir("dashboard", balcao), true);
+  assert.equal(podeAbrir("finance", balcao), false);
+  assert.equal(podeAbrir("order-3", balcao), false);
+  assert.equal(podeAbrir("users", balcao), false);
+  assert.equal(podeAbrir("users", { perfil: "ADMIN", permissoes: [] }), true);
+  assert.equal(
+    podeAbrir("dashboard", { perfil: "BALCONISTA", permissoes: ["FINANCEIRO"] }),
+    false,
+  );
 });

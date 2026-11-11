@@ -120,3 +120,21 @@ export const destinoDaBusca = (
   if (allowed("ORDENS")) return { view: "vehicles", busca: texto };
   return null;
 };
+
+const OPERACIONAIS = ["PECAS", "ORDENS", "RELATORIO_MENSAL", "REPOSICAO"];
+
+/** A tela pode ser aberta por este usuário? Espelha o que o menu oferece. */
+export const podeAbrir = (
+  view: string,
+  user: { perfil: string; permissoes: string[] },
+) => {
+  if (user.perfil === "ADMIN") return true;
+  const tem = (permissao: string) => user.permissoes.includes(permissao);
+  if (view === "dashboard") return OPERACIONAIS.some(tem);
+  if (view === "users" || view === "developer") return false;
+  if (view === "finance") return tem("FINANCEIRO");
+  if (view === "report") return tem("RELATORIO_MENSAL");
+  if (view === "reposition") return tem("REPOSICAO");
+  if (view === "movement" || view.startsWith("pieces")) return tem("PECAS");
+  return tem("ORDENS");
+};
