@@ -1,18 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { type FormEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  Badge,
   Button,
   Card,
   Empty,
   Loading,
   Metric,
   Table,
-  confirmar,
 } from "../../components/ui";
-import { api } from "../../lib/api";
-import { localDate, money, paraCsv, variacao } from "../../lib/format";
+import { localDate, money, variacao } from "../../lib/format";
 import { type FinanceEntry as Entry, type Order } from "../../types/domain";
+import { FinanceEntries } from "./FinanceEntries";
+import { FinanceForm } from "./FinanceForm";
+import { rentabilidade, somar } from "./totais";
 
 export function Finance({
   go,
@@ -30,14 +30,6 @@ export function Finance({
   const entries = lancamentos.data,
     orders = ordens.data ?? [];
   const [period, setPeriod] = useState<"all" | "month" | "next30">("month");
-  const [form, setForm] = useState({
-    tipo: "RECEITA",
-    descricao: "",
-    categoria: "",
-    valor: "",
-    vencimento: hoje,
-    ordemServicoId: "",
-  });
   const [erroEnvio, setErro] = useState("");
   const erro =
     erroEnvio ||
@@ -46,9 +38,6 @@ export function Finance({
       ? "Não foi possível carregar as ordens para vínculo: " +
         ordens.error.message
       : "");
-  const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
-  const [baixandoLote, setBaixandoLote] = useState(false);
-  const [baixandoId, setBaixandoId] = useState<number>();
   const entriesInPeriod = useMemo(() => {
     const date = new Date();
     const monthStart = localDate(
@@ -89,122 +78,9 @@ export function Finance({
       ? variacao(totals[chave], anterior[chave], anterior.rotulo)
       : "";
   const profitability = useMemo(
-    () =>
-      Object.values(
-        entriesInPeriod
-          .filter((entry) => entry.ordemServicoId && entry.status === "PAGO")
-          .reduce<
-            Record<
-              string,
-              { orderId: number; receita: number; despesa: number }
-            >
-          >((acc, entry) => {
-            const orderId = Number(entry.ordemServicoId);
-            const current = acc[orderId] ?? { orderId, receita: 0, despesa: 0 };
-            current[entry.tipo === "RECEITA" ? "receita" : "despesa"] += Number(
-              entry.valor,
-            );
-            acc[orderId] = current;
-            return acc;
-          }, {}),
-      ),
+    () => rentabilidade(entriesInPeriod),
     [entriesInPeriod],
   );
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    setErro("");
-    try {
-      await api("/financeiro", {
-        method: "POST",
-        body: JSON.stringify({
-          ...form,
-          valor: Number(form.valor),
-          ordemServicoId: form.ordemServicoId
-            ? Number(form.ordemServicoId)
-            : null,
-        }),
-      });
-      setForm({
-        tipo: "RECEITA",
-        descricao: "",
-        categoria: "",
-        valor: "",
-        vencimento: hoje,
-        ordemServicoId: "",
-      });
-    } catch (e) {
-      setErro((e as Error).message);
-    }
-  };
-  const baixar = async (id: number) => {
-    setErro("");
-    setBaixandoId(id);
-    try {
-      await api("/financeiro/" + id + "/baixar", { method: "POST" });
-    } catch (e) {
-      setErro((e as Error).message);
-    } finally {
-      setBaixandoId(undefined);
-    }
-  };
-  const pendentes = entriesInPeriod.filter((e) => e.status === "PENDENTE");
-  const marcados = pendentes.filter((e) => selecionados.has(e.id));
-  const somaMarcados = marcados.reduce((sum, e) => sum + Number(e.valor), 0);
-  const alternar = (id: number) =>
-    setSelecionados((atual) => {
-      const proximo = new Set(atual);
-      if (!proximo.delete(id)) proximo.add(id);
-      return proximo;
-    });
-  const baixarSelecionados = async () => {
-    const varios = marcados.length > 1;
-    if (
-      !(await confirmar(
-        `Baixar ${marcados.length} ${varios ? "lançamentos" : "lançamento"}?`,
-        `${money(somaMarcados)} ${varios ? "serão marcados" : "será marcado"} como pago com a data de hoje.`,
-        { acao: "Baixar" },
-      ))
-    )
-      return;
-    setErro("");
-    setBaixandoLote(true);
-    const falhas: string[] = [];
-    // Um por vez: cada baixa é independente e uma falha não desfaz as outras.
-    for (const entry of marcados) {
-      try {
-        await api("/financeiro/" + entry.id + "/baixar", { method: "POST" });
-      } catch (e) {
-        falhas.push(`${entry.descricao}: ${(e as Error).message}`);
-      }
-    }
-    setBaixandoLote(false);
-    setSelecionados(new Set());
-    if (falhas.length) setErro("Não baixados: " + falhas.join(" · "));
-  };
-  const exportar = () => {
-    const linhas = (marcados.length ? marcados : entriesInPeriod).map((e) => [
-      e.tipo === "RECEITA" ? "Receita" : "Despesa",
-      e.descricao,
-      e.categoria ?? "",
-      e.vencimento,
-      Number(e.valor).toFixed(2).replace(".", ","),
-      e.status === "PAGO" ? "Pago" : "Pendente",
-      e.ordemServicoId ? "#" + e.ordemServicoId : "",
-    ]);
-    const csv = paraCsv([
-      ["Tipo", "Descrição", "Categoria", "Vencimento", "Valor", "Status", "OS"],
-      ...linhas,
-    ]);
-    // BOM para o Excel reconhecer UTF-8 e manter os acentos.
-    const url = URL.createObjectURL(
-      new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }),
-    );
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `lancamentos-${hoje}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
   if (!entries)
     return erro ? (
       <div className="alert error" role="alert">
@@ -233,17 +109,17 @@ export function Finance({
       <div className="metrics">
         <Metric
           label="A receber"
-          value={money(totals.receber) as any}
+          value={money(totals.receber)}
           detail={comparar("receber")}
         />
         <Metric
           label="A pagar"
-          value={money(totals.pagar) as any}
+          value={money(totals.pagar)}
           detail={comparar("pagar")}
         />
         <Metric
           label="Recebido"
-          value={money(totals.recebido) as any}
+          value={money(totals.recebido)}
           detail={comparar("recebido")}
         />
       </div>
@@ -298,74 +174,7 @@ export function Finance({
         )}
       </Card>
       <div className="cards">
-        <form className="card compact-form" onSubmit={submit}>
-          <h2>Novo lançamento</h2>
-          <label>
-            Tipo
-            <select
-              value={form.tipo}
-              onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-            >
-              <option value="RECEITA">Receita</option>
-              <option value="DESPESA">Despesa</option>
-            </select>
-          </label>
-          <label>
-            Descrição
-            <input
-              required
-              value={form.descricao}
-              onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-            />
-          </label>
-          <label>
-            Categoria
-            <input
-              value={form.categoria}
-              onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-              placeholder="Ex.: mão de obra, aluguel"
-            />
-          </label>
-          <label>
-            Valor
-            <input
-              required
-              min="0.01"
-              step="0.01"
-              type="number"
-              value={form.valor}
-              onChange={(e) => setForm({ ...form, valor: e.target.value })}
-            />
-          </label>
-          <label>
-            Vencimento
-            <input
-              required
-              type="date"
-              value={form.vencimento}
-              onChange={(e) => setForm({ ...form, vencimento: e.target.value })}
-            />
-          </label>
-          {canOrders && (
-            <label>
-              OS vinculada (opcional)
-              <select
-                value={form.ordemServicoId}
-                onChange={(e) =>
-                  setForm({ ...form, ordemServicoId: e.target.value })
-                }
-              >
-                <option value="">Nenhuma</option>
-                {orders.map((order) => (
-                  <option key={order.id} value={order.id}>
-                    OS #{order.id} · {order.cliente.nome}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <Button>Adicionar lançamento</Button>
-        </form>
+        <FinanceForm orders={canOrders ? orders : undefined} failed={setErro} />
         <Card title="Como usar">
           <p>
             Registre receitas previstas e despesas da oficina. Ao receber ou
@@ -373,110 +182,7 @@ export function Finance({
           </p>
         </Card>
       </div>
-      <Card title="Lançamentos">
-        {entriesInPeriod.length > 0 && (
-          <div className="bulk-bar" role="group" aria-label="Ações em lote">
-            <span aria-live="polite">
-              {marcados.length
-                ? `${marcados.length} selecionado(s) · ${money(somaMarcados)}`
-                : "Marque os pendentes para baixar de uma vez."}
-            </span>
-            {pendentes.length > 0 && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() =>
-                  setSelecionados(
-                    marcados.length === pendentes.length
-                      ? new Set()
-                      : new Set(pendentes.map((e) => e.id)),
-                  )
-                }
-              >
-                {marcados.length === pendentes.length
-                  ? "Limpar seleção"
-                  : "Selecionar pendentes"}
-              </Button>
-            )}
-            <Button size="sm" variant="secondary" onClick={exportar}>
-              {marcados.length ? "Exportar selecionados" : "Exportar CSV"}
-            </Button>
-            <Button
-              size="sm"
-              onClick={baixarSelecionados}
-              disabled={!marcados.length || baixandoLote}
-            >
-              {baixandoLote ? "Baixando..." : "Baixar selecionados"}
-            </Button>
-          </div>
-        )}
-        {entriesInPeriod.length ? (
-          <Table
-            headers={[
-              "Seleção",
-              "Tipo",
-              "Descrição",
-              "Vencimento",
-              "Valor",
-              "Status",
-              "Ação",
-            ]}
-            rows={entriesInPeriod.map((entry) => [
-              entry.status === "PENDENTE" ? (
-                <input
-                  key="sel"
-                  type="checkbox"
-                  className="row-check"
-                  checked={selecionados.has(entry.id)}
-                  onChange={() => alternar(entry.id)}
-                  aria-label={`Selecionar ${entry.descricao}`}
-                />
-              ) : (
-                ""
-              ),
-              entry.tipo === "RECEITA" ? "Receita" : "Despesa",
-              <span key={entry.id}>
-                {entry.descricao}
-                <small className="block text-slate-500">
-                  {entry.categoria || "Sem categoria"}
-                  {entry.ordemServicoId ? " · OS #" + entry.ordemServicoId : ""}
-                </small>
-              </span>,
-              new Date(entry.vencimento + "T12:00:00").toLocaleDateString(
-                "pt-BR",
-              ),
-              money(entry.valor),
-              <Badge key="status" status={entry.status} />,
-              entry.status === "PENDENTE" ? (
-                <Button
-                  key="baixar"
-                  size="sm"
-                  onClick={() => baixar(entry.id)}
-                  disabled={baixandoLote || baixandoId !== undefined}
-                >
-                  {baixandoId === entry.id ? "Baixando..." : "Baixar"}
-                </Button>
-              ) : (
-                "Pago"
-              ),
-            ])}
-          />
-        ) : (
-          <Empty text="Nenhum lançamento para o período selecionado." />
-        )}
-      </Card>
+      <FinanceEntries entries={entriesInPeriod} failed={setErro} />
     </div>
   );
-}
-
-function somar(lista: Entry[]) {
-  const total = (tipo: Entry["tipo"], status: Entry["status"]) =>
-    lista
-      .filter((entry) => entry.tipo === tipo && entry.status === status)
-      .reduce((sum, entry) => sum + Number(entry.valor), 0);
-  return {
-    receber: total("RECEITA", "PENDENTE"),
-    pagar: total("DESPESA", "PENDENTE"),
-    recebido: total("RECEITA", "PAGO"),
-  };
 }

@@ -81,7 +81,11 @@ export async function downloadApi(url: string, filename: string) {
     const body = await response.json().catch(() => null);
     throw new Error(body?.mensagem || "Não foi possível baixar o arquivo.");
   }
-  const arquivo = await response.blob();
+  baixarArquivo(await response.blob(), filename);
+}
+
+/** Entrega ao navegador um arquivo já em memória. */
+export function baixarArquivo(arquivo: Blob, filename: string) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(arquivo);
   link.download = filename;
