@@ -162,7 +162,7 @@ export function Finance({
                 money(item.despesa),
                 <b
                   key={item.orderId}
-                  className={result >= 0 ? "text-emerald-700" : "text-red-700"}
+                  className={result >= 0 ? "text-(--green)" : "text-(--danger)"}
                 >
                   {money(result)}
                 </b>,

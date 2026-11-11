@@ -17,7 +17,7 @@ export function Table({
       aria-label={`Tabela de ${headers.join(", ")}`}
     >
       <table className="w-full text-sm">
-        <thead className="bg-slate-50">
+        <thead className="bg-(--card)">
           <tr>
             {headers.map((header) => (
               <th key={header} scope="col">
@@ -26,7 +26,7 @@ export function Table({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-(--line)">
           {!rows.length && (
             <tr className="table-empty">
               <td colSpan={headers.length}>{emptyText}</td>

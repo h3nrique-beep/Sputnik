@@ -83,15 +83,15 @@ export function Schedule({ go }: { go: (view: string) => void }) {
                 type="button"
                 key={order.id}
                 onClick={() => go("order-" + order.id)}
-                className="flex w-full flex-col gap-2 rounded-lg border border-slate-200 bg-white p-4 text-left transition hover:border-blue-300 hover:bg-blue-50 sm:flex-row sm:items-center sm:justify-between"
+                className="flex w-full flex-col gap-2 rounded-lg border border-(--line) bg-(--card) p-4 text-left transition hover:border-(--muted) sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
                   <b>{dateTime(String(order.agendamento))}</b>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-(--muted)">
                     {order.cliente.nome} · {order.veiculo.marcaModelo} ·{" "}
                     {order.veiculo.placa}
                   </p>
-                  <small className="text-slate-500">{order.descricao}</small>
+                  <small className="text-(--muted)">{order.descricao}</small>
                 </div>
                 <Badge status={order.status} />
               </button>
@@ -111,14 +111,14 @@ export function Schedule({ go }: { go: (view: string) => void }) {
                   type="button"
                   key={tipo + order.id}
                   onClick={() => go("order-" + order.id)}
-                  className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white p-4 text-left transition hover:border-blue-300"
+                  className="flex w-full items-center justify-between rounded-lg border border-(--line) bg-(--card) p-4 text-left transition hover:border-(--muted)"
                 >
                   <div>
                     <b>
                       {tipo}:{" "}
                       {new Date(data + "T12:00:00").toLocaleDateString("pt-BR")}
                     </b>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-(--muted)">
                       OS #{order.id} · {order.cliente.nome} ·{" "}
                       {order.veiculo.placa}
                     </p>

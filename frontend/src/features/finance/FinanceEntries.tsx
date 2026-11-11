@@ -152,7 +152,7 @@ export function FinanceEntries({
             entry.tipo === "RECEITA" ? "Receita" : "Despesa",
             <span key={entry.id}>
               {entry.descricao}
-              <small className="block text-slate-500">
+              <small className="block text-(--muted)">
                 {entry.categoria || "Sem categoria"}
                 {entry.ordemServicoId ? " · OS #" + entry.ordemServicoId : ""}
               </small>
