@@ -1,6 +1,28 @@
 # Plano de redesign e reestruturação das views (frontend)
 
-Data: 11/11/2026 · Escopo: `frontend/src/` · Situação: **plano, nada implementado**.
+Data: 11/11/2026 · Escopo: `frontend/src/` · Situação: **implementado em 11/11/2026** (ver "Situação da execução" abaixo; o restante do documento é o plano original, com as linhas de antes das mudanças).
+
+## Situação da execução
+
+| Etapa | Situação |
+|---|---|
+| 1 Estados de tela | feita |
+| 2 Um título por tela | feita |
+| 3 Botão único | feita para `primary`/`secondary` (17 botões). Os 3 botões `.link` de texto ficaram: o `Button variant="link"` é uma pílula e mudaria o visual |
+| 4 Detalhe da OS em partes | feita |
+| 5 Financeiro em partes | feita; o recorte por período continua em `Finance.tsx` |
+| 6 Painel | feita; `.dashboard-text-button` ficou (é link de texto) |
+| 7 Cores por token | feita |
+| 8 Casca, menu e permissão | feita |
+| 9 Limpeza de `shadcn` | feita; `recharts` removido |
+| 10 Modal com `<dialog>` | feita |
+| 11 Celular | feita |
+| 12 Central de cadastros | feita; o menu "Central de cadastros" agora exige a permissão de ordens |
+| 13 CSS | parcial: quebras de 12 para 5 larguras (430, 600, 760, 950, 1120). Mover as sobrescritas de `theme.css` para os arquivos de origem **não foi feito**: reescreve a cascata inteira sem ganho visível |
+
+Conferido no navegador com backend descartável (banco H2 separado): todas as rotas, temas claro e escuro, 375/590/740/940/1110px sem overflow, modal da OS por teclado, usuário só com permissão de peças sendo redirecionado. Não conferido: impressão real da OS (`Ctrl+P`) e download do PDF.
+
+Sobras conhecidas: classes CSS sem uso (`.catalog-counts`, `.catalog-heading [role="tablist"]`).
 
 Decisões já tomadas pelo usuário:
 
