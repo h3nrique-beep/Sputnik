@@ -355,7 +355,7 @@
     grid-template-columns: 1fr;
   }
 }
-@media (max-width: 680px) {
+@media (max-width: 760px) {
   .dashboard-intro {
     align-items: flex-start;
     flex-direction: column;

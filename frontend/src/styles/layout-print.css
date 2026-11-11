@@ -59,7 +59,7 @@ body:has(.login) {
   min-height: 0;
 }
 
-@media (max-width: 1020px) {
+@media (max-width: 950px) {
   body:has(.login),
   .login {
     height: auto;

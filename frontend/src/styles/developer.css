@@ -228,7 +228,7 @@
     animation: none;
   }
 }
-@media (max-width: 900px) {
+@media (max-width: 950px) {
   .developer-hero {
     display: grid;
   }
@@ -244,7 +244,7 @@
     padding-left: 0;
   }
 }
-@media (max-width: 620px) {
+@media (max-width: 600px) {
   .developer-metrics,
   .developer-summary {
     grid-template-columns: 1fr;

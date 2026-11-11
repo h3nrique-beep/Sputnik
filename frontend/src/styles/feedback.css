@@ -43,7 +43,7 @@
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 600px) {
   .toast {
     top: 1rem;
     right: 1rem;
