@@ -18,6 +18,8 @@ test("modal da OS fica fora do formulário e não força altura de tela inteira"
   assert.doesNotMatch(css, /min-height:\s*100(?:d)?vh/);
   assert.match(
     css,
-    /@media print\s*\{\s*\.os-document-overlay\s*\{\s*display:\s*none !important/,
+    /@media print\s*\{\s*\.os-document-modal\s*\{\s*display:\s*none !important/,
   );
+  // <dialog> nativo prende o foco e o devolve ao fechar.
+  assert.match(source, /showModal\(\)[\s\S]*<dialog/);
 });

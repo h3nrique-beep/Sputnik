@@ -1,5 +1,5 @@
 import { Button } from "../../../components/ui";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { type OrderDocumentData } from "../../../types/order-document";
@@ -23,23 +23,23 @@ export function OrderDocumentFields({
     if (!open) setDraft(value);
   }, [value, open]);
 
+  // <dialog> nativo: foco preso, fundo inerte e retorno do foco ao fechar.
+  const dialogo = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    if (!open) return;
-    const closeWithEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", closeWithEscape);
-    return () => window.removeEventListener("keydown", closeWithEscape);
+    if (open) dialogo.current?.showModal();
   }, [open]);
 
   const set = (key: string, next: string | number | null) =>
     setDraft((current) => ({ ...current, [key]: next }));
   const close = () => {
+    // close() antes de desmontar devolve o foco ao botão que abriu.
+    dialogo.current?.close();
     setDraft(value);
     setStep(0);
     setOpen(false);
   };
   const save = () => {
+    dialogo.current?.close();
     onChange(draft);
     setStep(0);
     setOpen(false);
@@ -66,128 +66,125 @@ export function OrderDocumentFields({
 
       {open &&
         createPortal(
-          <div
-            className="os-document-overlay"
-            role="presentation"
-            onMouseDown={close}
+          <dialog
+            ref={dialogo}
+            aria-labelledby="os-document-title"
+            className="os-document-modal"
+            // Esc e clique no fundo contam como "cancelar".
+            onCancel={(event) => {
+              event.preventDefault();
+              close();
+            }}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) close();
+            }}
           >
-            <section
-              aria-modal="true"
-              aria-labelledby="os-document-title"
-              className="os-document-modal"
-              role="dialog"
-              onMouseDown={(event) => event.stopPropagation()}
-            >
-              <header>
-                <div>
-                  <h2 id="os-document-title">Dados do documento</h2>
-                  <span>Preencha só o que fará parte da OS impressa.</span>
-                </div>
-                <button
-                  aria-label="Fechar"
-                  className="modal-close"
-                  type="button"
-                  onClick={close}
-                >
-                  <X size={18} aria-hidden="true" />
-                </button>
-              </header>
-              <nav
-                aria-label="Etapas do documento"
-                className="os-document-steps"
-              >
-                {groups.map((group, index) => (
-                  <button
-                    aria-current={step === index ? "step" : undefined}
-                    className={step === index ? "active" : ""}
-                    key={group.title}
-                    type="button"
-                    onClick={() => setStep(index)}
-                  >
-                    <em>{index + 1}</em>
-                    {group.title}
-                  </button>
-                ))}
-              </nav>
-              <div className="os-document-body">
-                <label className="document-service-type">
-                  Tipo de serviço
-                  <select
-                    value={draft.tipoServico ?? "EXTERNO"}
-                    onChange={(e) => set("tipoServico", e.target.value)}
-                  >
-                    <option value="EXTERNO">Externo</option>
-                    <option value="INTERNO">Interno</option>
-                    <option value="GARANTIA">Garantia</option>
-                    <option value="REVISAO">Revisão</option>
-                  </select>
-                </label>
-                <fieldset>
-                  <legend>{groups[step].title}</legend>
-                  {groups[step].help && <p>{groups[step].help}</p>}
-                  <div className="os-document-grid">
-                    {groups[step].fields.map((field) => (
-                      <label key={field.key}>
-                        {field.label}
-                        <input
-                          type={field.type ?? "text"}
-                          min={field.min}
-                          max={field.max}
-                          maxLength={field.length}
-                          value={draft[field.key] ?? ""}
-                          onChange={(e) =>
-                            set(
-                              field.key,
-                              e.target.value === ""
-                                ? null
-                                : field.type === "number"
-                                  ? Number(e.target.value)
-                                  : e.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-                {step === 0 && (
-                  <label className="document-observations">
-                    Observações da OS
-                    <textarea
-                      maxLength={1200}
-                      rows={3}
-                      value={draft.observacoes ?? ""}
-                      onChange={(e) => set("observacoes", e.target.value)}
-                    />
-                  </label>
-                )}
+            <header>
+              <div>
+                <h2 id="os-document-title">Dados do documento</h2>
+                <span>Preencha só o que fará parte da OS impressa.</span>
               </div>
-              <footer>
-                <button className="link" type="button" onClick={close}>
-                  Cancelar
+              <button
+                aria-label="Fechar"
+                className="modal-close"
+                type="button"
+                onClick={close}
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </header>
+            <nav aria-label="Etapas do documento" className="os-document-steps">
+              {groups.map((group, index) => (
+                <button
+                  aria-current={step === index ? "step" : undefined}
+                  className={step === index ? "active" : ""}
+                  key={group.title}
+                  type="button"
+                  onClick={() => setStep(index)}
+                >
+                  <em>{index + 1}</em>
+                  {group.title}
                 </button>
-                <span>
-                  <Button
-                    variant="secondary"
-                    disabled={step === 0}
-                    type="button"
-                    onClick={() => setStep(step - 1)}
-                  >
-                    Voltar
+              ))}
+            </nav>
+            <div className="os-document-body">
+              <label className="document-service-type">
+                Tipo de serviço
+                <select
+                  value={draft.tipoServico ?? "EXTERNO"}
+                  onChange={(e) => set("tipoServico", e.target.value)}
+                >
+                  <option value="EXTERNO">Externo</option>
+                  <option value="INTERNO">Interno</option>
+                  <option value="GARANTIA">Garantia</option>
+                  <option value="REVISAO">Revisão</option>
+                </select>
+              </label>
+              <fieldset>
+                <legend>{groups[step].title}</legend>
+                {groups[step].help && <p>{groups[step].help}</p>}
+                <div className="os-document-grid">
+                  {groups[step].fields.map((field) => (
+                    <label key={field.key}>
+                      {field.label}
+                      <input
+                        type={field.type ?? "text"}
+                        min={field.min}
+                        max={field.max}
+                        maxLength={field.length}
+                        value={draft[field.key] ?? ""}
+                        onChange={(e) =>
+                          set(
+                            field.key,
+                            e.target.value === ""
+                              ? null
+                              : field.type === "number"
+                                ? Number(e.target.value)
+                                : e.target.value,
+                          )
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              {step === 0 && (
+                <label className="document-observations">
+                  Observações da OS
+                  <textarea
+                    maxLength={1200}
+                    rows={3}
+                    value={draft.observacoes ?? ""}
+                    onChange={(e) => set("observacoes", e.target.value)}
+                  />
+                </label>
+              )}
+            </div>
+            <footer>
+              <button className="link" type="button" onClick={close}>
+                Cancelar
+              </button>
+              <span>
+                <Button
+                  variant="secondary"
+                  disabled={step === 0}
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                >
+                  Voltar
+                </Button>
+                {step < groups.length - 1 ? (
+                  <Button type="button" onClick={() => setStep(step + 1)}>
+                    Próximo
                   </Button>
-                  {step < groups.length - 1 ? (
-                    <Button type="button" onClick={() => setStep(step + 1)}>
-                      Próximo
-                    </Button>
-                  ) : (
-                    <Button type="button" onClick={save}>
-                      Salvar dados
-                    </Button>
-                  )}
-                </span>
-              </footer>
-            </section>
-          </div>,
+                ) : (
+                  <Button type="button" onClick={save}>
+                    Salvar dados
+                  </Button>
+                )}
+              </span>
+            </footer>
+          </dialog>,
           document.body,
         )}
     </div>
