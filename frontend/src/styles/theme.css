@@ -394,7 +394,7 @@ input[type="radio"] {
   margin-bottom: 0;
   border-radius: 12px;
 }
-.form-card .primary {
+.form-card .ui-button--primary {
   min-height: 40px;
   margin-top: 0;
 }
@@ -894,7 +894,7 @@ body:has(.login) {
   }
   input:not([type="checkbox"]):not([type="radio"]),
   select,
-  .form-card .primary {
+  .form-card .ui-button--primary {
     min-height: 44px;
   }
   .metric-grid-3 {

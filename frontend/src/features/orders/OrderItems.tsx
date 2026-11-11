@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
-import { SearchSelect } from "../../components/ui";
+import { SearchSelect, Button } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Piece } from "../../types/domain";
 
@@ -107,9 +107,9 @@ export function OrderItems({
             OS aberta a baixa é recusada.
           </p>
         )}
-        <button className="secondary" disabled={enviando}>
+        <Button variant="secondary" disabled={enviando}>
           Adicionar peça
-        </button>
+        </Button>
       </form>
       <hr />
       <form onSubmit={addService}>
@@ -132,9 +132,9 @@ export function OrderItems({
             onChange={(e) => setValor(e.target.value)}
           />
         </label>
-        <button className="secondary" disabled={enviando}>
+        <Button variant="secondary" disabled={enviando}>
           Adicionar serviço
-        </button>
+        </Button>
       </form>
     </div>
   );

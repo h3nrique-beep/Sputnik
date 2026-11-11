@@ -210,8 +210,7 @@ textarea {
   margin-bottom: 20px;
 }
 .actions button,
-.button,
-.primary {
+.button {
   background: var(--blue);
   border: 1px solid var(--blue);
   border-radius: 8px;
@@ -339,7 +338,7 @@ textarea:focus {
 .form-card textarea {
   min-height: 105px;
 }
-.form-card .primary {
+.form-card .ui-button--primary {
   width: 100%;
 }
 .toast,

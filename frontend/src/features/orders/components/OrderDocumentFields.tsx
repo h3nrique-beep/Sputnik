@@ -1,3 +1,4 @@
+import { Button } from "../../../components/ui";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
@@ -59,9 +60,9 @@ export function OrderDocumentFields({
             : "Preencha pagamento, entrega, veículo, consultor e dados da oficina"}
         </small>
       </div>
-      <button className="secondary" type="button" onClick={openModal}>
+      <Button variant="secondary" type="button" onClick={openModal}>
         {configured ? "Editar dados da OS" : "Preencher dados da OS"}
-      </button>
+      </Button>
 
       {open &&
         createPortal(
@@ -166,26 +167,22 @@ export function OrderDocumentFields({
                   Cancelar
                 </button>
                 <span>
-                  <button
-                    className="secondary"
+                  <Button
+                    variant="secondary"
                     disabled={step === 0}
                     type="button"
                     onClick={() => setStep(step - 1)}
                   >
                     Voltar
-                  </button>
+                  </Button>
                   {step < groups.length - 1 ? (
-                    <button
-                      className="primary"
-                      type="button"
-                      onClick={() => setStep(step + 1)}
-                    >
+                    <Button type="button" onClick={() => setStep(step + 1)}>
                       Próximo
-                    </button>
+                    </Button>
                   ) : (
-                    <button className="primary" type="button" onClick={save}>
+                    <Button type="button" onClick={save}>
                       Salvar dados
-                    </button>
+                    </Button>
                   )}
                 </span>
               </footer>

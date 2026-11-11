@@ -1,3 +1,4 @@
+import { Button } from "../../components/ui";
 import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
@@ -95,7 +96,7 @@ export function VehicleCreate({ done }: { done: () => void }) {
           onChange={(e) => set("quilometragemAtual", e.target.value)}
         />
       </label>
-      <button className="primary">Cadastrar veículo</button>
+      <Button>Cadastrar veículo</Button>
     </form>
   );
 }

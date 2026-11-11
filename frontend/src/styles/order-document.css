@@ -170,7 +170,7 @@
     align-items: flex-start;
     flex-direction: column;
   }
-  .os-document-control .secondary {
+  .os-document-control .ui-button--secondary {
     width: 100%;
   }
   .os-document-overlay {

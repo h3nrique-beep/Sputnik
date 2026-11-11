@@ -32,15 +32,6 @@
   border-top: 1px solid var(--line);
   margin: 18px 0;
 }
-.secondary {
-  background: #eef4ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  color: #1d4ed8;
-  cursor: pointer;
-  font-weight: 700;
-  padding: 9px 12px;
-}
 @media (max-width: 600px) {
   .grid-form {
     grid-template-columns: 1fr;

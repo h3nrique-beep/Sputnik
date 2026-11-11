@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { CircleCheck, Clock3, Plus, ShieldCheck } from "lucide-react";
-import { Loading, Table } from "../../components/ui";
+import { Loading, Table, Button } from "../../components/ui";
 import { api, downloadApi } from "../../lib/api";
 import {
   type BackupEntry,
@@ -161,10 +161,10 @@ export function DeveloperConsole() {
             funcionamento.
           </p>
         </div>
-        <button className="primary" onClick={criarBackup} disabled={criando}>
+        <Button onClick={criarBackup} disabled={criando}>
           <Plus size={16} aria-hidden="true" />
           {criando ? "Criando backup..." : "Criar backup"}
-        </button>
+        </Button>
       </section>
       <Table
         headers={["Arquivo", "Criado em", "Tamanho", "Ação"]}

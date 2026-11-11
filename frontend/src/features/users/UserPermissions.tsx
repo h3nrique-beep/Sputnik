@@ -1,3 +1,4 @@
+import { Button } from "../../components/ui";
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 import { PermissionFields } from "./PermissionFields";
@@ -38,7 +39,7 @@ export function UserPermissions({
         </div>
       )}
       <PermissionFields selected={permissoes} toggle={toggle} />
-      <button className="primary">Salvar permissões</button>
+      <Button>Salvar permissões</Button>
     </form>
   );
 }

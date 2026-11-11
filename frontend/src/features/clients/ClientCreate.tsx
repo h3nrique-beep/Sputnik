@@ -1,3 +1,4 @@
+import { Button } from "../../components/ui";
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 
@@ -45,7 +46,7 @@ export function ClientCreate({ done }: { done: () => void }) {
           onChange={(e) => setForm({ ...form, telefone: e.target.value })}
         />
       </label>
-      <button className="primary">Cadastrar cliente</button>
+      <Button>Cadastrar cliente</Button>
     </form>
   );
 }

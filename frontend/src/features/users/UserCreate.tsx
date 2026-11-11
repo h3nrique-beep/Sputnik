@@ -1,3 +1,4 @@
+import { Button } from "../../components/ui";
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 import { PermissionFields } from "./PermissionFields";
@@ -63,7 +64,7 @@ export function UserCreate({ done }: { done: () => void }) {
         />
       </label>
       <PermissionFields selected={form.permissoes} toggle={toggle} />
-      <button className="primary">Cadastrar usuário</button>
+      <Button>Cadastrar usuário</Button>
     </form>
   );
 }

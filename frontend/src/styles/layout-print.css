@@ -128,8 +128,8 @@ body:has(.login) {
   .content:has(.compact-form) .card:last-child {
     break-inside: avoid;
   }
-  .primary,
-  .secondary {
+  .ui-button--primary,
+  .ui-button--secondary {
     display: none !important;
   }
 }

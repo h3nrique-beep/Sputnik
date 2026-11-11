@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
-import { SearchSelect } from "../../components/ui";
+import { SearchSelect, Button } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Piece } from "../../types/domain";
 
@@ -108,9 +108,9 @@ export function StockMovement({
             : `Disponível agora: ${peca.disponivel}. Depois desta movimentação: ${saldoApos}.`}
         </p>
       )}
-      <button className="primary" disabled={saving || saidaInvalida}>
+      <Button disabled={saving || saidaInvalida}>
         {saving ? "Registrando…" : "Registrar movimentação"}
-      </button>
+      </Button>
     </form>
   );
 }

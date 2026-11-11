@@ -1,3 +1,4 @@
+import { Button } from "../../components/ui";
 import { type FormEvent, useState } from "react";
 import { PackageSearch, ClipboardList, RefreshCw } from "lucide-react";
 import { api } from "../../lib/api";
@@ -157,13 +158,13 @@ export function Login({ onLogin }: { onLogin: (u: User) => void }) {
               </button>
             </span>
           </label>
-          <button className="primary" disabled={entrando}>
+          <Button disabled={entrando}>
             {entrando
               ? "Aguarde..."
               : cadastro
                 ? "Criar conta de teste"
                 : "Entrar no sistema"}
-          </button>
+          </Button>
           {!cadastro && (
             <details className="password-help">
               <summary>Esqueci minha senha</summary>

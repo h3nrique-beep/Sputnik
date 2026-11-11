@@ -364,7 +364,7 @@ export function Finance({
               </select>
             </label>
           )}
-          <button className="primary">Adicionar lançamento</button>
+          <Button>Adicionar lançamento</Button>
         </form>
         <Card title="Como usar">
           <p>

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
-import { SearchSelect } from "../../components/ui";
+import { SearchSelect, Button } from "../../components/ui";
 import { api } from "../../lib/api";
 import { type Client, type Vehicle } from "../../types/domain";
 import { type OrderDocumentData } from "../../types/order-document";
@@ -134,9 +134,7 @@ export function OrderCreate({
         />
       </label>
       <OrderDocumentFields value={documento} onChange={setDocumento} />
-      <button className="primary">
-        {asQuote ? "Criar orçamento" : "Abrir ordem de serviço"}
-      </button>
+      <Button>{asQuote ? "Criar orçamento" : "Abrir ordem de serviço"}</Button>
     </form>
   );
 }

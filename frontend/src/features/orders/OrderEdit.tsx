@@ -1,4 +1,4 @@
-import { confirmar } from "../../components/ui";
+import { confirmar, Button } from "../../components/ui";
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 import { label } from "../../lib/format";
@@ -98,9 +98,9 @@ export function OrderEdit({
         />
       </label>
       <OrderDocumentFields value={documento} onChange={setDocumento} />
-      <button className="primary" disabled={saving}>
+      <Button disabled={saving}>
         {saving ? "Salvando..." : "Salvar alterações"}
-      </button>
+      </Button>
     </form>
   );
 }

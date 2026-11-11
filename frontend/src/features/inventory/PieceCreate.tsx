@@ -1,3 +1,4 @@
+import { Button } from "../../components/ui";
 import { type FormEvent, useState } from "react";
 import { api } from "../../lib/api";
 
@@ -131,9 +132,9 @@ export function PieceCreate({ done }: { done: () => void }) {
           onChange={(e) => set("estoqueMinimo", e.target.value)}
         />
       </label>
-      <button className="primary" disabled={saving}>
+      <Button disabled={saving}>
         {saving ? "Salvando…" : "Cadastrar peça"}
-      </button>
+      </Button>
     </form>
   );
 }
