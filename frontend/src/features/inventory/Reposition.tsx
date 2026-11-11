@@ -32,7 +32,6 @@ export function Reposition() {
     <div className="module-shell space-y-5">
       <div className="toolbar">
         <div>
-          <h2>Itens para comprar</h2>
           <p>Peças abaixo do mínimo, com a quantidade sugerida.</p>
         </div>
         <Button

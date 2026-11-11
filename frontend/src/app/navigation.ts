@@ -36,67 +36,65 @@ export const pathForView = (view: string) => {
     : (pathByView[view] ?? "/sistemas");
 };
 
-export const title = (v: string) =>
-  v === "dashboard"
-    ? "Visão geral"
-    : v === "cadastros"
-      ? "Central de cadastros"
-      : v === "movement"
-        ? "Movimentar estoque"
-        : v === "schedule"
-          ? "Agenda"
-          : v === "finance"
-            ? "Financeiro operacional"
-            : v === "report"
-              ? "Relatório mensal"
-              : v === "reposition"
-                ? "Reposição"
-                : v === "users"
-                  ? "Usuários"
-                  : v === "developer"
-                    ? "Desenvolvedor"
-                    : v.startsWith("pieces")
-                      ? v === "pieces-new"
-                        ? "Cadastrar peça"
-                        : "Estoque de peças"
-                      : v.startsWith("clients")
-                        ? v === "clients-new"
-                          ? "Cadastrar cliente"
-                          : "Clientes"
-                        : v.startsWith("vehicles")
-                          ? v === "vehicles-new"
-                            ? "Cadastrar veículo"
-                            : "Veículos"
-                          : v === "quotes-new"
-                            ? "Novo orçamento"
-                            : v === "orders-new"
-                              ? "Nova ordem de serviço"
-                              : v.startsWith("order-")
-                                ? "Detalhes da OS"
-                                : "Ordens de serviço";
+// Título (h1 da casca) e subtítulo de cada tela; a view não repete o título.
+const TELAS: Record<string, [titulo: string, subtitulo: string]> = {
+  dashboard: ["Visão geral", "Estoque automotivo, reposição e atendimento"],
+  cadastros: [
+    "Central de cadastros",
+    "Peças, clientes e veículos para a operação diária",
+  ],
+  clients: ["Clientes", "Contatos e documentos de quem traz o veículo"],
+  "clients-new": [
+    "Cadastrar cliente",
+    "Dados de contato para abrir atendimentos",
+  ],
+  vehicles: ["Veículos", "Placa, chassi e quilometragem de cada veículo"],
+  "vehicles-new": [
+    "Cadastrar veículo",
+    "Vincule o veículo ao cliente responsável",
+  ],
+  pieces: [
+    "Estoque de peças",
+    "Disponibilidade, preço e localização de cada item",
+  ],
+  "pieces-new": ["Cadastrar peça", "Código, preço, estoque mínimo e locação"],
+  movement: [
+    "Movimentar estoque",
+    "Entradas e saídas com rastreabilidade de estoque",
+  ],
+  reposition: ["Reposição", "Priorize os itens que precisam de compra"],
+  orders: [
+    "Ordens de serviço",
+    "Serviços, custos e status de cada atendimento",
+  ],
+  "orders-new": [
+    "Nova ordem de serviço",
+    "Selecione o cliente e o veículo para registrar o atendimento",
+  ],
+  "quotes-new": [
+    "Novo orçamento",
+    "Monte a proposta; o estoque só muda após a aprovação do cliente",
+  ],
+  order: ["Detalhes da OS", "Itens, custos, status e documento do atendimento"],
+  schedule: ["Agenda", "Próximos atendimentos da oficina"],
+  report: ["Relatório mensal", "Entradas e saídas de estoque do mês"],
+  finance: [
+    "Financeiro operacional",
+    "Valores previstos e concluídos nas ordens de serviço",
+  ],
+  users: ["Usuários", "Quem acessa o sistema e quais módulos enxerga"],
+  developer: [
+    "Desenvolvedor",
+    "Monitoramento, manutenção e cópias seguras do sistema",
+  ],
+};
 
-export const subtitle = (v: string) =>
-  v === "dashboard"
-    ? "Estoque automotivo, reposição e atendimento"
-    : v === "cadastros"
-      ? "Peças, clientes e veículos para a operação diária"
-      : v === "pieces"
-        ? "Disponibilidade, preço e localização de cada item"
-        : v === "movement"
-          ? "Entradas e saídas com rastreabilidade de estoque"
-          : v === "reposition"
-            ? "Priorize os itens que precisam de compra"
-            : v === "quotes-new"
-              ? "Monte a proposta; o estoque só muda após a aprovação do cliente"
-              : v === "schedule"
-                ? "Próximos atendimentos da oficina"
-                : v === "finance"
-                  ? "Valores previstos e concluídos nas ordens de serviço"
-                  : v === "orders-new"
-                    ? "Selecione o cliente e o veículo para registrar o atendimento"
-                    : v === "developer"
-                      ? "Monitoramento, manutenção e cópias seguras do sistema"
-                      : "Gestão simples, segura e organizada";
+const tela = (v: string) =>
+  TELAS[v.startsWith("order-") ? "order" : v] ?? TELAS.orders;
+
+export const title = (v: string) => tela(v)[0];
+
+export const subtitle = (v: string) => tela(v)[1];
 
 // Placa antiga (ABC-1234) ou Mercosul (ABC1D23).
 const PLACA = /^[A-Z]{3}-?\d[A-Z0-9]\d{2}$/i;

@@ -71,7 +71,6 @@ export function Orders({ go }: { go: (v: string) => void }) {
       )}
       <div className="toolbar">
         <div>
-          <h2>Atendimentos</h2>
           <p>
             {quadro
               ? "Arraste o cartão para mudar o status. Orçamentos mudam pela aprovação."

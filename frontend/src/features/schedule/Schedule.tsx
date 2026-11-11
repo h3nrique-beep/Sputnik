@@ -52,7 +52,6 @@ export function Schedule({ go }: { go: (view: string) => void }) {
     <div className="module-shell space-y-5">
       <div className="toolbar">
         <div>
-          <h2>Agenda da oficina</h2>
           <p>
             Organize os próximos atendimentos e abra a OS diretamente da fila.
           </p>

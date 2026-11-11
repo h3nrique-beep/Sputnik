@@ -53,7 +53,6 @@ export function CatalogHub({
       )}
       <div className="catalog-heading">
         <div>
-          <h2>Catálogo e atendimento</h2>
           <p>Encontre as peças e os cadastros que apoiam sua operação.</p>
         </div>
         <TabsList aria-label="Tipo de cadastro" role="group">

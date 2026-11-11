@@ -95,7 +95,6 @@ export function Users() {
       )}
       <div className="toolbar">
         <div>
-          <h2>Acessos do sistema</h2>
           <p>Cadastre balcões e defina os módulos disponíveis.</p>
         </div>
         <Button onClick={() => setShowCreate(!showCreate)}>

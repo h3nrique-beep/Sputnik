@@ -217,7 +217,6 @@ export function Finance({
     <div className="module-shell space-y-5">
       <div className="toolbar">
         <div>
-          <h2>Financeiro</h2>
           <p>Controle contas a receber, despesas e pagamentos efetivados.</p>
         </div>
         {canOrders && (
